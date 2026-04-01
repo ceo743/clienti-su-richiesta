@@ -724,7 +724,10 @@ function submitForm(e) {
   if (!c.checked) ok = false;
   if (!ok) { document.getElementById('formError').style.display = 'block'; return; }
   document.getElementById('formError').style.display = 'none';
-  console.log('Form:', { nome: f.value, cognome: l.value, email: m.value, tel: p.value });
+  fetch('https://hooks.zapier.com/hooks/catch/6421650/unehste/', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: f.value + ' ' + l.value, email: m.value, phone: p.value })
+  }).catch(() => {});
   const form = document.getElementById('modalForm');
   form.style.opacity = '0';
   form.style.transform = 'translateY(-10px)';
