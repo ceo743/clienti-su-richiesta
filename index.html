@@ -84,13 +84,7 @@
     .form-field::placeholder{color:rgba(255,255,255,0.2)}
     .form-field.error{border-color:rgba(255,68,68,0.5);box-shadow:0 0 20px rgba(255,68,68,0.08)}
 
-    /* ===== MODAL ===== */
-    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);z-index:200;display:none;align-items:center;justify-content:center;opacity:0;transition:opacity 0.4s}
-    .modal-overlay.active{display:flex;opacity:1}
-    .modal-content{background:linear-gradient(145deg,#111820,#0d1117);border:1px solid rgba(255,255,255,0.06);border-radius:24px;padding:52px 44px;max-width:700px;width:92%;position:relative;max-height:92vh;overflow-y:auto;transform:scale(0.85) translateY(20px);transition:all 0.5s cubic-bezier(0.16,1,0.3,1);box-shadow:0 40px 100px rgba(0,0,0,0.5)}
-    .modal-overlay.active .modal-content{transform:scale(1) translateY(0)}
-    .modal-close{position:absolute;top:18px;right:22px;background:none;border:none;color:rgba(255,255,255,0.3);font-size:28px;transition:all 0.3s;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:50%}
-    .modal-close:hover{color:#fff;background:rgba(255,255,255,0.06);transform:rotate(90deg)}
+    /* ===== (modal removed - video is now inline) ===== */
 
     /* ===== VIDEO PLAYER ===== */
     .video-wrap{position:relative;cursor:pointer;overflow:hidden;border-radius:20px;border:1px solid rgba(255,255,255,0.06);box-shadow:0 20px 60px rgba(0,0,0,0.4)}
@@ -132,7 +126,7 @@
       .show-mobile{display:block!important}
       .play-btn{width:64px;height:64px}
       .play-btn svg{width:24px;height:24px}
-      .modal-content{padding:36px 24px}
+      /* modal removed */
       .btn-gold{padding:16px 36px}
     }
     @media(min-width:769px) and (max-width:1024px){.grid-4{grid-template-columns:1fr 1fr!important}}
@@ -155,7 +149,7 @@
       <a href="#benefici" class="nav-link">Benefici</a>
       <a href="#risultati" class="nav-link">Risultati</a>
       <a href="#chi-e" class="nav-link">Chi sono</a>
-      <a href="#registrazione-form" class="btn-cta" style="padding:10px 24px;font-size:12px">Guarda la Video Lezione</a>
+      <a href="javascript:void(0)" onclick="scrollToAccess()" class="btn-cta" style="padding:10px 24px;font-size:12px">Guarda la Video Lezione</a>
     </nav>
     <button class="show-mobile" id="menuBtn" onclick="toggleMenu()" style="background:none;border:none;z-index:101;padding:8px;position:relative;width:32px;height:32px" aria-label="Menu">
       <span id="mb1" style="display:block;width:22px;height:1.5px;background:#fff;position:absolute;top:9px;left:5px;transition:all 0.4s cubic-bezier(0.4,0,0.2,1)"></span>
@@ -176,7 +170,7 @@
   <a href="#risultati" onclick="closeMenu()" style="color:#fff;text-decoration:none;font-size:28px;font-family:'Playfair Display',serif;opacity:0.8;transition:opacity 0.3s" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'">Risultati</a>
   <a href="#chi-e" onclick="closeMenu()" style="color:#fff;text-decoration:none;font-size:28px;font-family:'Playfair Display',serif;opacity:0.8;transition:opacity 0.3s" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'">Chi sono</a>
   <div style="width:60px;height:1px;background:linear-gradient(90deg,transparent,rgba(212,175,55,0.3),transparent)"></div>
-  <a href="#registrazione-form" onclick="closeMenu()" class="btn-cta"><span>Guarda la Video Lezione</span></a>
+  <a href="javascript:void(0)" onclick="closeMenu();scrollToAccess()" class="btn-cta"><span>Guarda la Video Lezione</span></a>
 </div>
 
 <!-- ===== HERO ===== -->
@@ -194,12 +188,12 @@
     <p class="body-text reveal" style="max-width:560px;margin:0 auto 48px;font-size:clamp(15px,1.3vw,19px)">Scopri i 4 step per acquisire clienti sulla piattaforma di business #1 al mondo, senza ads, senza perdere ore sui social</p>
 
     <div class="reveal" style="margin-bottom:48px">
-      <a href="#registrazione-form" class="btn-gold"><span>Guarda la Video Lezione →</span></a>
+      <a href="javascript:void(0)" onclick="scrollToAccess()" class="btn-gold"><span>Guarda la Video Lezione →</span></a>
     </div>
 
     <!-- VIDEO THUMBNAIL -->
     <div class="reveal" style="max-width:720px;margin:0 auto 48px">
-      <div class="video-wrap" onclick="openModal()">
+      <div class="video-wrap" onclick="scrollToAccess()">
         <img src="https://uploads3.fw360.it/uploads/env/4/2492/img/pages/gallery/677f5475b0ed5_screenshot-2025-01-09-alle-05-45-15.png" alt="Video Lezione Gratuita" class="video-thumb" style="aspect-ratio:16/9;object-fit:cover;width:100%;background:linear-gradient(135deg,#111820,#1a2030)"/>
         <div class="play-btn">
           <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
@@ -263,28 +257,59 @@
   </div>
 </section>
 
-<!-- ===== VIDEO MODAL ===== -->
-<div class="modal-overlay" id="modal">
-  <div class="modal-content">
-    <button class="modal-close" onclick="closeModal()">&times;</button>
-    <div id="modalVideo">
-      <div style="text-align:center;margin-bottom:24px">
-        <h3 class="h-md">Ecco la tua <span class="gold">Video Lezione!</span></h3>
+<!-- ===== VIDEO SECTION (inline, gated) ===== -->
+<section id="video-lezione" class="section" style="padding:80px 32px;position:relative;z-index:1;display:none">
+  <div class="orb" style="width:600px;height:600px;background:#D4AF37;top:-200px;left:-200px;opacity:0.04"></div>
+  <div style="max-width:800px;margin:0 auto;position:relative;z-index:2">
+
+    <!-- Countdown bar -->
+    <div id="countdownBar" style="background:linear-gradient(135deg,rgba(191,149,63,0.12),rgba(212,175,55,0.06));border:1px solid rgba(212,175,55,0.15);border-radius:16px;padding:20px 28px;margin-bottom:40px;text-align:center">
+      <p style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:10px;text-transform:uppercase;letter-spacing:2px">Il tuo accesso scade tra</p>
+      <div id="countdown" style="display:flex;justify-content:center;gap:20px;flex-wrap:wrap">
+        <div style="text-align:center"><span id="cdDays" style="font-family:'Playfair Display',serif;font-size:clamp(28px,4vw,42px);font-weight:800;color:#D4AF37">0</span><p style="font-size:10px;color:rgba(255,255,255,0.25);text-transform:uppercase;letter-spacing:1px;margin-top:2px">Giorni</p></div>
+        <span style="font-family:'Playfair Display',serif;font-size:clamp(28px,4vw,42px);font-weight:800;color:rgba(212,175,55,0.3)">:</span>
+        <div style="text-align:center"><span id="cdHours" style="font-family:'Playfair Display',serif;font-size:clamp(28px,4vw,42px);font-weight:800;color:#D4AF37">0</span><p style="font-size:10px;color:rgba(255,255,255,0.25);text-transform:uppercase;letter-spacing:1px;margin-top:2px">Ore</p></div>
+        <span style="font-family:'Playfair Display',serif;font-size:clamp(28px,4vw,42px);font-weight:800;color:rgba(212,175,55,0.3)">:</span>
+        <div style="text-align:center"><span id="cdMinutes" style="font-family:'Playfair Display',serif;font-size:clamp(28px,4vw,42px);font-weight:800;color:#D4AF37">0</span><p style="font-size:10px;color:rgba(255,255,255,0.25);text-transform:uppercase;letter-spacing:1px;margin-top:2px">Minuti</p></div>
+        <span style="font-family:'Playfair Display',serif;font-size:clamp(28px,4vw,42px);font-weight:800;color:rgba(212,175,55,0.3)">:</span>
+        <div style="text-align:center"><span id="cdSeconds" style="font-family:'Playfair Display',serif;font-size:clamp(28px,4vw,42px);font-weight:800;color:#D4AF37">0</span><p style="font-size:10px;color:rgba(255,255,255,0.25);text-transform:uppercase;letter-spacing:1px;margin-top:2px">Secondi</p></div>
       </div>
-      <div id="videoContainer" style="position:relative;width:100%;background:#0a0d12;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.04);margin-bottom:28px">
-        <div id="vidalytics_embed_FC_2OFL5X3cYyfd0" style="width: 100%; position:relative; padding-top: 56.25%;"></div>
-      </div>
-      <div style="margin-top:32px;text-align:center">
-        <p class="label" style="margin-bottom:12px">Prenota</p>
-        <h3 class="h-md" style="margin-bottom:8px">Parliamone <span class="gold">insieme</span></h3>
-        <p style="font-size:13px;color:rgba(255,255,255,0.3);margin-bottom:20px">Scegli il giorno e l'orario che preferisci</p>
-        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:16px;min-height:580px">
-          <iframe src="https://calendly.com/dc-academy-team/consulenza-strategica-gratuita-linkedin-dc-academy?utm_source=clientisurichiesta.it&utm_campaign=calendly&utm_medium=video_vsl&utm_content=vsl_clienti_su_richiesta" style="width:100%;height:560px;border:none;border-radius:12px" title="Calendly"></iframe>
-        </div>
+    </div>
+
+    <!-- Video heading -->
+    <div style="text-align:center;margin-bottom:32px">
+      <h2 class="h-lg" style="margin-bottom:8px">Ecco la tua <span class="gold">Video Lezione!</span></h2>
+      <p class="body-text" style="font-size:14px">Guardala con attenzione, contiene strategie concrete</p>
+    </div>
+
+    <!-- Video player -->
+    <div style="position:relative;width:100%;background:#0a0d12;border-radius:20px;overflow:hidden;border:1px solid rgba(255,255,255,0.04);margin-bottom:48px;box-shadow:0 20px 60px rgba(0,0,0,0.4)">
+      <div id="vidalytics_embed_FC_2OFL5X3cYyfd0" style="width:100%;position:relative;padding-top:56.25%"></div>
+    </div>
+
+    <!-- Calendly -->
+    <div style="text-align:center">
+      <p class="label" style="margin-bottom:12px">Prenota</p>
+      <h3 class="h-md" style="margin-bottom:8px">Parliamone <span class="gold">insieme</span></h3>
+      <p style="font-size:13px;color:rgba(255,255,255,0.3);margin-bottom:20px">Scegli il giorno e l'orario che preferisci</p>
+      <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:16px;min-height:580px">
+        <iframe src="https://calendly.com/dc-academy-team/consulenza-strategica-gratuita-linkedin-dc-academy?utm_source=clientisurichiesta.it&utm_campaign=calendly&utm_medium=video_vsl&utm_content=vsl_clienti_su_richiesta" style="width:100%;height:560px;border:none;border-radius:12px" title="Calendly"></iframe>
       </div>
     </div>
   </div>
-</div>
+</section>
+
+<!-- ===== ACCESSO SCADUTO (hidden by default) ===== -->
+<section id="accesso-scaduto" class="section" style="padding:100px 32px;position:relative;z-index:1;display:none">
+  <div style="max-width:560px;margin:0 auto;text-align:center">
+    <div style="width:72px;height:72px;background:rgba(255,68,68,0.1);border:1px solid rgba(255,68,68,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 24px">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ff4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    </div>
+    <h2 class="h-lg" style="margin-bottom:12px">Il tuo accesso è <span style="color:#ff4444">scaduto</span></h2>
+    <p class="body-text" style="margin-bottom:40px">Il periodo di 5 giorni per visualizzare la video lezione è terminato.<br>Se vuoi continuare il percorso, prenota una consulenza gratuita.</p>
+    <a href="https://calendly.com/dc-academy-team/consulenza-strategica-gratuita-linkedin-dc-academy?utm_source=clientisurichiesta.it&utm_campaign=scaduto&utm_medium=landing" target="_blank" class="btn-gold"><span>Prenota Consulenza Gratuita →</span></a>
+  </div>
+</section>
 
 <div class="gold-line"></div>
 
@@ -517,7 +542,7 @@
     <p class="label reveal" style="margin-bottom:16px">Non perdere questa opportunità</p>
     <h2 class="h-lg reveal" style="margin-bottom:20px">Pronto a trovare <span class="gold">nuovi clienti</span>?</h2>
     <p class="body-text reveal" style="margin-bottom:48px">Guarda la video lezione gratuita e scopri il metodo che ha già funzionato per centinaia di professionisti</p>
-    <div class="reveal"><button onclick="openModal()" class="btn-gold" style="font-size:13px;padding:22px 56px"><span>Guarda la Video Lezione Gratuita →</span></button></div>
+    <div class="reveal"><a href="javascript:void(0)" onclick="scrollToAccess()" class="btn-gold" style="font-size:13px;padding:22px 56px"><span>Guarda la Video Lezione Gratuita →</span></a></div>
   </div>
 </section>
 
@@ -700,19 +725,104 @@ function toggleMenu() {
 }
 function closeMenu() { if (menuOpen) toggleMenu(); }
 
-// ===== MODAL =====
-function openModal() {
-  const m = document.getElementById('modal');
-  m.style.display = 'flex';
-  setTimeout(() => m.classList.add('active'), 10);
-  document.body.style.overflow = 'hidden';
+// ===== SESSION & ACCESS SYSTEM =====
+const ACCESS_DURATION = 5 * 24 * 60 * 60 * 1000; // 5 giorni in ms
+let countdownInterval = null;
+
+function getSession() {
+  try {
+    const raw = localStorage.getItem('vsl_access');
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch(e) { return null; }
 }
-function closeModal() {
-  const m = document.getElementById('modal');
-  m.classList.remove('active');
-  setTimeout(() => { m.style.display = 'none'; document.body.style.overflow = ''; }, 400);
+
+function getTimeRemaining() {
+  const session = getSession();
+  if (!session) return -1;
+  const expires = session.timestamp + ACCESS_DURATION;
+  return expires - Date.now();
 }
-document.getElementById('modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+
+function showVideoSection() {
+  document.getElementById('registrazione-form').style.display = 'none';
+  document.getElementById('accesso-scaduto').style.display = 'none';
+  document.getElementById('video-lezione').style.display = 'block';
+  loadVidalytics();
+  startCountdown();
+  // Scroll to video if not already visible
+  setTimeout(() => {
+    document.getElementById('video-lezione').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 300);
+}
+
+function showExpiredSection() {
+  document.getElementById('registrazione-form').style.display = 'none';
+  document.getElementById('video-lezione').style.display = 'none';
+  document.getElementById('accesso-scaduto').style.display = 'block';
+}
+
+function showFormSection() {
+  document.getElementById('registrazione-form').style.display = 'block';
+  document.getElementById('video-lezione').style.display = 'none';
+  document.getElementById('accesso-scaduto').style.display = 'none';
+}
+
+function startCountdown() {
+  function update() {
+    const remaining = getTimeRemaining();
+    if (remaining <= 0) {
+      clearInterval(countdownInterval);
+      showExpiredSection();
+      return;
+    }
+    const days = Math.floor(remaining / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+    document.getElementById('cdDays').textContent = days;
+    document.getElementById('cdHours').textContent = String(hours).padStart(2, '0');
+    document.getElementById('cdMinutes').textContent = String(minutes).padStart(2, '0');
+    document.getElementById('cdSeconds').textContent = String(seconds).padStart(2, '0');
+  }
+  update();
+  countdownInterval = setInterval(update, 1000);
+}
+
+function loadVidalytics() {
+  if (window._vidalyticsLoaded) return;
+  window._vidalyticsLoaded = true;
+  (function (v, i, d, a, l, y, t, c, s) {
+    y='_'+d.toLowerCase();c=d+'L';if(!v[d]){v[d]={};}if(!v[c]){v[c]={};}if(!v[y]){v[y]={};}var vl='Loader',vli=v[y][vl],vsl=v[c][vl+'Script'],vlf=v[c][vl+'Loaded'],ve='Embed';
+    if(!vsl){vsl=function(u,cb){if(t){cb();return;}s=i.createElement("script");s.type="text/javascript";s.async=1;s.src=u;if(s.readyState){s.onreadystatechange=function(){if(s.readyState==="loaded"||s.readyState=="complete"){s.onreadystatechange=null;vlf=1;cb();}};}else{s.onload=function(){vlf=1;cb();};}i.getElementsByTagName("head")[0].appendChild(s);};}
+    vsl(l+'loader.min.js',function(){if(!vli){var vlc=v[c][vl];vli=new vlc();}vli.loadScript(l+'player.min.js',function(){var vec=v[d][ve];t=new vec();t.run(a);});});
+  })(window, document, 'Vidalytics', 'vidalytics_embed_FC_2OFL5X3cYyfd0', 'https://fast.vidalytics.com/embeds/NyDZYQqV/FC_2OFL5X3cYyfd0/');
+}
+
+// Scroll to the right section based on session state
+function scrollToAccess() {
+  const session = getSession();
+  if (session && getTimeRemaining() > 0) {
+    document.getElementById('video-lezione').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } else if (session) {
+    document.getElementById('accesso-scaduto').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } else {
+    document.getElementById('registrazione-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+// Check session on page load
+(function checkAccess() {
+  const session = getSession();
+  if (session) {
+    const remaining = getTimeRemaining();
+    if (remaining > 0) {
+      showVideoSection();
+    } else {
+      showExpiredSection();
+    }
+  }
+})();
 
 // ===== FORM SUBMIT =====
 function submitForm(e) {
@@ -731,25 +841,19 @@ function submitForm(e) {
   if (!c.checked) ok = false;
   if (!ok) { document.getElementById('formError').style.display = 'block'; return; }
   document.getElementById('formError').style.display = 'none';
+  // Send to Zapier
   fetch('https://hooks.zapier.com/hooks/catch/6421650/unehste/', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ name: f.value + ' ' + l.value, email: m.value, phone: p.value, company: document.getElementById('fieldCompany').value.trim() || 'N/A' })
   }).catch(() => {});
-  // Replace inline form with success message
-  const formCard = document.querySelector('#registrazione-form .glass');
-  formCard.innerHTML = '<div style="text-align:center;padding:32px 0"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:16px"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><h3 class="h-md" style="margin-bottom:8px">Ci siamo! <span class="gold">Guarda il video</span></h3><p class="body-text" style="font-size:14px;color:rgba(255,255,255,0.4)">Il video si sta aprendo...</p></div>';
-  // Open video modal and load player
-  setTimeout(() => {
-    openModal();
-    if (!window._vidalyticsLoaded) {
-      window._vidalyticsLoaded = true;
-      (function (v, i, d, a, l, y, t, c, s) {
-        y='_'+d.toLowerCase();c=d+'L';if(!v[d]){v[d]={};}if(!v[c]){v[c]={};}if(!v[y]){v[y]={};}var vl='Loader',vli=v[y][vl],vsl=v[c][vl+'Script'],vlf=v[c][vl+'Loaded'],ve='Embed';
-        if(!vsl){vsl=function(u,cb){if(t){cb();return;}s=i.createElement("script");s.type="text/javascript";s.async=1;s.src=u;if(s.readyState){s.onreadystatechange=function(){if(s.readyState==="loaded"||s.readyState=="complete"){s.onreadystatechange=null;vlf=1;cb();}};}else{s.onload=function(){vlf=1;cb();};}i.getElementsByTagName("head")[0].appendChild(s);};}
-        vsl(l+'loader.min.js',function(){if(!vli){var vlc=v[c][vl];vli=new vlc();}vli.loadScript(l+'player.min.js',function(){var vec=v[d][ve];t=new vec();t.run(a);});});
-      })(window, document, 'Vidalytics', 'vidalytics_embed_FC_2OFL5X3cYyfd0', 'https://fast.vidalytics.com/embeds/NyDZYQqV/FC_2OFL5X3cYyfd0/');
-    }
-  }, 500);
+  // Save session to localStorage
+  localStorage.setItem('vsl_access', JSON.stringify({
+    timestamp: Date.now(),
+    name: f.value + ' ' + l.value,
+    email: m.value
+  }));
+  // Show video section
+  showVideoSection();
 }
 
 // ===== SOCIAL PROOF NOTIFICATIONS =====
