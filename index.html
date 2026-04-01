@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Clienti Su Richiesta,DC Academy</title>
+  <meta name="description" content="Scopri come attrarre nuovi clienti usando LinkedIn. Il metodo di Davide Caiazzo."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,700;1,800&display=swap" rel="stylesheet"/>
+  <style>
+    /* ===== RESET ===== */
+    *{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth;scroll-padding-top:80px}
+    body{font-family:'Inter',sans-serif;background:#080b10;color:#fff;overflow-x:hidden}
+    a,button,.btn-gold,.btn-outline,.btn-cta{cursor:pointer}
+    ::selection{background:rgba(212,175,55,0.3);color:#fff}
+    ::-webkit-scrollbar{width:4px}
+    ::-webkit-scrollbar-track{background:#080b10}
+    ::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#D4AF37,#8B6914);border-radius:4px}
+
+    /* ===== CANVAS BG ===== */
+    #particleCanvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+    /* trail canvas removed */
+
+    /* ===== TYPOGRAPHY ===== */
+    .h-hero{font-family:'Playfair Display',serif;font-size:clamp(36px,6vw,76px);font-weight:900;line-height:1.02;letter-spacing:-0.03em}
+    .h-lg{font-family:'Playfair Display',serif;font-size:clamp(28px,4.5vw,52px);font-weight:800;line-height:1.08;letter-spacing:-0.02em}
+    .h-md{font-size:clamp(17px,2vw,22px);font-weight:600;line-height:1.3}
+    .body-text{font-size:clamp(15px,1.1vw,17px);color:rgba(255,255,255,0.5);line-height:1.8;font-weight:300}
+    .label{font-size:11px;text-transform:uppercase;letter-spacing:4px;color:#D4AF37;font-weight:600}
+
+    /* ===== GOLD SHIMMER ===== */
+    .gold{background:linear-gradient(135deg,#BF953F 0%,#FCF6BA 25%,#B38728 50%,#FBF5B7 75%,#AA771C 100%);background-size:400% 400%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:goldShimmer 6s ease infinite}
+    @keyframes goldShimmer{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+
+    .gold-line{height:1px;background:linear-gradient(90deg,transparent 0%,rgba(212,175,55,0.08) 20%,rgba(212,175,55,0.3) 50%,rgba(212,175,55,0.08) 80%,transparent 100%)}
+
+    /* ===== BUTTONS ===== */
+    .btn-gold{display:inline-flex;align-items:center;gap:10px;padding:20px 48px;background:linear-gradient(135deg,#BF953F,#D4AF37);color:#000;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:2.5px;border:none;border-radius:60px;text-decoration:none;transition:all 0.5s cubic-bezier(0.4,0,0.2,1);position:relative;overflow:hidden;font-family:'Inter',sans-serif;box-shadow:0 4px 30px rgba(212,175,55,0.2)}
+    .btn-gold::before{content:'';position:absolute;inset:-2px;background:linear-gradient(135deg,#FCF6BA,#D4AF37,#BF953F,#FCF6BA);background-size:300% 300%;border-radius:60px;z-index:-1;animation:goldShimmer 4s ease infinite;filter:blur(8px);opacity:0;transition:opacity 0.5s}
+    .btn-gold:hover{transform:translateY(-3px) scale(1.02);box-shadow:0 20px 60px rgba(212,175,55,0.35)}
+    .btn-gold:hover::before{opacity:1}
+    .btn-gold span{position:relative;z-index:1}
+
+    .btn-outline{display:inline-flex;align-items:center;gap:8px;padding:14px 32px;background:transparent;color:#D4AF37;font-weight:500;font-size:12px;text-transform:uppercase;letter-spacing:2px;border:1px solid rgba(212,175,55,0.2);border-radius:60px;text-decoration:none;transition:all 0.4s;font-family:'Inter',sans-serif}
+    .btn-outline:hover{border-color:#D4AF37;background:rgba(212,175,55,0.06);box-shadow:0 0 30px rgba(212,175,55,0.1)}
+
+    .btn-cta{display:inline-flex;align-items:center;gap:8px;padding:14px 28px;background:#127059;color:#fff;font-weight:600;font-size:13px;letter-spacing:1px;border:none;border-radius:60px;text-decoration:none;transition:all 0.4s;font-family:'Inter',sans-serif;box-shadow:0 4px 20px rgba(18,112,89,0.2)}
+    .btn-cta:hover{background:#15845a;transform:translateY(-2px);box-shadow:0 12px 40px rgba(18,112,89,0.35)}
+
+    /* ===== GLASS CARD ===== */
+    .glass{background:rgba(255,255,255,0.02);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.04);border-radius:20px;position:relative;overflow:hidden;transition:all 0.6s cubic-bezier(0.4,0,0.2,1)}
+    .glass::before{content:'';position:absolute;inset:0;border-radius:20px;padding:1px;background:linear-gradient(135deg,rgba(212,175,55,0.08),transparent 40%,transparent 60%,rgba(212,175,55,0.04));-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;opacity:0;transition:opacity 0.6s}
+    .glass:hover{background:rgba(255,255,255,0.04);transform:translateY(-6px);box-shadow:0 24px 64px rgba(0,0,0,0.4),0 0 80px rgba(212,175,55,0.03)}
+    .glass:hover::before{opacity:1}
+
+    /* ===== SCROLL REVEAL ===== */
+    .reveal{opacity:0;transform:translateY(60px);transition:all 1s cubic-bezier(0.16,1,0.3,1)}
+    .reveal.visible{opacity:1;transform:translateY(0)}
+    .reveal-left{opacity:0;transform:translateX(-80px);transition:all 1s cubic-bezier(0.16,1,0.3,1)}
+    .reveal-left.visible{opacity:1;transform:translateX(0)}
+    .reveal-right{opacity:0;transform:translateX(80px);transition:all 1s cubic-bezier(0.16,1,0.3,1)}
+    .reveal-right.visible{opacity:1;transform:translateX(0)}
+    .reveal-scale{opacity:0;transform:scale(0.9);transition:all 1s cubic-bezier(0.16,1,0.3,1)}
+    .reveal-scale.visible{opacity:1;transform:scale(1)}
+
+    /* ===== SECTIONS ===== */
+    .section{padding:140px 32px;position:relative;z-index:1}
+
+    /* ===== GLOW ORBS ===== */
+    .orb{position:absolute;border-radius:50%;filter:blur(120px);pointer-events:none;animation:orbFloat 12s ease-in-out infinite}
+    @keyframes orbFloat{0%,100%{transform:translate(0,0)}33%{transform:translate(20px,-30px)}66%{transform:translate(-15px,20px)}}
+
+    /* ===== NAV ===== */
+    .nav-link{color:rgba(255,255,255,0.45);text-decoration:none;font-size:13px;letter-spacing:0.5px;font-weight:400;transition:all 0.3s;position:relative}
+    .nav-link::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:1px;background:#D4AF37;transition:width 0.3s}
+    .nav-link:hover{color:#D4AF37}
+    .nav-link:hover::after{width:100%}
+
+    /* ===== FORM ===== */
+    .form-field{width:100%;padding:18px 22px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:14px;color:#fff;font-size:15px;font-family:'Inter',sans-serif;outline:none;transition:all 0.4s cubic-bezier(0.4,0,0.2,1)}
+    .form-field:focus{border-color:rgba(212,175,55,0.5);background:rgba(255,255,255,0.06);box-shadow:0 0 30px rgba(212,175,55,0.08),inset 0 0 20px rgba(212,175,55,0.02)}
+    .form-field::placeholder{color:rgba(255,255,255,0.2)}
+    .form-field.error{border-color:rgba(255,68,68,0.5);box-shadow:0 0 20px rgba(255,68,68,0.08)}
+
+    /* ===== MODAL ===== */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);z-index:200;display:none;align-items:center;justify-content:center;opacity:0;transition:opacity 0.4s}
+    .modal-overlay.active{display:flex;opacity:1}
+    .modal-content{background:linear-gradient(145deg,#111820,#0d1117);border:1px solid rgba(255,255,255,0.06);border-radius:24px;padding:52px 44px;max-width:700px;width:92%;position:relative;max-height:92vh;overflow-y:auto;transform:scale(0.85) translateY(20px);transition:all 0.5s cubic-bezier(0.16,1,0.3,1);box-shadow:0 40px 100px rgba(0,0,0,0.5)}
+    .modal-overlay.active .modal-content{transform:scale(1) translateY(0)}
+    .modal-close{position:absolute;top:18px;right:22px;background:none;border:none;color:rgba(255,255,255,0.3);font-size:28px;transition:all 0.3s;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:50%}
+    .modal-close:hover{color:#fff;background:rgba(255,255,255,0.06);transform:rotate(90deg)}
+
+    /* ===== VIDEO PLAYER ===== */
+    .video-wrap{position:relative;cursor:pointer;overflow:hidden;border-radius:20px;border:1px solid rgba(255,255,255,0.06);box-shadow:0 20px 60px rgba(0,0,0,0.4)}
+    .video-wrap:hover .play-btn{transform:translate(-50%,-50%) scale(1.15);box-shadow:0 0 80px rgba(212,175,55,0.5)}
+    .video-wrap:hover .video-thumb{transform:scale(1.04)}
+    .video-thumb{transition:transform 0.8s cubic-bezier(0.4,0,0.2,1);width:100%;display:block}
+    .play-btn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:88px;height:88px;background:linear-gradient(135deg,#BF953F,#D4AF37);border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all 0.5s cubic-bezier(0.16,1,0.3,1);box-shadow:0 0 50px rgba(212,175,55,0.35)}
+    .play-btn svg{width:30px;height:30px;fill:#000;margin-left:4px}
+
+    /* ===== WHATSAPP ===== */
+    .whatsapp{position:fixed;bottom:28px;right:28px;z-index:90;width:56px;height:56px;background:#25D366;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 24px rgba(37,211,102,0.35);transition:all 0.4s;text-decoration:none;animation:waPulse 3s ease-in-out infinite}
+    .whatsapp:hover{transform:scale(1.12);box-shadow:0 8px 36px rgba(37,211,102,0.5)}
+    .whatsapp svg{width:28px;height:28px;fill:#fff}
+    @keyframes waPulse{0%,100%{box-shadow:0 4px 24px rgba(37,211,102,0.35)}50%{box-shadow:0 4px 24px rgba(37,211,102,0.35),0 0 0 12px rgba(37,211,102,0.08)}}
+
+    /* ===== NOTIFICATION ===== */
+    .notif{position:fixed;bottom:28px;left:28px;z-index:95;opacity:0;transform:translateX(-100%) scale(0.8);pointer-events:none;transition:all 0.5s cubic-bezier(0.16,1,0.3,1)}
+    .notif.show{opacity:1;transform:translateX(0) scale(1);pointer-events:auto}
+    .notif-box{background:rgba(14,18,26,0.95);backdrop-filter:blur(24px);border:1px solid rgba(212,175,55,0.12);border-radius:16px;padding:14px 42px 14px 16px;max-width:320px;box-shadow:0 12px 40px rgba(0,0,0,0.5),0 0 40px rgba(212,175,55,0.04)}
+
+    /* ===== COUNTER ===== */
+    .stat-number{font-family:'Playfair Display',serif;font-weight:800}
+
+    /* ===== TARGET ITEM ===== */
+    .target-item{padding:14px 24px;display:flex;align-items:center;gap:10px;border-radius:60px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);transition:all 0.4s}
+    .target-item:hover{background:rgba(212,175,55,0.08);border-color:rgba(212,175,55,0.2);transform:translateY(-3px);box-shadow:0 8px 24px rgba(212,175,55,0.08)}
+    .target-arrow{color:#D4AF37;font-size:18px;flex-shrink:0;transition:transform 0.3s}
+    .target-item:hover .target-arrow{transform:translateX(4px)}
+
+    /* ===== RESPONSIVE ===== */
+    @media(max-width:768px){
+      body,a,button,input,textarea,label,select{cursor:auto}
+      /* cursor mobile override removed */
+      .section{padding:80px 16px}
+      .grid-2{grid-template-columns:1fr!important}
+      .grid-4{grid-template-columns:1fr!important}
+      .grid-3{grid-template-columns:1fr!important}
+      .hide-mobile{display:none!important}
+      .show-mobile{display:block!important}
+      .play-btn{width:64px;height:64px}
+      .play-btn svg{width:24px;height:24px}
+      .modal-content{padding:36px 24px}
+      .btn-gold{padding:16px 36px}
+    }
+    @media(min-width:769px) and (max-width:1024px){.grid-4{grid-template-columns:1fr 1fr!important}}
+    @media(min-width:769px){.show-mobile{display:none!important}}
+  </style>
+</head>
+<body>
+
+<!-- Canvases -->
+<canvas id="particleCanvas"></canvas>
+
+<!-- ===== HEADER ===== -->
+<header id="header" style="position:fixed;top:0;left:0;right:0;z-index:100;padding:18px 0;transition:all 0.5s cubic-bezier(0.4,0,0.2,1);border-bottom:1px solid transparent">
+  <div style="max-width:1200px;margin:0 auto;padding:0 32px;display:flex;align-items:center;justify-content:space-between">
+    <a href="#" style="text-decoration:none;font-family:'Playfair Display',serif;font-size:24px;font-weight:900;color:#fff;letter-spacing:1px;position:relative">
+      DAVIDE CAIAZZO
+      <span style="position:absolute;bottom:-2px;left:0;width:100%;height:1px;background:linear-gradient(90deg,#D4AF37,transparent);opacity:0.3"></span>
+    </a>
+    <nav class="hide-mobile" style="display:flex;gap:36px;align-items:center">
+      <a href="#benefici" class="nav-link">Benefici</a>
+      <a href="#risultati" class="nav-link">Risultati</a>
+      <a href="#chi-e" class="nav-link">Chi sono</a>
+      <a href="#registrazione" class="btn-cta" style="padding:10px 24px;font-size:12px">Prenota una Consulenza</a>
+    </nav>
+    <button class="show-mobile" id="menuBtn" onclick="toggleMenu()" style="background:none;border:none;z-index:101;padding:8px;position:relative;width:32px;height:32px" aria-label="Menu">
+      <span id="mb1" style="display:block;width:22px;height:1.5px;background:#fff;position:absolute;top:9px;left:5px;transition:all 0.4s cubic-bezier(0.4,0,0.2,1)"></span>
+      <span id="mb2" style="display:block;width:16px;height:1.5px;background:#D4AF37;position:absolute;top:16px;left:5px;transition:all 0.4s cubic-bezier(0.4,0,0.2,1)"></span>
+      <span id="mb3" style="display:block;width:22px;height:1.5px;background:#fff;position:absolute;top:23px;left:5px;transition:all 0.4s cubic-bezier(0.4,0,0.2,1)"></span>
+    </button>
+  </div>
+</header>
+
+<!-- Disclaimer -->
+<div id="disclaimer" style="position:fixed;top:58px;left:0;right:0;z-index:99;background:rgba(8,11,16,0.9);backdrop-filter:blur(10px);padding:10px 32px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.03);transition:all 0.5s">
+  <p style="font-size:14px;color:rgba(255,255,255,0.3);line-height:1.6;max-width:900px;margin:0 auto">I contenuti di questo sito hanno natura pubblicitaria a favore della DC Academy S.r.l.<br>Per qualsiasi approfondimento sui nostri servizi, clienti, testimonianze, testate e dei numeri citati su questo sito visita la pagina: www.davidecaiazzo.it/trasparenza</p>
+</div>
+
+<!-- Mobile Menu -->
+<div id="mobileMenu" style="position:fixed;inset:0;background:rgba(8,11,16,0.98);backdrop-filter:blur(20px);z-index:98;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:36px;transform:translateX(100%);transition:transform 0.5s cubic-bezier(0.4,0,0.2,1)">
+  <a href="#benefici" onclick="closeMenu()" style="color:#fff;text-decoration:none;font-size:28px;font-family:'Playfair Display',serif;opacity:0.8;transition:opacity 0.3s" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'">Benefici</a>
+  <a href="#risultati" onclick="closeMenu()" style="color:#fff;text-decoration:none;font-size:28px;font-family:'Playfair Display',serif;opacity:0.8;transition:opacity 0.3s" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'">Risultati</a>
+  <a href="#chi-e" onclick="closeMenu()" style="color:#fff;text-decoration:none;font-size:28px;font-family:'Playfair Display',serif;opacity:0.8;transition:opacity 0.3s" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'">Chi sono</a>
+  <div style="width:60px;height:1px;background:linear-gradient(90deg,transparent,rgba(212,175,55,0.3),transparent)"></div>
+  <a href="#registrazione" onclick="closeMenu()" class="btn-cta"><span>Prenota una Consulenza</span></a>
+</div>
+
+<!-- ===== HERO ===== -->
+<section style="min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:130px 32px 80px">
+  <div class="orb" style="width:700px;height:700px;background:#D4AF37;top:-350px;right:-250px;opacity:0.06"></div>
+  <div class="orb" style="width:500px;height:500px;background:#127059;bottom:-250px;left:-200px;opacity:0.04;animation-delay:4s"></div>
+  <div class="orb" style="width:300px;height:300px;background:#D4AF37;top:60%;left:10%;opacity:0.03;animation-delay:8s"></div>
+
+  <!-- Grid pattern -->
+  <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(212,175,55,0.015) 1px,transparent 1px),linear-gradient(90deg,rgba(212,175,55,0.015) 1px,transparent 1px);background-size:80px 80px;pointer-events:none;mask-image:radial-gradient(ellipse at center,black 30%,transparent 70%)"></div>
+
+  <div style="max-width:900px;text-align:center;position:relative;z-index:2">
+    <p class="label reveal" style="margin-bottom:24px">DC Academy presenta</p>
+    <h1 class="h-hero reveal gold" style="margin-bottom:28px">Vuoi aumentare le tue entrate ma non sai come trovare nuovi clienti?</h1>
+    <p class="body-text reveal" style="max-width:560px;margin:0 auto 48px;font-size:clamp(15px,1.3vw,19px)">Scopri i 4 step per acquisire clienti sulla piattaforma di business #1 al mondo, senza ads, senza perdere ore sui social</p>
+
+    <!-- VIDEO THUMBNAIL -->
+    <div class="reveal" style="max-width:720px;margin:0 auto 48px">
+      <div class="video-wrap" onclick="openModal()">
+        <img src="https://uploads3.fw360.it/uploads/env/4/2492/img/pages/gallery/677f5475b0ed5_screenshot-2025-01-09-alle-05-45-15.png" alt="Video Lezione Gratuita" class="video-thumb" style="aspect-ratio:16/9;object-fit:cover;width:100%;background:linear-gradient(135deg,#111820,#1a2030)"/>
+        <div class="play-btn">
+          <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+        </div>
+        <!-- Overlay gradient -->
+        <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(8,11,16,0.9) 0%,rgba(8,11,16,0.1) 40%,rgba(8,11,16,0.3) 100%)"></div>
+        <!-- Badge -->
+        <div style="position:absolute;bottom:0;left:0;right:0;padding:36px 28px 24px;text-align:left;z-index:2">
+          <span style="background:linear-gradient(135deg,#BF953F,#D4AF37);color:#000;font-size:11px;font-weight:700;padding:5px 14px;border-radius:6px;display:inline-block;margin-bottom:10px;letter-spacing:0.5px">SEI UN IMPRENDITORE?</span>
+        </div>
+        <!-- Glow ring -->
+        <div style="position:absolute;top:50%;left:50%;width:120px;height:120px;transform:translate(-50%,-50%);border-radius:50%;border:1px solid rgba(212,175,55,0.15);animation:playPulse 3s ease-in-out infinite"></div>
+      </div>
+    </div>
+
+    <!-- Scroll indicator -->
+    <div class="reveal" style="display:flex;flex-direction:column;align-items:center;gap:10px">
+      <div style="width:24px;height:40px;border:1.5px solid rgba(255,255,255,0.08);border-radius:12px;display:flex;justify-content:center;padding-top:8px">
+        <div style="width:3px;height:8px;background:#D4AF37;border-radius:2px;animation:scrollDot 2.5s ease-in-out infinite"></div>
+      </div>
+      <span style="font-size:9px;color:rgba(255,255,255,0.12);text-transform:uppercase;letter-spacing:4px">Scopri di più</span>
+    </div>
+  </div>
+</section>
+<style>
+@keyframes scrollDot{0%,100%{transform:translateY(0);opacity:1}50%{transform:translateY(12px);opacity:0.15}}
+@keyframes playPulse{0%,100%{opacity:0.5;transform:translate(-50%,-50%) scale(1)}50%{opacity:0;transform:translate(-50%,-50%) scale(1.6)}}
+</style>
+
+<!-- ===== FORM MODAL ===== -->
+<div class="modal-overlay" id="modal">
+  <div class="modal-content">
+    <button class="modal-close" onclick="closeModal()">&times;</button>
+
+    <!-- STEP 1: Form -->
+    <div id="modalForm">
+      <div style="text-align:center;margin-bottom:36px">
+        <div style="width:64px;height:64px;background:linear-gradient(135deg,#BF953F,#D4AF37);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;box-shadow:0 8px 30px rgba(212,175,55,0.25)">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="#000"><polygon points="5,3 19,12 5,21"/></svg>
+        </div>
+        <h3 class="h-md" style="margin-bottom:8px">Guarda la Video Lezione <span class="gold">Gratuita</span></h3>
+        <p class="body-text" style="font-size:14px">Inserisci i tuoi dati per accedere subito</p>
+      </div>
+      <form onsubmit="submitForm(event)" novalidate style="display:flex;flex-direction:column;gap:14px">
+        <input type="text" id="fieldName" class="form-field" placeholder="Nome" required/>
+        <input type="text" id="fieldSurname" class="form-field" placeholder="Cognome" required/>
+        <input type="email" id="fieldEmail" class="form-field" placeholder="Email" required/>
+        <input type="tel" id="fieldPhone" class="form-field" placeholder="Cellulare" required/>
+        <input type="text" id="fieldCompany" class="form-field" placeholder="Azienda (opzionale)"/>
+        <label style="display:flex;align-items:flex-start;gap:12px;margin-top:6px">
+          <input type="checkbox" id="fieldPrivacy" required style="margin-top:3px;accent-color:#D4AF37;width:18px;height:18px;flex-shrink:0"/>
+          <span style="font-size:12px;color:rgba(255,255,255,0.3);line-height:1.6">Accetto la <a href="https://docs.google.com/document/d/1qUNgRcZ0W9aZxutDu1Fv2k5aM6Nti4V0/edit" target="_blank" style="color:#D4AF37;text-decoration:underline">Privacy Policy</a> e acconsento al trattamento dei dati personali</span>
+        </label>
+        <label style="display:flex;gap:10px;align-items:flex-start;cursor:pointer">
+          <input type="checkbox" id="fieldMarketing" style="margin-top:3px;accent-color:#D4AF37;width:18px;height:18px;flex-shrink:0"/>
+          <span style="font-size:12px;color:rgba(255,255,255,0.3);line-height:1.6">Acconsento a ricevere comunicazioni commerciali e materiali informativi via email (facoltativo)</span>
+        </label>
+        <p id="formError" style="color:#ff4444;font-size:12px;text-align:center;display:none">Compila tutti i campi e accetta la privacy policy</p>
+        <button type="submit" class="btn-gold" style="width:100%;justify-content:center;margin-top:8px"><span>Accedi alla Video Lezione →</span></button>
+        <p style="text-align:center;font-size:11px;color:rgba(255,255,255,0.15);margin-top:2px">🔒 I tuoi dati sono al sicuro. Zero spam.</p>
+      </form>
+    </div>
+
+    <!-- STEP 2: Video -->
+    <div id="modalVideo" style="display:none">
+      <div style="text-align:center;margin-bottom:24px">
+        <h3 class="h-md">Ecco la tua <span class="gold">Video Lezione!</span></h3>
+      </div>
+      <div id="videoContainer" style="position:relative;width:100%;background:#0a0d12;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.04);margin-bottom:28px">
+        <div id="vidalytics_embed_FC_2OFL5X3cYyfd0" style="width: 100%; position:relative; padding-top: 56.25%;"></div>
+      </div>
+      <div style="margin-top:32px;text-align:center">
+        <p class="label" style="margin-bottom:12px">Prenota</p>
+        <h3 class="h-md" style="margin-bottom:8px">Parliamone <span class="gold">insieme</span></h3>
+        <p style="font-size:13px;color:rgba(255,255,255,0.3);margin-bottom:20px">Scegli il giorno e l'orario che preferisci</p>
+        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:16px;min-height:580px">
+          <iframe src="https://calendly.com/dc-academy-team/consulenza-strategica-gratuita-linkedin-dc-academy?utm_source=clientisurichiesta.it&utm_campaign=calendly&utm_medium=video_vsl&utm_content=vsl_clienti_su_richiesta" style="width:100%;height:560px;border:none;border-radius:12px" title="Calendly"></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="gold-line"></div>
+
+<!-- ===== BENEFICI ===== -->
+<section id="benefici" class="section" style="position:relative">
+  <div class="orb" style="width:500px;height:500px;background:#D4AF37;top:50%;left:-250px;transform:translateY(-50%);opacity:0.04"></div>
+  <div style="max-width:1100px;margin:0 auto;position:relative;z-index:2">
+    <div style="text-align:center;margin-bottom:72px">
+      <p class="label reveal" style="margin-bottom:16px">Perché funziona</p>
+      <h2 class="h-lg reveal">Il metodo che ha generato<br><span class="gold">oltre 1.2 milioni di Euro in 4 mesi</span></h2>
+    </div>
+    <div class="grid-3" style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px">
+      <div class="glass reveal" style="padding:48px 32px;text-align:center;transition-delay:0s">
+        <div style="width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg,rgba(212,175,55,0.15),rgba(212,175,55,0.03));display:flex;align-items:center;justify-content:center;margin:0 auto 24px;font-size:28px;border:1px solid rgba(212,175,55,0.08)">🎯</div>
+        <h3 class="h-md" style="font-size:18px;margin-bottom:12px">Autorevolezza di settore</h3>
+        <p class="body-text" style="font-size:14px">Posizionati come punto di riferimento nel tuo mercato e genera fiducia nei potenziali clienti</p>
+      </div>
+      <div class="glass reveal" style="padding:48px 32px;text-align:center;transition-delay:0.15s">
+        <div style="width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg,rgba(212,175,55,0.15),rgba(212,175,55,0.03));display:flex;align-items:center;justify-content:center;margin:0 auto 24px;font-size:28px;border:1px solid rgba(212,175,55,0.08)">⚡</div>
+        <h3 class="h-md" style="font-size:18px;margin-bottom:12px">Risparmia tempo</h3>
+        <p class="body-text" style="font-size:14px">Smetti di rincorrere clienti con strategie che non portano risultati concreti</p>
+      </div>
+      <div class="glass reveal" style="padding:48px 32px;text-align:center;transition-delay:0.3s">
+        <div style="width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg,rgba(212,175,55,0.15),rgba(212,175,55,0.03));display:flex;align-items:center;justify-content:center;margin:0 auto 24px;font-size:28px;border:1px solid rgba(212,175,55,0.08)">🧲</div>
+        <h3 class="h-md" style="font-size:18px;margin-bottom:12px">Zero pubblicità</h3>
+        <p class="body-text" style="font-size:14px">Genera richieste in modo organico da decision maker che cercano i tuoi servizi</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="gold-line"></div>
+
+<!-- ===== TESTIMONIANZE ===== -->
+<section id="risultati" class="section">
+  <div style="max-width:1200px;margin:0 auto">
+    <div style="text-align:center;margin-bottom:72px">
+      <p class="label reveal" style="margin-bottom:16px">Casi studio reali</p>
+      <h2 class="h-lg reveal">I risultati <span class="gold">parlano da soli</span></h2>
+    </div>
+    <div class="grid-3" style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px">
+      <div class="glass reveal" style="padding:36px 28px;text-align:center;transition-delay:0s">
+        <div style="width:68px;height:68px;border-radius:50%;background:linear-gradient(135deg,#BF953F,#D4AF37);display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:22px;font-weight:800;color:#000;font-family:'Playfair Display',serif;box-shadow:0 8px 24px rgba(212,175,55,0.2)">LC</div>
+        <h3 style="font-size:16px;font-weight:700;margin-bottom:3px">Luca Chieti</h3>
+        <p style="font-size:11px;color:rgba(255,255,255,0.25);margin-bottom:18px;letter-spacing:0.5px">Consulente Finanziario</p>
+        <div class="stat-number" style="font-size:30px;margin-bottom:4px"><span class="gold counter" data-target="420000">0</span></div>
+        <p style="font-size:11px;color:rgba(255,255,255,0.3)">visualizzazioni</p>
+        <p style="font-size:12px;color:rgba(255,255,255,0.4);margin:6px 0 16px">+47 richieste, +8 clienti in 5gg</p>
+        <div style="color:#D4AF37;font-size:12px;letter-spacing:3px">★ ★ ★ ★ ★</div>
+      </div>
+      <div class="glass reveal" style="padding:36px 28px;text-align:center;transition-delay:0.1s">
+        <div style="width:68px;height:68px;border-radius:50%;background:linear-gradient(135deg,#BF953F,#D4AF37);display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:22px;font-weight:800;color:#000;font-family:'Playfair Display',serif;box-shadow:0 8px 24px rgba(212,175,55,0.2)">LZ</div>
+        <h3 style="font-size:16px;font-weight:700;margin-bottom:3px">Luca Zerbini</h3>
+        <p style="font-size:11px;color:rgba(255,255,255,0.25);margin-bottom:18px;letter-spacing:0.5px">Imprenditore</p>
+        <div class="stat-number" style="font-size:30px;margin-bottom:4px">+<span class="gold counter" data-target="100">0</span>M €</div>
+        <p style="font-size:11px;color:rgba(255,255,255,0.3);margin-bottom:16px">raccolti anche grazie a LinkedIn</p>
+        <div style="color:#D4AF37;font-size:12px;letter-spacing:3px">★ ★ ★ ★ ★</div>
+      </div>
+      <div class="glass reveal" style="padding:36px 28px;text-align:center;transition-delay:0.2s">
+        <div style="width:68px;height:68px;border-radius:50%;background:linear-gradient(135deg,#BF953F,#D4AF37);display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:22px;font-weight:800;color:#000;font-family:'Playfair Display',serif;box-shadow:0 8px 24px rgba(212,175,55,0.2)">MP</div>
+        <h3 style="font-size:16px;font-weight:700;margin-bottom:3px">Matteo Pianosi</h3>
+        <p style="font-size:11px;color:rgba(255,255,255,0.25);margin-bottom:18px;letter-spacing:0.5px">Consulente Aziendale</p>
+        <div class="stat-number" style="font-size:30px;margin-bottom:4px">+<span class="gold counter" data-target="4">0</span> clienti</div>
+        <p style="font-size:11px;color:rgba(255,255,255,0.3);margin-bottom:16px">in soli 15 giorni</p>
+        <div style="color:#D4AF37;font-size:12px;letter-spacing:3px">★ ★ ★ ★ ★</div>
+      </div>
+      <div class="glass reveal" style="padding:36px 28px;text-align:center;transition-delay:0.3s">
+        <div style="width:68px;height:68px;border-radius:50%;background:linear-gradient(135deg,#BF953F,#D4AF37);display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:22px;font-weight:800;color:#000;font-family:'Playfair Display',serif;box-shadow:0 8px 24px rgba(212,175,55,0.2)">BC</div>
+        <h3 style="font-size:16px;font-weight:700;margin-bottom:3px">Bruno Calabretta</h3>
+        <p style="font-size:11px;color:rgba(255,255,255,0.25);margin-bottom:18px;letter-spacing:0.5px">Manager & Crypto</p>
+        <div class="stat-number" style="font-size:30px;margin-bottom:4px">0 → <span class="gold counter" data-target="6">0</span> clienti</div>
+        <p style="font-size:11px;color:rgba(255,255,255,0.3);margin-bottom:16px">ad alto costo in 30 giorni</p>
+        <div style="color:#D4AF37;font-size:12px;letter-spacing:3px">★ ★ ★ ★ ★</div>
+      </div>
+      <div class="glass reveal" style="padding:36px 28px;text-align:center;transition-delay:0.4s">
+        <div style="width:68px;height:68px;border-radius:50%;background:linear-gradient(135deg,#BF953F,#D4AF37);display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:22px;font-weight:800;color:#000;font-family:'Playfair Display',serif;box-shadow:0 8px 24px rgba(212,175,55,0.2)">AP</div>
+        <h3 style="font-size:16px;font-weight:700;margin-bottom:3px">Andrea Pietrini</h3>
+        <p style="font-size:11px;color:rgba(255,255,255,0.25);margin-bottom:18px;letter-spacing:0.5px">Chairman YOURgroup</p>
+        <div class="stat-number" style="font-size:30px;margin-bottom:4px">+<span class="gold counter" data-target="100">0</span> clienti</div>
+        <p style="font-size:11px;color:rgba(255,255,255,0.3)">di fascia alta</p>
+        <p style="font-size:12px;color:rgba(255,255,255,0.4);margin:6px 0 16px">+35.000 follower, 1M views</p>
+        <div style="color:#D4AF37;font-size:12px;letter-spacing:3px">★ ★ ★ ★ ★</div>
+      </div>
+      <div class="glass reveal" style="padding:36px 28px;text-align:center;transition-delay:0.5s">
+        <div style="width:68px;height:68px;border-radius:50%;background:linear-gradient(135deg,#BF953F,#D4AF37);display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:22px;font-weight:800;color:#000;font-family:'Playfair Display',serif;box-shadow:0 8px 24px rgba(212,175,55,0.2)">AB</div>
+        <h3 style="font-size:16px;font-weight:700;margin-bottom:3px">Alfio Bardolla</h3>
+        <p style="font-size:11px;color:rgba(255,255,255,0.25);margin-bottom:18px;letter-spacing:0.5px">Imprenditore e Investitore</p>
+        <div class="stat-number" style="font-size:30px;margin-bottom:4px">+<span class="gold counter" data-target="9000">0</span>%</div>
+        <p style="font-size:11px;color:rgba(255,255,255,0.3)">engagement nei primi 7 post</p>
+        <p style="font-size:12px;color:rgba(255,255,255,0.4);margin:6px 0 16px">da 23 a 476 reaction per post</p>
+        <div style="color:#D4AF37;font-size:12px;letter-spacing:3px">★ ★ ★ ★ ★</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="gold-line"></div>
+
+<!-- ===== CHI È ===== -->
+<section id="chi-e" class="section" style="position:relative">
+  <div class="orb" style="width:400px;height:400px;background:#D4AF37;bottom:-150px;right:-150px;opacity:0.04;animation-delay:6s"></div>
+  <div class="grid-2" style="max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1.4fr;gap:64px;align-items:center;position:relative;z-index:2">
+    <div class="reveal-left">
+      <div style="aspect-ratio:3/4;border-radius:20px;border:1px solid rgba(255,255,255,0.04);position:relative;overflow:hidden">
+        <img src="camera-dei-deputati.png" alt="Davide Caiazzo alla Camera dei Deputati" style="width:100%;height:100%;object-fit:cover;object-position:center 20%"/>
+        <div style="position:absolute;bottom:0;left:0;right:0;height:30%;background:linear-gradient(to top,rgba(8,11,16,0.5),transparent)"></div>
+        <div style="position:absolute;top:0;right:0;width:120px;height:120px;background:linear-gradient(225deg,rgba(212,175,55,0.08),transparent);border-radius:0 20px 0 0"></div>
+      </div>
+    </div>
+    <div class="reveal-right">
+      <p class="label" style="margin-bottom:16px">Il fondatore</p>
+      <h2 class="h-lg" style="margin-bottom:20px">Chi è <span class="gold">Davide Caiazzo</span>?</h2>
+      <div style="display:flex;gap:40px;margin-bottom:32px">
+        <div>
+          <div class="stat-number" style="font-size:34px"><span class="gold counter" data-target="220">0</span>K+</div>
+          <p style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:2px">follower</p>
+        </div>
+        <div>
+          <div class="stat-number" style="font-size:34px"><span class="gold counter" data-target="150">0</span>M+</div>
+          <p style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:2px">visualizzazioni</p>
+        </div>
+      </div>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:14px">
+        <li style="display:flex;align-items:flex-start;gap:14px"><span style="color:#D4AF37;font-size:10px;margin-top:6px;flex-shrink:0">◆</span><span class="body-text" style="font-size:14px">Docente LinkedIn e Presidente della DC Academy</span></li>
+        <li style="display:flex;align-items:flex-start;gap:14px"><span style="color:#D4AF37;font-size:10px;margin-top:6px;flex-shrink:0">◆</span><span class="body-text" style="font-size:14px">Ex avvocato in studi legali internazionali</span></li>
+        <li style="display:flex;align-items:flex-start;gap:14px"><span style="color:#D4AF37;font-size:10px;margin-top:6px;flex-shrink:0">◆</span><span class="body-text" style="font-size:14px">Più giovane Dir. Legal/Corporate Affairs in Colgate Palmolive (29 anni)</span></li>
+        <li style="display:flex;align-items:flex-start;gap:14px"><span style="color:#D4AF37;font-size:10px;margin-top:6px;flex-shrink:0">◆</span><span class="body-text" style="font-size:14px">CEO di My Governance,Prada, BNL, PwC, Hyundai, Liu Jo</span></li>
+        <li style="display:flex;align-items:flex-start;gap:14px"><span style="color:#D4AF37;font-size:10px;margin-top:6px;flex-shrink:0">◆</span><span class="body-text" style="font-size:14px">Autore "I Segreti del Personal Branding",Feltrinelli</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="gold-line"></div>
+
+<!-- ===== ARTICOLI SU DI ME ===== -->
+<section class="section" style="padding:100px 32px">
+  <div style="max-width:1200px;margin:0 auto">
+    <div style="text-align:center;margin-bottom:56px">
+      <p class="label reveal" style="margin-bottom:16px">Rassegna stampa</p>
+      <h2 class="h-lg reveal">Articoli <span class="gold">Su di Me</span></h2>
+    </div>
+    <div class="grid-3" style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px">
+      <div class="glass reveal" style="padding:0;overflow:hidden;transition-delay:0s">
+        <div style="overflow:hidden;border-radius:20px 20px 0 0"><img src="https://davidecaiazzo.lovable.app/assets/press-sole24ore-zucchetti-oLIeB0Oo.png" alt="Il Sole 24 Ore - Zucchetti acquisisce My Governance" style="width:100%;aspect-ratio:16/10;object-fit:cover;display:block;transition:transform 0.6s" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'"/></div>
+        <div style="padding:20px 24px">
+          <p style="font-size:11px;color:#D4AF37;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">Il Sole 24 Ore</p>
+          <p style="font-size:14px;color:rgba(255,255,255,0.7);line-height:1.5">Zucchetti acquisisce My Governance: valutazione oltre 10 milioni, Caiazzo confermato AD</p>
+        </div>
+      </div>
+      <div class="glass reveal" style="padding:0;overflow:hidden;transition-delay:0.1s">
+        <div style="overflow:hidden;border-radius:20px 20px 0 0"><img src="https://davidecaiazzo.lovable.app/assets/press-sole24ore-fintech-IanVw6N_.png" alt="Il Sole 24 Ore - MYGO premiata" style="width:100%;aspect-ratio:16/10;object-fit:cover;display:block;transition:transform 0.6s" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'"/></div>
+        <div style="padding:20px 24px">
+          <p style="font-size:11px;color:#D4AF37;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">Il Sole 24 Ore</p>
+          <p style="font-size:14px;color:rgba(255,255,255,0.7);line-height:1.5">MYGO premiata agli Oscar del FinTech per le migliori soluzioni LegalTech e Compliance</p>
+        </div>
+      </div>
+      <div class="glass reveal" style="padding:0;overflow:hidden;transition-delay:0.2s">
+        <div style="overflow:hidden;border-radius:20px 20px 0 0"><img src="https://davidecaiazzo.lovable.app/assets/press-vanityfair-BddLa0Ky.png" alt="Vanity Fair - Davide Caiazzo" style="width:100%;aspect-ratio:16/10;object-fit:cover;display:block;transition:transform 0.6s" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'"/></div>
+        <div style="padding:20px 24px">
+          <p style="font-size:11px;color:#D4AF37;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">Vanity Fair</p>
+          <p style="font-size:14px;color:rgba(255,255,255,0.7);line-height:1.5">Davide Caiazzo: 11 consigli su come crescere su LinkedIn</p>
+        </div>
+      </div>
+      <div class="glass reveal" style="padding:0;overflow:hidden;transition-delay:0.3s">
+        <div style="overflow:hidden;border-radius:20px 20px 0 0"><img src="https://davidecaiazzo.lovable.app/assets/press-affaritaliani-CX_cMMX8.png" alt="Affaritaliani - Davide Caiazzo" style="width:100%;aspect-ratio:16/10;object-fit:cover;display:block;transition:transform 0.6s" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'"/></div>
+        <div style="padding:20px 24px">
+          <p style="font-size:11px;color:#D4AF37;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">Affaritaliani</p>
+          <p style="font-size:14px;color:rgba(255,255,255,0.7);line-height:1.5">Davide Caiazzo, il Re di LinkedIn: "Vi svelo i segreti del Personal Branding"</p>
+        </div>
+      </div>
+      <div class="glass reveal" style="padding:0;overflow:hidden;transition-delay:0.4s">
+        <div style="overflow:hidden;border-radius:20px 20px 0 0"><img src="https://davidecaiazzo.lovable.app/assets/press-iltempo-DsLWH3k8.png" alt="Il Tempo - Premio Impresa Etica" style="width:100%;aspect-ratio:16/10;object-fit:cover;display:block;transition:transform 0.6s" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'"/></div>
+        <div style="padding:20px 24px">
+          <p style="font-size:11px;color:#D4AF37;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">Il Tempo</p>
+          <p style="font-size:14px;color:rgba(255,255,255,0.7);line-height:1.5">Assegnato il premio "Impresa Etica e Innovativa" a Davide Caiazzo e Savino Novelli</p>
+        </div>
+      </div>
+      <div class="glass reveal" style="padding:0;overflow:hidden;transition-delay:0.5s">
+        <div style="overflow:hidden;border-radius:20px 20px 0 0"><img src="https://davidecaiazzo.lovable.app/assets/press-leggo-Clldgqu6.png" alt="Leggo - Il Potere di LinkedIn" style="width:100%;aspect-ratio:16/10;object-fit:cover;display:block;transition:transform 0.6s" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'"/></div>
+        <div style="padding:20px 24px">
+          <p style="font-size:11px;color:#D4AF37;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">Leggo</p>
+          <p style="font-size:14px;color:rgba(255,255,255,0.7);line-height:1.5">Libri, arriva Il Potere di LinkedIn di Davide Caiazzo</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="gold-line"></div>
+
+<!-- ===== A CHI È RIVOLTA ===== -->
+<section id="target" class="section">
+  <div style="max-width:1100px;margin:0 auto">
+    <div style="text-align:center;margin-bottom:72px">
+      <p class="label reveal" style="margin-bottom:16px">Per chi è</p>
+      <h2 class="h-lg reveal">A chi è rivolta <span class="gold">questa lezione</span>?</h2>
+    </div>
+    <div class="reveal" style="display:flex;flex-wrap:wrap;justify-content:center;gap:16px;max-width:1000px;margin:0 auto">
+      <div class="target-item" style="display:flex;align-items:center;gap:10px;padding:14px 24px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:60px;transition:all 0.4s"><span style="font-size:20px">👔</span><span style="font-size:14px;font-weight:500;color:rgba(255,255,255,0.7)">Imprenditori</span></div>
+      <div class="target-item" style="display:flex;align-items:center;gap:10px;padding:14px 24px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:60px;transition:all 0.4s"><span style="font-size:20px">📊</span><span style="font-size:14px;font-weight:500;color:rgba(255,255,255,0.7)">Consulenti</span></div>
+      <div class="target-item" style="display:flex;align-items:center;gap:10px;padding:14px 24px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:60px;transition:all 0.4s"><span style="font-size:20px">⚖️</span><span style="font-size:14px;font-weight:500;color:rgba(255,255,255,0.7)">Avvocati</span></div>
+      <div class="target-item" style="display:flex;align-items:center;gap:10px;padding:14px 24px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:60px;transition:all 0.4s"><span style="font-size:20px">🏠</span><span style="font-size:14px;font-weight:500;color:rgba(255,255,255,0.7)">Agenti Immobiliari</span></div>
+      <div class="target-item" style="display:flex;align-items:center;gap:10px;padding:14px 24px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:60px;transition:all 0.4s"><span style="font-size:20px">🏗️</span><span style="font-size:14px;font-weight:500;color:rgba(255,255,255,0.7)">Ingegneri</span></div>
+      <div class="target-item" style="display:flex;align-items:center;gap:10px;padding:14px 24px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:60px;transition:all 0.4s"><span style="font-size:20px">📰</span><span style="font-size:14px;font-weight:500;color:rgba(255,255,255,0.7)">Giornalisti</span></div>
+      <div class="target-item" style="display:flex;align-items:center;gap:10px;padding:14px 24px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:60px;transition:all 0.4s"><span style="font-size:20px">📐</span><span style="font-size:14px;font-weight:500;color:rgba(255,255,255,0.7)">Geometri</span></div>
+      <div class="target-item" style="display:flex;align-items:center;gap:10px;padding:14px 24px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:60px;transition:all 0.4s"><span style="font-size:20px">🧮</span><span style="font-size:14px;font-weight:500;color:rgba(255,255,255,0.7)">Commercialisti</span></div>
+      <div class="target-item" style="display:flex;align-items:center;gap:10px;padding:14px 24px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:60px;transition:all 0.4s"><span style="font-size:20px">🎨</span><span style="font-size:14px;font-weight:500;color:rgba(255,255,255,0.7)">Grafici</span></div>
+      <div class="target-item" style="display:flex;align-items:center;gap:10px;padding:14px 24px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:60px;transition:all 0.4s"><span style="font-size:20px">📝</span><span style="font-size:14px;font-weight:500;color:rgba(255,255,255,0.7)">Notai</span></div>
+      <div class="target-item" style="display:flex;align-items:center;gap:10px;padding:14px 24px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:60px;transition:all 0.4s"><span style="font-size:20px">🍽️</span><span style="font-size:14px;font-weight:500;color:rgba(255,255,255,0.7)">Ristoratori</span></div>
+      <div class="target-item" style="display:flex;align-items:center;gap:10px;padding:14px 24px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:60px;transition:all 0.4s"><span style="font-size:20px">💪</span><span style="font-size:14px;font-weight:500;color:rgba(255,255,255,0.7)">Personal Trainer</span></div>
+      <div class="target-item" style="display:flex;align-items:center;gap:10px;padding:14px 24px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:60px;transition:all 0.4s"><span style="font-size:20px">✍️</span><span style="font-size:14px;font-weight:500;color:rgba(255,255,255,0.7)">Copywriter</span></div>
+      <div class="target-item" style="display:flex;align-items:center;gap:10px;padding:14px 24px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:60px;transition:all 0.4s"><span style="font-size:20px">🦷</span><span style="font-size:14px;font-weight:500;color:rgba(255,255,255,0.7)">Dentisti</span></div>
+      <div class="target-item" style="display:flex;align-items:center;gap:10px;padding:14px 24px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:60px;transition:all 0.4s"><span style="font-size:20px">🧠</span><span style="font-size:14px;font-weight:500;color:rgba(255,255,255,0.7)">Psicologi</span></div>
+      <div class="target-item" style="display:flex;align-items:center;gap:10px;padding:14px 24px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:60px;transition:all 0.4s"><span style="font-size:20px">🏛️</span><span style="font-size:14px;font-weight:500;color:rgba(255,255,255,0.7)">Architetti</span></div>
+      <div class="target-item" style="display:flex;align-items:center;gap:10px;padding:14px 24px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:60px;transition:all 0.4s"><span style="font-size:20px">🌐</span><span style="font-size:14px;font-weight:500;color:rgba(255,255,255,0.7)">Web Agency</span></div>
+      <div class="target-item" style="display:flex;align-items:center;gap:10px;padding:14px 24px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:60px;transition:all 0.4s"><span style="font-size:20px">🏢</span><span style="font-size:14px;font-weight:500;color:rgba(255,255,255,0.7)">Manager e C Level</span></div>
+      <div class="target-item" style="display:flex;align-items:center;gap:10px;padding:14px 24px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:60px;transition:all 0.4s"><span style="font-size:20px">🧮</span><span style="font-size:14px;font-weight:500;color:rgba(255,255,255,0.7)">Ragionieri</span></div>
+    </div>
+    <p class="body-text reveal" style="text-align:center;margin-top:40px;font-size:15px">...e qualsiasi <span style="color:#D4AF37">libero professionista o imprenditore</span> che vuole acquisire clienti tramite LinkedIn</p>
+  </div>
+</section>
+
+<div class="gold-line"></div>
+
+<!-- ===== CTA FINALE ===== -->
+<section id="registrazione" class="section" style="position:relative">
+  <div class="orb" style="width:600px;height:600px;background:#D4AF37;top:50%;left:50%;transform:translate(-50%,-50%);opacity:0.04"></div>
+  <div style="max-width:600px;margin:0 auto;text-align:center;position:relative;z-index:2">
+    <p class="label reveal" style="margin-bottom:16px">Non perdere questa opportunità</p>
+    <h2 class="h-lg reveal" style="margin-bottom:20px">Pronto a trovare <span class="gold">nuovi clienti</span>?</h2>
+    <p class="body-text reveal" style="margin-bottom:48px">Guarda la video lezione gratuita e scopri il metodo che ha già funzionato per centinaia di professionisti</p>
+    <div class="reveal"><button onclick="openModal()" class="btn-gold" style="font-size:13px;padding:22px 56px"><span>Guarda la Video Lezione Gratuita →</span></button></div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<div class="gold-line"></div>
+<footer style="padding:64px 32px;background:linear-gradient(180deg,#080b10,#050709)">
+  <div style="max-width:800px;margin:0 auto;text-align:center">
+    <p style="font-family:'Playfair Display',serif;font-size:20px;font-weight:800;margin-bottom:24px">DC<span style="color:#D4AF37">.</span> Academy</p>
+    <div style="font-size:12px;color:rgba(255,255,255,0.15);line-height:2.2;margin-bottom:24px">
+      <p>P.IVA: 05125350750 · Via I. Adriano 9, Lecce</p>
+      <p>academy@davidecaiazzo.it</p>
+    </div>
+    <div style="display:flex;justify-content:center;gap:24px;margin-bottom:24px;flex-wrap:wrap">
+      <a href="https://docs.google.com/document/d/1qUNgRcZ0W9aZxutDu1Fv2k5aM6Nti4V0/edit" target="_blank" style="color:rgba(255,255,255,0.2);text-decoration:none;font-size:11px;transition:color 0.3s;letter-spacing:0.5px" onmouseover="this.style.color='#D4AF37'" onmouseout="this.style.color='rgba(255,255,255,0.2)'">Privacy Policy</a>
+      <a href="https://docs.google.com/document/d/1PTTs2QFMqBtZaefLHPrrfMxJRnlGewih/edit?usp=sharing&ouid=101002448876750781490&rtpof=true&sd=true" target="_blank" style="color:rgba(255,255,255,0.2);text-decoration:none;font-size:11px;transition:color 0.3s;letter-spacing:0.5px" onmouseover="this.style.color='#D4AF37'" onmouseout="this.style.color='rgba(255,255,255,0.2)'">Cookie Policy</a>
+      <a href="https://docs.google.com/document/d/1K6WGjt9aFTRN-zWMvEOh5bw2A32nNag-/edit?usp=sharing&ouid=101002448876750781490&rtpof=true&sd=true" target="_blank" style="color:rgba(255,255,255,0.2);text-decoration:none;font-size:11px;transition:color 0.3s;letter-spacing:0.5px" onmouseover="this.style.color='#D4AF37'" onmouseout="this.style.color='rgba(255,255,255,0.2)'">Condizioni di Vendita</a>
+    </div>
+    <p style="color:rgba(255,255,255,0.08);font-size:10px;margin-bottom:6px">I contenuti di questo sito hanno natura pubblicitaria a favore della DC Academy S.r.l. · Per qualsiasi approfondimento sui nostri servizi, clienti, testimonianze, testate e dei numeri citati su questo sito visita la pagina: www.davidecaiazzo.it/trasparenza</p>
+    <p style="color:rgba(255,255,255,0.06);font-size:10px">&copy; 2026 DC Academy S.r.l.</p>
+  </div>
+</footer>
+
+<!-- ===== WHATSAPP ===== -->
+<a href="https://bit.ly/clienti-su-richiesta-info" target="_blank" class="whatsapp" aria-label="WhatsApp">
+  <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+</a>
+
+<!-- ===== NOTIFICATION ===== -->
+<div class="notif" id="notification">
+  <div class="notif-box">
+    <button onclick="hideNotif()" style="position:absolute;top:10px;right:12px;background:none;border:none;color:rgba(255,255,255,0.2);font-size:16px;transition:color 0.3s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.2)'">&times;</button>
+    <div style="display:flex;align-items:center;gap:12px">
+      <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#BF953F,#D4AF37);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;color:#000;font-weight:700;box-shadow:0 4px 12px rgba(212,175,55,0.2)">✓</div>
+      <div>
+        <p style="font-size:13px;font-weight:500"><span id="notifName">Marco R.</span> <span style="color:rgba(255,255,255,0.3);font-weight:300">ha effettuato l'accesso</span></p>
+        <p id="notifTime" style="color:rgba(255,255,255,0.15);font-size:10px;margin-top:2px">2 min fa</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== COOKIE ===== -->
+<div id="cookieBanner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:96;padding:16px 24px;background:rgba(8,11,16,0.95);backdrop-filter:blur(20px);border-top:1px solid rgba(255,255,255,0.04);animation:slideUp 0.5s cubic-bezier(0.16,1,0.3,1)">
+  <div style="max-width:900px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px">
+    <p style="color:rgba(255,255,255,0.3);font-size:12px;flex:1;min-width:200px">Utilizziamo cookie per migliorare la tua esperienza. <a href="https://docs.google.com/document/d/1PTTs2QFMqBtZaefLHPrrfMxJRnlGewih/edit?usp=sharing&ouid=101002448876750781490&rtpof=true&sd=true" target="_blank" style="color:#D4AF37;text-decoration:underline;font-size:12px">Info</a></p>
+    <div style="display:flex;gap:10px">
+      <button onclick="acceptCookie(1)" class="btn-gold" style="padding:8px 22px;font-size:10px;border-radius:60px"><span>Accetta</span></button>
+      <button onclick="acceptCookie(0)" class="btn-outline" style="padding:8px 22px;font-size:10px">Rifiuta</button>
+    </div>
+  </div>
+</div>
+<style>@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}</style>
+
+<!-- ===== JAVASCRIPT ===== -->
+<script>
+// ===== PARTICLE BACKGROUND =====
+const pCanvas = document.getElementById('particleCanvas');
+const pCtx = pCanvas.getContext('2d');
+let particles = [];
+const PARTICLE_COUNT = 60;
+
+function resizeCanvas() {
+  pCanvas.width = window.innerWidth;
+  pCanvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+class Particle {
+  constructor() { this.reset(); }
+  reset() {
+    this.x = Math.random() * pCanvas.width;
+    this.y = Math.random() * pCanvas.height;
+    this.size = Math.random() * 1.5 + 0.3;
+    this.speedX = (Math.random() - 0.5) * 0.3;
+    this.speedY = (Math.random() - 0.5) * 0.3;
+    this.opacity = Math.random() * 0.15 + 0.03;
+    this.gold = Math.random() > 0.7;
+  }
+  update() {
+    this.x += this.speedX;
+    this.y += this.speedY;
+    if (this.x < 0 || this.x > pCanvas.width || this.y < 0 || this.y > pCanvas.height) this.reset();
+  }
+  draw() {
+    pCtx.beginPath();
+    pCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    if (this.gold) {
+      pCtx.fillStyle = `rgba(212, 175, 55, ${this.opacity * 2})`;
+      pCtx.shadowBlur = 10;
+      pCtx.shadowColor = 'rgba(212, 175, 55, 0.3)';
+    } else {
+      pCtx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+      pCtx.shadowBlur = 0;
+    }
+    pCtx.fill();
+    pCtx.shadowBlur = 0;
+  }
+}
+
+for (let i = 0; i < PARTICLE_COUNT; i++) particles.push(new Particle());
+
+function animateParticles() {
+  pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+  particles.forEach(p => { p.update(); p.draw(); });
+  requestAnimationFrame(animateParticles);
+}
+animateParticles();
+
+// Custom cursor removed - using standard browser cursor like davidecaiazzo.it
+
+// ===== HEADER SCROLL =====
+window.addEventListener('scroll', () => {
+  const header = document.getElementById('header');
+  const disc = document.getElementById('disclaimer');
+  if (scrollY > 60) {
+    header.style.background = 'rgba(8,11,16,0.92)';
+    header.style.backdropFilter = 'blur(20px)';
+    header.style.webkitBackdropFilter = 'blur(20px)';
+    header.style.borderBottomColor = 'rgba(255,255,255,0.03)';
+    header.style.padding = '10px 0';
+    disc.style.transform = 'translateY(-100%)';
+    disc.style.opacity = '0';
+  } else {
+    header.style.background = 'transparent';
+    header.style.backdropFilter = 'none';
+    header.style.borderBottomColor = 'transparent';
+    header.style.padding = '18px 0';
+    disc.style.transform = 'translateY(0)';
+    disc.style.opacity = '1';
+  }
+});
+
+// ===== SCROLL REVEAL =====
+const revealObserver = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      revealObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+document.querySelectorAll('.reveal,.reveal-left,.reveal-right,.reveal-scale').forEach(el => revealObserver.observe(el));
+
+// ===== COUNTER ANIMATION =====
+const counterObserver = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const target = +entry.target.dataset.target;
+      const duration = 2500;
+      const start = performance.now();
+      (function tick(now) {
+        const progress = Math.min((now - start) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 4); // easeOutQuart
+        const value = Math.floor(eased * target);
+        entry.target.textContent = value.toLocaleString('it-IT');
+        if (progress < 1) requestAnimationFrame(tick);
+      })(start);
+      counterObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.5 });
+document.querySelectorAll('.counter').forEach(el => counterObserver.observe(el));
+
+// ===== MOBILE MENU =====
+let menuOpen = false;
+function toggleMenu() {
+  menuOpen = !menuOpen;
+  document.getElementById('mobileMenu').style.transform = menuOpen ? 'translateX(0)' : 'translateX(100%)';
+  const b1 = document.getElementById('mb1'), b2 = document.getElementById('mb2'), b3 = document.getElementById('mb3');
+  if (menuOpen) {
+    b1.style.transform = 'rotate(45deg) translate(5px, 5px)';
+    b2.style.opacity = '0'; b2.style.transform = 'translateX(10px)';
+    b3.style.transform = 'rotate(-45deg) translate(5px, -5px)';
+  } else {
+    b1.style.transform = 'none';
+    b2.style.opacity = '1'; b2.style.transform = 'none';
+    b3.style.transform = 'none';
+  }
+}
+function closeMenu() { if (menuOpen) toggleMenu(); }
+
+// ===== MODAL =====
+function openModal() {
+  const m = document.getElementById('modal');
+  m.style.display = 'flex';
+  setTimeout(() => m.classList.add('active'), 10);
+  document.body.style.overflow = 'hidden';
+}
+function closeModal() {
+  const m = document.getElementById('modal');
+  m.classList.remove('active');
+  setTimeout(() => { m.style.display = 'none'; document.body.style.overflow = ''; }, 400);
+}
+document.getElementById('modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+
+// ===== FORM SUBMIT =====
+function submitForm(e) {
+  e.preventDefault();
+  const f = document.getElementById('fieldName'),
+        l = document.getElementById('fieldSurname'),
+        m = document.getElementById('fieldEmail'),
+        p = document.getElementById('fieldPhone'),
+        c = document.getElementById('fieldPrivacy');
+  [f, l, m, p].forEach(x => x.classList.remove('error'));
+  let ok = true;
+  if (!f.value.trim()) { f.classList.add('error'); ok = false; }
+  if (!l.value.trim()) { l.classList.add('error'); ok = false; }
+  if (!m.value.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(m.value)) { m.classList.add('error'); ok = false; }
+  if (!p.value.trim()) { p.classList.add('error'); ok = false; }
+  if (!c.checked) ok = false;
+  if (!ok) { document.getElementById('formError').style.display = 'block'; return; }
+  document.getElementById('formError').style.display = 'none';
+  console.log('Form:', { nome: f.value, cognome: l.value, email: m.value, tel: p.value });
+  const form = document.getElementById('modalForm');
+  form.style.opacity = '0';
+  form.style.transform = 'translateY(-10px)';
+  form.style.transition = 'all 0.4s';
+  setTimeout(() => {
+    form.style.display = 'none';
+    const vid = document.getElementById('modalVideo');
+    vid.style.display = 'block';
+    vid.style.opacity = '0';
+    vid.style.transform = 'translateY(10px)';
+    setTimeout(() => {
+      vid.style.transition = 'all 0.5s'; vid.style.opacity = '1'; vid.style.transform = 'translateY(0)';
+      // Load Vidalytics player dynamically
+      if (!window._vidalyticsLoaded) {
+        window._vidalyticsLoaded = true;
+        (function (v, i, d, a, l, y, t, c, s) {
+          y='_'+d.toLowerCase();c=d+'L';if(!v[d]){v[d]={};}if(!v[c]){v[c]={};}if(!v[y]){v[y]={};}var vl='Loader',vli=v[y][vl],vsl=v[c][vl+'Script'],vlf=v[c][vl+'Loaded'],ve='Embed';
+          if(!vsl){vsl=function(u,cb){if(t){cb();return;}s=i.createElement("script");s.type="text/javascript";s.async=1;s.src=u;if(s.readyState){s.onreadystatechange=function(){if(s.readyState==="loaded"||s.readyState=="complete"){s.onreadystatechange=null;vlf=1;cb();}};}else{s.onload=function(){vlf=1;cb();};}i.getElementsByTagName("head")[0].appendChild(s);};}
+          vsl(l+'loader.min.js',function(){if(!vli){var vlc=v[c][vl];vli=new vlc();}vli.loadScript(l+'player.min.js',function(){var vec=v[d][ve];t=new vec();t.run(a);});});
+        })(window, document, 'Vidalytics', 'vidalytics_embed_FC_2OFL5X3cYyfd0', 'https://fast.vidalytics.com/embeds/NyDZYQqV/FC_2OFL5X3cYyfd0/');
+      }
+    }, 30);
+  }, 400);
+}
+
+// ===== SOCIAL PROOF NOTIFICATIONS =====
+const notifNames = ["Marco R.", "Giulia S.", "Alessandro M.", "Francesca B.", "Luca P.", "Sara D.", "Andrea T.", "Valentina C.", "Roberto F.", "Elena G.", "Giovanni M.", "Chiara L."];
+const notifTimes = ["appena ora", "2 min fa", "5 min fa", "8 min fa", "12 min fa"];
+let notifCount = 0;
+
+function showNotif() {
+  if (notifCount >= 3 || innerWidth < 768) return;
+  const el = document.getElementById('notification');
+  document.getElementById('notifName').textContent = notifNames[Math.floor(Math.random() * notifNames.length)];
+  document.getElementById('notifTime').textContent = notifTimes[Math.floor(Math.random() * notifTimes.length)];
+  el.classList.add('show');
+  notifCount++;
+  setTimeout(hideNotif, 5000);
+}
+function hideNotif() {
+  const el = document.getElementById('notification');
+  el.classList.remove('show');
+  if (notifCount < 3) setTimeout(showNotif, 18000 + Math.random() * 12000);
+}
+setTimeout(showNotif, 9000);
+
+// ===== COOKIE =====
+function acceptCookie(accept) {
+  localStorage.setItem('cookieChoice', accept ? 'y' : 'n');
+  const b = document.getElementById('cookieBanner');
+  b.style.opacity = '0';
+  b.style.transform = 'translateY(20px)';
+  b.style.transition = 'all 0.4s';
+  setTimeout(() => b.style.display = 'none', 400);
+}
+if (!localStorage.getItem('cookieChoice')) document.getElementById('cookieBanner').style.display = 'block';
+</script>
+</body>
+</html>
