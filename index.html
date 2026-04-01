@@ -763,8 +763,10 @@ function showVideoSection() {
 }
 
 function showExpiredSection() {
-  document.getElementById('registrazione-form').style.display = 'none';
-  document.getElementById('video-lezione').style.display = 'none';
+  // Nascondi tutto il contenuto della pagina tranne header e accesso-scaduto
+  document.querySelectorAll('body > section, body > .gold-line, body > footer, #disclaimer, #registrazione-form, #video-lezione').forEach(el => {
+    el.style.display = 'none';
+  });
   document.getElementById('accesso-scaduto').style.display = 'block';
 }
 
