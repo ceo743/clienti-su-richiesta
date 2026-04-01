@@ -726,7 +726,7 @@ function submitForm(e) {
   document.getElementById('formError').style.display = 'none';
   fetch('https://hooks.zapier.com/hooks/catch/6421650/unehste/', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name: f.value + ' ' + l.value, email: m.value, phone: p.value })
+    body: JSON.stringify({ name: f.value + ' ' + l.value, email: m.value, phone: p.value, company: document.getElementById('fieldCompany').value.trim() || 'N/A' })
   }).catch(() => {});
   const form = document.getElementById('modalForm');
   form.style.opacity = '0';
