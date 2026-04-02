@@ -19,19 +19,10 @@
 
     .container{max-width:800px;margin:0 auto;padding:0 24px}
 
-    /* Header */
-    .header{padding:18px 0;background:rgba(8,11,16,0.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,0.04)}
-    .header a{text-decoration:none;font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:#fff;letter-spacing:1px;display:block;text-align:center}
-
-    /* Confirmation banner */
-    .confirm-bar{display:flex;align-items:center;justify-content:center;gap:12px;padding:16px 24px;background:rgba(18,112,89,0.08);border-bottom:1px solid rgba(18,112,89,0.15)}
-    .confirm-bar svg{flex-shrink:0}
-    .confirm-bar p{font-size:16px;font-weight:500;color:rgba(255,255,255,0.8)}
-
     /* Main content */
-    .main{padding:36px 24px 48px}
-    .main h1{font-family:'Playfair Display',serif;font-size:clamp(24px,4.5vw,36px);font-weight:800;text-align:center;margin-bottom:10px;line-height:1.2}
-    .main .subtitle{text-align:center;font-size:16px;color:rgba(255,255,255,0.45);margin-bottom:32px;font-weight:300}
+    .main{padding:48px 24px 48px}
+    .main h1{font-family:'Playfair Display',serif;font-size:clamp(26px,5vw,42px);font-weight:800;text-align:center;margin-bottom:10px;line-height:1.2}
+    .main .subtitle{text-align:center;font-size:17px;color:rgba(255,255,255,0.45);margin-bottom:36px;font-weight:300}
 
     /* Video */
     .video-wrap{width:100%;background:#0a0d12;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);margin-bottom:48px;box-shadow:0 20px 60px rgba(0,0,0,0.4)}
@@ -45,16 +36,16 @@
 
     /* Step cards - redesigned */
     .cards{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:48px}
-    .card{background:linear-gradient(160deg,rgba(255,255,255,0.04) 0%,rgba(255,255,255,0.01) 100%);border:1px solid rgba(255,255,255,0.06);border-radius:20px;padding:32px 28px;position:relative;overflow:hidden;transition:all 0.4s}
+    .card{background:linear-gradient(160deg,rgba(255,255,255,0.04) 0%,rgba(255,255,255,0.01) 100%);border:1px solid rgba(255,255,255,0.06);border-radius:24px;padding:40px 32px;position:relative;overflow:hidden;transition:all 0.4s}
     .card:hover{border-color:rgba(212,175,55,0.15);transform:translateY(-2px);box-shadow:0 16px 48px rgba(0,0,0,0.3)}
     .card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#BF953F,#D4AF37);opacity:0;transition:opacity 0.4s}
     .card:hover::before{opacity:1}
-    .card-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:20px}
+    .card-icon{width:60px;height:60px;border-radius:16px;display:flex;align-items:center;justify-content:center;margin-bottom:24px}
     .card-icon.red{background:rgba(255,68,68,0.08);border:1px solid rgba(255,68,68,0.12)}
     .card-icon.gold-bg{background:rgba(212,175,55,0.08);border:1px solid rgba(212,175,55,0.12)}
-    .card h3{font-family:'Playfair Display',serif;font-size:clamp(18px,2.5vw,22px);font-weight:800;margin-bottom:12px;line-height:1.25}
-    .card p{font-size:15px;color:rgba(255,255,255,0.45);line-height:1.75;font-weight:300}
-    .card .highlight{display:inline-block;margin-top:12px;font-size:13px;font-weight:600;color:#D4AF37;letter-spacing:0.3px}
+    .card h3{font-family:'Playfair Display',serif;font-size:clamp(20px,3vw,26px);font-weight:800;margin-bottom:14px;line-height:1.25}
+    .card p{font-size:16px;color:rgba(255,255,255,0.45);line-height:1.8;font-weight:300}
+    .card .highlight{display:inline-block;margin-top:16px;font-size:14px;font-weight:600;color:#D4AF37;letter-spacing:0.3px}
 
     /* Sign off */
     .signoff{text-align:center;padding:36px 0;border-top:1px solid rgba(255,255,255,0.04)}
@@ -120,17 +111,6 @@
   </div>
 </div>
 
-<!-- HEADER -->
-<div class="header">
-  <a href="https://clienti.davidecaiazzo.it/">DAVIDE CAIAZZO</a>
-</div>
-
-<!-- CONFIRMATION BANNER -->
-<div class="confirm-bar">
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#25D366" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-  <p>Abbiamo ricevuto la tua <strong>candidatura!</strong></p>
-</div>
-
 <!-- MAIN -->
 <div class="main">
   <div class="container">
@@ -154,7 +134,7 @@
 
       <div class="card">
         <div class="card-icon red">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ff4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ff4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         </div>
         <h3>Sii <span class="gold">Puntuale</span></h3>
         <p>Annulliamo circa l'80% delle domande che riceviamo. Assicurati di entrare nella video chiamata qualche minuto prima.</p>
@@ -163,7 +143,7 @@
 
       <div class="card">
         <div class="card-icon gold-bg">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
         </div>
         <h3>Zero <span class="gold">Distrazioni</span></h3>
         <p>Stanza silenziosa e massima attenzione. Dobbiamo capire i tuoi obiettivi e come aiutarti ad emergere su LinkedIn.</p>
