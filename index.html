@@ -223,15 +223,17 @@
     <!-- VIDEO PLAYER + COUNTDOWN (shown when session active, hidden by default) -->
     <div id="heroVideo" style="max-width:960px;margin:0 auto;display:none">
       <!-- Compact countdown bar -->
-      <div id="countdownBar" style="display:flex;align-items:center;justify-content:center;gap:12px;background:rgba(191,149,63,0.1);border:1px solid rgba(212,175,55,0.15);border-radius:12px;padding:16px 28px;margin-bottom:20px;flex-wrap:wrap">
-        <span style="font-size:13px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:2px;margin-right:10px;font-weight:600">L'accesso alla video lezione gratuita scade tra:</span>
-        <span id="cdDays" style="font-family:'Playfair Display',serif;font-size:36px;font-weight:800;color:#D4AF37">0</span><span style="font-size:14px;color:rgba(255,255,255,0.3);font-weight:600">g</span>
-        <span style="color:rgba(212,175,55,0.4);font-weight:800;font-size:24px">:</span>
-        <span id="cdHours" style="font-family:'Playfair Display',serif;font-size:36px;font-weight:800;color:#D4AF37">00</span><span style="font-size:14px;color:rgba(255,255,255,0.3);font-weight:600">h</span>
-        <span style="color:rgba(212,175,55,0.4);font-weight:800;font-size:24px">:</span>
-        <span id="cdMinutes" style="font-family:'Playfair Display',serif;font-size:36px;font-weight:800;color:#D4AF37">00</span><span style="font-size:14px;color:rgba(255,255,255,0.3);font-weight:600">m</span>
-        <span style="color:rgba(212,175,55,0.4);font-weight:800;font-size:24px">:</span>
-        <span id="cdSeconds" style="font-family:'Playfair Display',serif;font-size:36px;font-weight:800;color:#D4AF37">00</span><span style="font-size:14px;color:rgba(255,255,255,0.3);font-weight:600">s</span>
+      <div id="countdownBar" style="display:flex;align-items:center;justify-content:center;gap:10px;background:rgba(191,149,63,0.1);border:1px solid rgba(212,175,55,0.15);border-radius:12px;padding:14px 24px;margin-bottom:20px;flex-wrap:wrap">
+        <span style="font-size:12px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:1.5px;font-weight:600">L'accesso alla video lezione gratuita scade tra:</span>
+        <span style="display:flex;align-items:center;gap:6px;white-space:nowrap">
+          <span id="cdDays" style="font-family:'Playfair Display',serif;font-size:32px;font-weight:800;color:#D4AF37">0</span><span style="font-size:12px;color:rgba(255,255,255,0.3);font-weight:600">g</span>
+          <span style="color:rgba(212,175,55,0.4);font-weight:800;font-size:20px">:</span>
+          <span id="cdHours" style="font-family:'Playfair Display',serif;font-size:32px;font-weight:800;color:#D4AF37">00</span><span style="font-size:12px;color:rgba(255,255,255,0.3);font-weight:600">h</span>
+          <span style="color:rgba(212,175,55,0.4);font-weight:800;font-size:20px">:</span>
+          <span id="cdMinutes" style="font-family:'Playfair Display',serif;font-size:32px;font-weight:800;color:#D4AF37">00</span><span style="font-size:12px;color:rgba(255,255,255,0.3);font-weight:600">m</span>
+          <span style="color:rgba(212,175,55,0.4);font-weight:800;font-size:20px">:</span>
+          <span id="cdSeconds" style="font-family:'Playfair Display',serif;font-size:32px;font-weight:800;color:#D4AF37">00</span><span style="font-size:12px;color:rgba(255,255,255,0.3);font-weight:600">s</span>
+        </span>
       </div>
       <!-- Video FULL WIDTH -->
       <div style="position:relative;width:100%;background:#0a0d12;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.04);box-shadow:0 20px 60px rgba(0,0,0,0.4)">
