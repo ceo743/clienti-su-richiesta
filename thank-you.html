@@ -71,14 +71,46 @@
     .whatsapp svg{width:28px;height:28px;fill:#fff}
     @keyframes waPulse{0%,100%{box-shadow:0 4px 24px rgba(37,211,102,0.35)}50%{box-shadow:0 4px 24px rgba(37,211,102,0.35),0 0 0 12px rgba(37,211,102,0.08)}}
 
+    /* Modal overlay */
+    .modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:24px;animation:fadeIn 0.3s ease}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    .modal-box{background:linear-gradient(160deg,#0f1319 0%,#0a0d12 100%);border:1px solid rgba(212,175,55,0.15);border-radius:20px;max-width:480px;width:100%;padding:40px 32px 32px;position:relative;box-shadow:0 24px 80px rgba(0,0,0,0.6),0 0 0 1px rgba(212,175,55,0.05);animation:slideUp 0.4s cubic-bezier(0.16,1,0.3,1)}
+    @keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+    .modal-icon{width:72px;height:72px;background:linear-gradient(135deg,rgba(18,112,89,0.2),rgba(18,112,89,0.08));border:2px solid rgba(25,200,130,0.25);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;box-shadow:0 12px 40px rgba(18,112,89,0.12)}
+    .modal-box h2{font-family:'Playfair Display',serif;font-size:clamp(22px,4vw,28px);font-weight:800;text-align:center;margin-bottom:8px;line-height:1.2}
+    .modal-box .modal-sub{text-align:center;font-size:14px;color:rgba(255,255,255,0.4);margin-bottom:24px;line-height:1.6;font-weight:300}
+    .modal-alert{background:rgba(255,200,50,0.06);border:1px solid rgba(212,175,55,0.12);border-radius:12px;padding:16px 20px;display:flex;gap:12px;align-items:flex-start;margin-bottom:28px}
+    .modal-alert svg{flex-shrink:0;margin-top:2px}
+    .modal-alert p{font-size:13px;color:rgba(255,255,255,0.55);line-height:1.6}
+    .modal-alert strong{color:rgba(255,255,255,0.85)}
+    .modal-btn{display:block;width:100%;padding:16px;background:linear-gradient(135deg,#BF953F,#D4AF37);color:#000;font-family:'Inter',sans-serif;font-size:15px;font-weight:700;border:none;border-radius:12px;cursor:pointer;transition:all 0.3s;letter-spacing:0.3px}
+    .modal-btn:hover{transform:translateY(-1px);box-shadow:0 8px 30px rgba(212,175,55,0.3)}
+
     @media(max-width:600px){
       .main{padding:24px 16px 32px}
       .step{gap:12px}
       .step-num{width:34px;height:34px;font-size:15px}
+      .modal-box{padding:32px 20px 24px}
     }
   </style>
 </head>
 <body>
+
+<!-- MODAL - Step 1: Ti chiameremo -->
+<div class="modal-overlay" id="callModal">
+  <div class="modal-box">
+    <div class="modal-icon">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#25D366" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <h2>Candidatura <span class="gold">Ricevuta!</span></h2>
+    <p class="modal-sub">Complimenti! Sei a un passo dalla tua Sessione Strategica con Davide Caiazzo.</p>
+    <div class="modal-alert">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      <p><strong>Ti chiameremo a brevissimo</strong> per confermare la sessione. Mi raccomando, rispondi perch&eacute; altrimenti dovremo fissare la consulenza con un altro collega.</p>
+    </div>
+    <button class="modal-btn" onclick="document.getElementById('callModal').style.display='none'">Ho capito, mostrami il Video &rarr;</button>
+  </div>
+</div>
 
 <!-- HEADER -->
 <div class="header">
@@ -110,14 +142,6 @@
       <div class="step">
         <div class="step-num">1</div>
         <div class="step-content">
-          <h3>Ti chiameremo a <span class="gold">brevissimo</span></h3>
-          <p>Ti chiameremo per confermare la Sessione Strategica con Davide Caiazzo. Mi raccomando rispondi perch&eacute; altrimenti dovremo fissare la tua consulenza con un altro collega.</p>
-        </div>
-      </div>
-
-      <div class="step">
-        <div class="step-num">2</div>
-        <div class="step-content">
           <h3>Presentati <span class="gold">puntuale</span></h3>
           <div class="warning">
             <p>Annulliamo circa l'80% delle domande che riceviamo ogni giorno. Sfortunatamente non possiamo aiutare tutti, quindi assicurati di entrare nella video chiamata qualche minuto prima. Se cambi idea, usa l'invito ricevuto per cancellarla cos&igrave; da poter dare spazio a qualcun altro.</p>
@@ -126,7 +150,7 @@
       </div>
 
       <div class="step">
-        <div class="step-num">3</div>
+        <div class="step-num">2</div>
         <div class="step-content">
           <h3>Stanza silenziosa, zero <span class="gold">distrazioni</span></h3>
           <p>Avremo bisogno della massima attenzione per capire esattamente quali sono i tuoi obiettivi e come la nostra societ&agrave; potr&agrave; aiutarti ad emergere su LinkedIn e a raggiungere i tuoi risultati.</p>
