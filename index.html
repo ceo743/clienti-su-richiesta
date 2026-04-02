@@ -733,16 +733,115 @@ function toggleMenu() {
 }
 function closeMenu() { if (menuOpen) toggleMenu(); }
 
-// ===== SESSION & ACCESS SYSTEM =====
+// ===== SESSION & ACCESS SYSTEM (MULTI-LAYER) =====
 const ACCESS_DURATION = 5 * 24 * 60 * 60 * 1000; // 5 giorni in ms
 let countdownInterval = null;
 
+// --- Cookie helpers ---
+function setCookie(name, value, days) {
+  const d = new Date(); d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
+  document.cookie = name + '=' + encodeURIComponent(value) + ';expires=' + d.toUTCString() + ';path=/;SameSite=Lax';
+}
+function getCookie(name) {
+  const v = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+  return v ? decodeURIComponent(v.pop()) : null;
+}
+
+// --- IndexedDB helpers ---
+function idbSave(data) {
+  try {
+    const req = indexedDB.open('vsl_db', 1);
+    req.onupgradeneeded = function(e) { e.target.result.createObjectStore('sessions', { keyPath: 'id' }); };
+    req.onsuccess = function(e) {
+      const db = e.target.result;
+      const tx = db.transaction('sessions', 'readwrite');
+      tx.objectStore('sessions').put({ id: 'main', ...data });
+    };
+  } catch(e) {}
+}
+function idbGet(callback) {
+  try {
+    const req = indexedDB.open('vsl_db', 1);
+    req.onupgradeneeded = function(e) { e.target.result.createObjectStore('sessions', { keyPath: 'id' }); };
+    req.onsuccess = function(e) {
+      const db = e.target.result;
+      const tx = db.transaction('sessions', 'readonly');
+      const getReq = tx.objectStore('sessions').get('main');
+      getReq.onsuccess = function() { callback(getReq.result || null); };
+      getReq.onerror = function() { callback(null); };
+    };
+    req.onerror = function() { callback(null); };
+  } catch(e) { callback(null); }
+}
+
+// --- Browser fingerprint (simple hash) ---
+function getFingerprint() {
+  const data = [
+    navigator.userAgent,
+    screen.width + 'x' + screen.height,
+    screen.colorDepth,
+    navigator.language,
+    new Date().getTimezoneOffset(),
+    navigator.hardwareConcurrency || 0
+  ].join('|');
+  let hash = 0;
+  for (let i = 0; i < data.length; i++) { hash = ((hash << 5) - hash) + data.charCodeAt(i); hash |= 0; }
+  return 'fp_' + Math.abs(hash).toString(36);
+}
+
+// --- Save session to ALL storage layers ---
+function saveSessionAll(data) {
+  const json = JSON.stringify(data);
+  localStorage.setItem('vsl_access', json);
+  sessionStorage.setItem('vsl_access', json);
+  setCookie('vsl_access', json, 6); // cookie dura 6 giorni (buffer)
+  idbSave(data);
+}
+
+// --- Get session: try all layers, restore missing ones ---
 function getSession() {
+  let session = null;
+
+  // 1. Try localStorage
   try {
     const raw = localStorage.getItem('vsl_access');
-    if (!raw) return null;
-    return JSON.parse(raw);
-  } catch(e) { return null; }
+    if (raw) session = JSON.parse(raw);
+  } catch(e) {}
+
+  // 2. Fallback: sessionStorage
+  if (!session) {
+    try {
+      const raw = sessionStorage.getItem('vsl_access');
+      if (raw) session = JSON.parse(raw);
+    } catch(e) {}
+  }
+
+  // 3. Fallback: cookie
+  if (!session) {
+    try {
+      const raw = getCookie('vsl_access');
+      if (raw) session = JSON.parse(raw);
+    } catch(e) {}
+  }
+
+  // If found from fallback, restore to all layers
+  if (session) {
+    saveSessionAll(session);
+  }
+
+  // 4. Also check IndexedDB async (restore if found later)
+  if (!session) {
+    idbGet(function(idbData) {
+      if (idbData && idbData.timestamp) {
+        delete idbData.id;
+        saveSessionAll(idbData);
+        // Reload page to apply restored session
+        location.reload();
+      }
+    });
+  }
+
+  return session;
 }
 
 function getTimeRemaining() {
@@ -856,12 +955,28 @@ function submitForm(e) {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ name: f.value + ' ' + l.value, email: m.value, phone: p.value, company: document.getElementById('fieldCompany').value.trim() || 'N/A' })
   }).catch(() => {});
-  // Save session to localStorage
-  localStorage.setItem('vsl_access', JSON.stringify({
+  // Se esiste già una sessione valida, NON sovrascrivere il timestamp
+  const existingSession = getSession();
+  if (existingSession && (existingSession.timestamp + ACCESS_DURATION) > Date.now()) {
+    // Sessione ancora valida, mostra video senza resettare il timer
+    showVideoSection();
+    return;
+  }
+  // Nuova sessione: salva su tutti i layer con fingerprint
+  const sessionData = {
     timestamp: Date.now(),
     name: f.value + ' ' + l.value,
-    email: m.value
-  }));
+    email: m.value,
+    fp: getFingerprint()
+  };
+  // Fetch IP e salva
+  fetch('https://api.ipify.org?format=json').then(r => r.json()).then(d => {
+    sessionData.ip = d.ip;
+    saveSessionAll(sessionData);
+  }).catch(() => {
+    saveSessionAll(sessionData);
+  });
+  saveSessionAll(sessionData); // salva subito, IP si aggiunge dopo
   // Show video section
   showVideoSection();
 }
