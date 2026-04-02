@@ -183,7 +183,7 @@
 </div>
 
 <!-- ===== HERO ===== -->
-<section style="min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:130px 32px 80px">
+<section style="min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:100px 32px 40px">
   <div class="orb" style="width:700px;height:700px;background:#D4AF37;top:-350px;right:-250px;opacity:0.06"></div>
   <div class="orb" style="width:500px;height:500px;background:#127059;bottom:-250px;left:-200px;opacity:0.04;animation-delay:4s"></div>
   <div class="orb" style="width:300px;height:300px;background:#D4AF37;top:60%;left:10%;opacity:0.03;animation-delay:8s"></div>
@@ -194,17 +194,17 @@
   <div style="max-width:900px;text-align:center;position:relative;z-index:2">
     <!-- HERO COPY (hidden when video active) -->
     <div id="heroCopy">
-      <p class="label reveal" style="margin-bottom:24px">DC Academy presenta</p>
-      <h1 class="h-hero reveal gold" style="margin-bottom:28px">Vuoi aumentare le tue entrate ma non sai come trovare nuovi clienti?</h1>
-      <p class="body-text reveal" style="max-width:560px;margin:0 auto 48px;font-size:clamp(15px,1.3vw,19px)">Scopri i 4 step per acquisire clienti sulla piattaforma di business #1 al mondo, senza ads, senza perdere ore sui social</p>
+      <p class="label reveal" style="margin-bottom:16px">DC Academy presenta</p>
+      <h1 class="h-hero reveal gold" style="margin-bottom:20px">Vuoi aumentare le tue entrate ma non sai come trovare nuovi clienti?</h1>
+      <p class="body-text reveal" style="max-width:560px;margin:0 auto 28px;font-size:clamp(15px,1.3vw,19px)">Scopri i 4 step per acquisire clienti sulla piattaforma di business #1 al mondo, senza ads, senza perdere ore sui social</p>
 
-      <div class="reveal" style="margin-bottom:48px">
+      <div class="reveal" style="margin-bottom:28px">
         <a href="javascript:void(0)" onclick="scrollToAccess()" class="btn-gold" id="heroCTA"><span>Guarda la Video Lezione →</span></a>
       </div>
     </div>
 
     <!-- VIDEO THUMBNAIL (shown when no session) -->
-    <div id="heroThumbnail" class="reveal" style="max-width:720px;margin:0 auto 48px">
+    <div id="heroThumbnail" class="reveal" style="max-width:720px;margin:0 auto 24px">
       <div class="video-wrap" onclick="openFormModal()">
         <img src="https://uploads3.fw360.it/uploads/env/4/2492/img/pages/gallery/677f5475b0ed5_screenshot-2025-01-09-alle-05-45-15.png" alt="Video Lezione Gratuita" class="video-thumb" style="aspect-ratio:16/9;object-fit:cover;width:100%;background:linear-gradient(135deg,#111820,#1a2030)"/>
         <div class="play-btn">
@@ -219,37 +219,21 @@
     </div>
 
     <!-- VIDEO PLAYER + COUNTDOWN (shown when session active, hidden by default) -->
-    <div id="heroVideo" style="max-width:800px;margin:0 auto 48px;display:none">
-      <!-- Countdown -->
-      <div id="countdownBar" style="background:linear-gradient(135deg,rgba(191,149,63,0.12),rgba(212,175,55,0.06));border:1px solid rgba(212,175,55,0.15);border-radius:16px;padding:20px 28px;margin-bottom:24px;text-align:center">
-        <p style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:10px;text-transform:uppercase;letter-spacing:2px">Il tuo accesso scade tra</p>
-        <div id="countdown" style="display:flex;justify-content:center;gap:20px;flex-wrap:wrap">
-          <div style="text-align:center"><span id="cdDays" style="font-family:'Playfair Display',serif;font-size:clamp(28px,4vw,42px);font-weight:800;color:#D4AF37">0</span><p style="font-size:10px;color:rgba(255,255,255,0.25);text-transform:uppercase;letter-spacing:1px;margin-top:2px">Giorni</p></div>
-          <span style="font-family:'Playfair Display',serif;font-size:clamp(28px,4vw,42px);font-weight:800;color:rgba(212,175,55,0.3)">:</span>
-          <div style="text-align:center"><span id="cdHours" style="font-family:'Playfair Display',serif;font-size:clamp(28px,4vw,42px);font-weight:800;color:#D4AF37">0</span><p style="font-size:10px;color:rgba(255,255,255,0.25);text-transform:uppercase;letter-spacing:1px;margin-top:2px">Ore</p></div>
-          <span style="font-family:'Playfair Display',serif;font-size:clamp(28px,4vw,42px);font-weight:800;color:rgba(212,175,55,0.3)">:</span>
-          <div style="text-align:center"><span id="cdMinutes" style="font-family:'Playfair Display',serif;font-size:clamp(28px,4vw,42px);font-weight:800;color:#D4AF37">0</span><p style="font-size:10px;color:rgba(255,255,255,0.25);text-transform:uppercase;letter-spacing:1px;margin-top:2px">Minuti</p></div>
-          <span style="font-family:'Playfair Display',serif;font-size:clamp(28px,4vw,42px);font-weight:800;color:rgba(212,175,55,0.3)">:</span>
-          <div style="text-align:center"><span id="cdSeconds" style="font-family:'Playfair Display',serif;font-size:clamp(28px,4vw,42px);font-weight:800;color:#D4AF37">0</span><p style="font-size:10px;color:rgba(255,255,255,0.25);text-transform:uppercase;letter-spacing:1px;margin-top:2px">Secondi</p></div>
-        </div>
+    <div id="heroVideo" style="max-width:960px;margin:0 auto;display:none">
+      <!-- Compact countdown bar -->
+      <div id="countdownBar" style="display:flex;align-items:center;justify-content:center;gap:8px;background:rgba(191,149,63,0.08);border:1px solid rgba(212,175,55,0.12);border-radius:10px;padding:10px 20px;margin-bottom:16px;flex-wrap:wrap">
+        <span style="font-size:11px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:1.5px;margin-right:8px">Accesso scade tra</span>
+        <span id="cdDays" style="font-family:'Playfair Display',serif;font-size:20px;font-weight:800;color:#D4AF37">0</span><span style="font-size:10px;color:rgba(255,255,255,0.25)">g</span>
+        <span style="color:rgba(212,175,55,0.3);font-weight:800">:</span>
+        <span id="cdHours" style="font-family:'Playfair Display',serif;font-size:20px;font-weight:800;color:#D4AF37">00</span><span style="font-size:10px;color:rgba(255,255,255,0.25)">h</span>
+        <span style="color:rgba(212,175,55,0.3);font-weight:800">:</span>
+        <span id="cdMinutes" style="font-family:'Playfair Display',serif;font-size:20px;font-weight:800;color:#D4AF37">00</span><span style="font-size:10px;color:rgba(255,255,255,0.25)">m</span>
+        <span style="color:rgba(212,175,55,0.3);font-weight:800">:</span>
+        <span id="cdSeconds" style="font-family:'Playfair Display',serif;font-size:20px;font-weight:800;color:#D4AF37">00</span><span style="font-size:10px;color:rgba(255,255,255,0.25)">s</span>
       </div>
-      <!-- Title -->
-      <div style="text-align:center;margin-bottom:20px">
-        <h2 class="h-lg" style="margin-bottom:8px">Ecco la tua <span class="gold">Video Lezione!</span></h2>
-        <p class="body-text" style="font-size:14px">Guardala con attenzione, contiene strategie concrete</p>
-      </div>
-      <!-- Video -->
-      <div style="position:relative;width:100%;background:#0a0d12;border-radius:20px;overflow:hidden;border:1px solid rgba(255,255,255,0.04);box-shadow:0 20px 60px rgba(0,0,0,0.4);margin-bottom:48px">
+      <!-- Video FULL WIDTH -->
+      <div style="position:relative;width:100%;background:#0a0d12;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.04);box-shadow:0 20px 60px rgba(0,0,0,0.4)">
         <div id="vidalytics_embed_FC_2OFL5X3cYyfd0" style="width:100%;position:relative;padding-top:56.25%"></div>
-      </div>
-      <!-- Calendly -->
-      <div style="text-align:center">
-        <p class="label" style="margin-bottom:12px">Prenota</p>
-        <h3 class="h-md" style="margin-bottom:8px">Parliamone <span class="gold">insieme</span></h3>
-        <p style="font-size:13px;color:rgba(255,255,255,0.3);margin-bottom:20px">Scegli il giorno e l'orario che preferisci</p>
-        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:16px;min-height:700px">
-          <div class="calendly-inline-widget" data-url="https://calendly.com/dc-academy-team/consulenza-strategica-gratuita-clienti-su-richiesta?hide_event_type_details=1&hide_gdpr_banner=1" style="min-width:320px;height:700px;"></div>
-        </div>
       </div>
     </div>
 
@@ -259,6 +243,18 @@
         <div style="width:3px;height:8px;background:#D4AF37;border-radius:2px;animation:scrollDot 2.5s ease-in-out infinite"></div>
       </div>
       <span style="font-size:9px;color:rgba(255,255,255,0.12);text-transform:uppercase;letter-spacing:4px">Scopri di più</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CALENDLY SECTION (shown only with active session) ===== -->
+<section id="calendlySection" class="section" style="padding:60px 32px;position:relative;z-index:1;display:none">
+  <div style="max-width:800px;margin:0 auto;text-align:center">
+    <p class="label" style="margin-bottom:12px">Prenota</p>
+    <h3 class="h-md" style="margin-bottom:8px">Parliamone <span class="gold">insieme</span></h3>
+    <p style="font-size:13px;color:rgba(255,255,255,0.3);margin-bottom:20px">Scegli il giorno e l'orario che preferisci</p>
+    <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:16px;min-height:700px">
+      <div class="calendly-inline-widget" data-url="https://calendly.com/dc-academy-team/consulenza-strategica-gratuita-clienti-su-richiesta?hide_event_type_details=1&hide_gdpr_banner=1" style="min-width:320px;height:700px;"></div>
     </div>
   </div>
 </section>
@@ -870,8 +866,9 @@ function showVideoSection() {
   document.getElementById('heroThumbnail').style.display = 'none';
   var si = document.getElementById('scrollIndicator'); if (si) si.style.display = 'none';
   document.getElementById('disclaimer').style.display = 'none';
-  // Mostra video nella hero
+  // Mostra video nella hero + calendly
   document.getElementById('heroVideo').style.display = 'block';
+  var calSec = document.getElementById('calendlySection'); if (calSec) calSec.style.display = 'block';
   document.getElementById('accesso-scaduto').style.display = 'none';
   // Chiudi modal form se aperto
   closeFormModal();
@@ -880,7 +877,7 @@ function showVideoSection() {
 }
 
 function showExpiredSection() {
-  document.querySelectorAll('body > section, body > .gold-line, body > footer, #disclaimer').forEach(el => {
+  document.querySelectorAll('body > section, body > .gold-line, body > footer, #disclaimer, #calendlySection').forEach(el => {
     el.style.display = 'none';
   });
   document.getElementById('accesso-scaduto').style.display = 'block';
