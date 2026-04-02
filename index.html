@@ -151,7 +151,7 @@
 <canvas id="particleCanvas"></canvas>
 
 <!-- ===== HEADER ===== -->
-<header id="header" style="position:fixed;top:0;left:0;right:0;z-index:100;padding:18px 0;transition:all 0.5s cubic-bezier(0.4,0,0.2,1);border-bottom:1px solid transparent;transform:translateY(-100%);opacity:0">
+<header id="header" style="position:fixed;top:0;left:0;right:0;z-index:100;padding:18px 0;transition:all 0.5s cubic-bezier(0.4,0,0.2,1);border-bottom:1px solid transparent">
   <div style="max-width:1200px;margin:0 auto;padding:0 32px;display:flex;align-items:center;justify-content:space-between">
     <a href="#" style="text-decoration:none;font-family:'Playfair Display',serif;font-size:24px;font-weight:900;color:#fff;letter-spacing:1px;position:relative">
       DAVIDE CAIAZZO
@@ -186,7 +186,7 @@
 </div>
 
 <!-- ===== HERO ===== -->
-<section style="position:relative;overflow:hidden;padding:20px 32px 40px">
+<section style="position:relative;overflow:hidden;padding:80px 32px 40px">
   <div class="orb" style="width:700px;height:700px;background:#D4AF37;top:-350px;right:-250px;opacity:0.06"></div>
   <div class="orb" style="width:500px;height:500px;background:#127059;bottom:-250px;left:-200px;opacity:0.04;animation-delay:4s"></div>
 
@@ -663,17 +663,13 @@ animateParticles();
 // ===== HEADER SCROLL =====
 window.addEventListener('scroll', () => {
   const header = document.getElementById('header');
-  if (scrollY > 300) {
-    header.style.transform = 'translateY(0)';
-    header.style.opacity = '1';
+  if (scrollY > 60) {
     header.style.background = 'rgba(8,11,16,0.92)';
     header.style.backdropFilter = 'blur(20px)';
     header.style.webkitBackdropFilter = 'blur(20px)';
     header.style.borderBottomColor = 'rgba(255,255,255,0.03)';
     header.style.padding = '10px 0';
   } else {
-    header.style.transform = 'translateY(-100%)';
-    header.style.opacity = '0';
     header.style.background = 'transparent';
     header.style.backdropFilter = 'none';
     header.style.borderBottomColor = 'transparent';
