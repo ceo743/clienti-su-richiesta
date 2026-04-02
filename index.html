@@ -192,12 +192,15 @@
   <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(212,175,55,0.015) 1px,transparent 1px),linear-gradient(90deg,rgba(212,175,55,0.015) 1px,transparent 1px);background-size:80px 80px;pointer-events:none;mask-image:radial-gradient(ellipse at center,black 30%,transparent 70%)"></div>
 
   <div style="max-width:900px;text-align:center;position:relative;z-index:2">
-    <p class="label reveal" style="margin-bottom:24px">DC Academy presenta</p>
-    <h1 class="h-hero reveal gold" style="margin-bottom:28px">Vuoi aumentare le tue entrate ma non sai come trovare nuovi clienti?</h1>
-    <p class="body-text reveal" style="max-width:560px;margin:0 auto 48px;font-size:clamp(15px,1.3vw,19px)">Scopri i 4 step per acquisire clienti sulla piattaforma di business #1 al mondo, senza ads, senza perdere ore sui social</p>
+    <!-- HERO COPY (hidden when video active) -->
+    <div id="heroCopy">
+      <p class="label reveal" style="margin-bottom:24px">DC Academy presenta</p>
+      <h1 class="h-hero reveal gold" style="margin-bottom:28px">Vuoi aumentare le tue entrate ma non sai come trovare nuovi clienti?</h1>
+      <p class="body-text reveal" style="max-width:560px;margin:0 auto 48px;font-size:clamp(15px,1.3vw,19px)">Scopri i 4 step per acquisire clienti sulla piattaforma di business #1 al mondo, senza ads, senza perdere ore sui social</p>
 
-    <div class="reveal" style="margin-bottom:48px">
-      <a href="javascript:void(0)" onclick="scrollToAccess()" class="btn-gold" id="heroCTA"><span>Guarda la Video Lezione →</span></a>
+      <div class="reveal" style="margin-bottom:48px">
+        <a href="javascript:void(0)" onclick="scrollToAccess()" class="btn-gold" id="heroCTA"><span>Guarda la Video Lezione →</span></a>
+      </div>
     </div>
 
     <!-- VIDEO THUMBNAIL (shown when no session) -->
@@ -251,7 +254,7 @@
     </div>
 
     <!-- Scroll indicator -->
-    <div class="reveal" style="display:flex;flex-direction:column;align-items:center;gap:10px">
+    <div id="scrollIndicator" class="reveal" style="display:flex;flex-direction:column;align-items:center;gap:10px">
       <div style="width:24px;height:40px;border:1.5px solid rgba(255,255,255,0.08);border-radius:12px;display:flex;justify-content:center;padding-top:8px">
         <div style="width:3px;height:8px;background:#D4AF37;border-radius:2px;animation:scrollDot 2.5s ease-in-out infinite"></div>
       </div>
@@ -862,8 +865,12 @@ function closeFormModal() {
 }
 
 function showVideoSection() {
-  // Nascondi thumbnail, mostra video nella hero
+  // Nascondi hero copy, thumbnail, scroll indicator, disclaimer
+  document.getElementById('heroCopy').style.display = 'none';
   document.getElementById('heroThumbnail').style.display = 'none';
+  var si = document.getElementById('scrollIndicator'); if (si) si.style.display = 'none';
+  document.getElementById('disclaimer').style.display = 'none';
+  // Mostra video nella hero
   document.getElementById('heroVideo').style.display = 'block';
   document.getElementById('accesso-scaduto').style.display = 'none';
   // Chiudi modal form se aperto
@@ -880,7 +887,9 @@ function showExpiredSection() {
 }
 
 function showFormSection() {
-  document.getElementById('heroThumbnail').style.display = 'block';
+  document.getElementById('heroCopy').style.display = '';
+  document.getElementById('heroThumbnail').style.display = '';
+  var si = document.getElementById('scrollIndicator'); if (si) si.style.display = '';
   document.getElementById('heroVideo').style.display = 'none';
   document.getElementById('accesso-scaduto').style.display = 'none';
 }
