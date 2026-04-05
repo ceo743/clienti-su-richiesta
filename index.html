@@ -131,9 +131,8 @@
     /* ===== RESPONSIVE ===== */
     @media(max-width:768px){
       body,a,button,input,textarea,label,select{cursor:auto}
-      /* cursor mobile override removed */
-      .section{padding:80px 16px}
-      .grid-2{grid-template-columns:1fr!important}
+      .section{padding:60px 16px}
+      .grid-2{grid-template-columns:1fr!important;gap:32px!important}
       .grid-4{grid-template-columns:1fr!important}
       .grid-3{grid-template-columns:1fr!important}
       .hide-mobile{display:none!important}
@@ -141,7 +140,32 @@
       .play-btn{width:64px;height:64px}
       .play-btn svg{width:24px;height:24px}
       .form-modal-box{padding:28px 20px 20px;border-radius:20px}
-      .btn-gold{padding:16px 36px}
+      .btn-gold{padding:16px 28px;font-size:11px;letter-spacing:1.5px}
+      /* Hero section mobile */
+      #heroSection{padding:70px 12px 0!important}
+      /* Countdown bar mobile */
+      #countdownBar{flex-direction:column;gap:6px;padding:10px 12px!important;border-radius:10px!important}
+      #countdownBar span:first-child{font-size:10px!important;letter-spacing:1px!important}
+      #countdownBar #cdDays,#countdownBar #cdHours,#countdownBar #cdMinutes,#countdownBar #cdSeconds{font-size:22px!important}
+      /* Video container mobile */
+      #heroVideo{padding-top:6px!important}
+      /* Lock section mobile */
+      #calendlyLock{padding:28px 16px 32px!important;border-radius:0 0 14px 14px!important}
+      #calendlyLock>div:nth-child(2){flex-direction:column!important;gap:12px!important;text-align:center!important}
+      #calendlyLock>div:nth-child(2) div:last-child{text-align:center!important}
+      #calendlyLock>div:nth-child(2) div:last-child h3{font-size:22px!important}
+      #calendlyLock>div:nth-child(2) div:last-child p{font-size:13px!important}
+      #calendlyLock #lockMinutes,#calendlyLock #lockSeconds{font-size:52px!important}
+      /* Calendly widget mobile */
+      #calendlyWidget{padding:28px 12px 24px!important;border-radius:0 0 14px 14px!important}
+      #calendlyWidget>div:nth-child(2){flex-direction:column!important;gap:12px!important;text-align:center!important}
+      #calendlyWidget>div:nth-child(2) div:last-child{text-align:center!important}
+      #calendlyWidget>div:nth-child(2) div:last-child h3{font-size:22px!important}
+      .calendly-inline-widget{height:600px!important;min-width:280px!important}
+      /* Target items mobile */
+      .target-item{padding:10px 16px!important}
+      /* Overflow prevention */
+      html,body{max-width:100vw;overflow-x:hidden}
     }
     @media(min-width:769px) and (max-width:1024px){.grid-4{grid-template-columns:1fr 1fr!important}}
     @media(min-width:769px){.show-mobile{display:none!important}}
@@ -944,7 +968,8 @@ function showVideoSection() {
   var si = document.getElementById('scrollIndicator'); if (si) si.style.display = 'none';
   document.getElementById('disclaimer').style.display = 'none';
   // Fix padding: abbastanza top per header fisso, zero bottom
-  document.getElementById('heroSection').style.padding = '100px 32px 0';
+  var isMobile = window.innerWidth <= 768;
+  document.getElementById('heroSection').style.padding = isMobile ? '70px 12px 0' : '100px 32px 0';
   // Mostra video nella hero + calendly (locked)
   document.getElementById('heroVideo').style.display = 'block';
   // Lock e widget Calendly sono ora dentro heroVideo, non serve mostrare sezione separata
