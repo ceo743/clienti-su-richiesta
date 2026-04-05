@@ -253,7 +253,7 @@
 </section>
 
 <!-- ===== CALENDLY SECTION (shown only with active session) ===== -->
-<section id="calendlySection" class="section" style="padding:60px 32px;position:relative;z-index:1;display:none">
+<section id="calendlySection" class="section" style="padding:0 32px 60px;position:relative;z-index:1;display:none">
   <div style="max-width:800px;margin:0 auto;text-align:center">
     <p class="label" style="margin-bottom:12px">Prenota</p>
     <h3 class="h-md" style="margin-bottom:8px">Parliamone <span class="gold">insieme</span></h3>
@@ -900,6 +900,8 @@ function showVideoSection() {
   var ctaW = document.getElementById('heroCTAWrap'); if (ctaW) ctaW.style.display = 'none';
   var si = document.getElementById('scrollIndicator'); if (si) si.style.display = 'none';
   document.getElementById('disclaimer').style.display = 'none';
+  // Riduci padding hero per eliminare spazio vuoto sotto video
+  document.getElementById('heroVideo').parentElement.parentElement.style.paddingBottom = '0';
   // Mostra video nella hero + calendly (locked)
   document.getElementById('heroVideo').style.display = 'block';
   var calSec = document.getElementById('calendlySection'); if (calSec) calSec.style.display = 'block';
