@@ -976,8 +976,8 @@ function submitForm(e) {
   document.getElementById('formError').style.display = 'none';
   // Send to Zapier
   fetch('https://hooks.zapier.com/hooks/catch/6421650/unehste/', {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name: f.value + ' ' + l.value, email: m.value, phone: p.value, company: document.getElementById('fieldCompany').value.trim() || 'N/A' })
+    method: 'POST',
+    body: new URLSearchParams({ name: f.value + ' ' + l.value, email: m.value, phone: p.value, company: document.getElementById('fieldCompany').value.trim() || 'N/A' })
   }).catch(() => {});
   // Se esiste già una sessione valida, NON sovrascrivere il timestamp
   const existingSession = getSession();
