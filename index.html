@@ -237,7 +237,7 @@
         </span>
       </div>
       <!-- Video FULL WIDTH -->
-      <div style="position:relative;width:100%;background:#0a0d12;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.04);box-shadow:0 20px 60px rgba(0,0,0,0.4)">
+      <div style="position:relative;width:100%;background:#0a0d12;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.04);box-shadow:0 20px 60px rgba(0,0,0,0.4);margin-bottom:0">
         <div id="vidalytics_embed_FC_2OFL5X3cYyfd0" style="width:100%;position:relative;padding-top:56.25%"></div>
       </div>
     </div>
@@ -255,38 +255,39 @@
 <!-- ===== CALENDLY SECTION (shown only with active session) ===== -->
 <section id="calendlySection" class="section" style="padding:0 32px 60px;position:relative;z-index:1;display:none">
   <div style="max-width:800px;margin:0 auto;text-align:center">
-    <p class="label" style="margin-bottom:12px">Prenota</p>
-    <h3 class="h-md" style="margin-bottom:8px">Parliamone <span class="gold">insieme</span></h3>
-    <p style="font-size:13px;color:rgba(255,255,255,0.3);margin-bottom:20px">Scegli il giorno e l'orario che preferisci</p>
-
     <!-- COUNTDOWN LOCK OVERLAY -->
-    <div id="calendlyLock" style="position:relative;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:60px 32px;min-height:400px;display:flex;flex-direction:column;align-items:center;justify-content:center">
-      <div style="width:80px;height:80px;background:linear-gradient(135deg,rgba(191,149,63,0.15),rgba(212,175,55,0.08));border:1px solid rgba(212,175,55,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:24px">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1"/></svg>
+    <div id="calendlyLock" style="position:relative;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:64px 32px;display:flex;flex-direction:column;align-items:center;justify-content:center">
+      <div style="width:100px;height:100px;background:linear-gradient(135deg,rgba(191,149,63,0.15),rgba(212,175,55,0.08));border:1px solid rgba(212,175,55,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:32px">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1"/></svg>
       </div>
-      <h3 style="font-family:'Playfair Display',serif;font-size:22px;font-weight:800;margin-bottom:8px">Guarda il video per sbloccare</h3>
-      <p style="font-size:14px;color:rgba(255,255,255,0.4);margin-bottom:28px;max-width:400px;line-height:1.6">La prenotazione della consulenza gratuita si sblocca tra:</p>
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
+      <h3 style="font-family:'Playfair Display',serif;font-size:32px;font-weight:800;margin-bottom:12px">Guarda il video per sbloccare</h3>
+      <p style="font-size:18px;color:rgba(255,255,255,0.4);margin-bottom:36px;max-width:500px;line-height:1.6">La prenotazione della consulenza gratuita si sblocca tra:</p>
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:32px">
         <div style="text-align:center">
-          <span id="lockMinutes" style="font-family:'Playfair Display',serif;font-size:48px;font-weight:800;color:#D4AF37;line-height:1">15</span>
-          <p style="font-size:10px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:2px;margin-top:4px">minuti</p>
+          <span id="lockMinutes" style="font-family:'Playfair Display',serif;font-size:72px;font-weight:800;color:#D4AF37;line-height:1">15</span>
+          <p style="font-size:13px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:2px;margin-top:6px">minuti</p>
         </div>
-        <span style="color:rgba(212,175,55,0.4);font-weight:800;font-size:28px;margin-bottom:16px">:</span>
+        <span style="color:rgba(212,175,55,0.4);font-weight:800;font-size:40px;margin-bottom:20px">:</span>
         <div style="text-align:center">
-          <span id="lockSeconds" style="font-family:'Playfair Display',serif;font-size:48px;font-weight:800;color:#D4AF37;line-height:1">00</span>
-          <p style="font-size:10px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:2px;margin-top:4px">secondi</p>
+          <span id="lockSeconds" style="font-family:'Playfair Display',serif;font-size:72px;font-weight:800;color:#D4AF37;line-height:1">00</span>
+          <p style="font-size:13px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:2px;margin-top:6px">secondi</p>
         </div>
       </div>
       <!-- Progress bar -->
-      <div style="width:100%;max-width:300px;height:4px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden">
+      <div style="width:100%;max-width:400px;height:6px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden">
         <div id="lockProgress" style="width:0%;height:100%;background:linear-gradient(90deg,#BF953F,#D4AF37);border-radius:4px;transition:width 1s linear"></div>
       </div>
-      <p style="font-size:11px;color:rgba(255,255,255,0.2);margin-top:16px">&#9757; Intanto guarda il video qui sopra</p>
+      <p style="font-size:14px;color:rgba(255,255,255,0.25);margin-top:20px">&#9757; Intanto guarda il video qui sopra</p>
     </div>
 
     <!-- CALENDLY WIDGET (hidden until unlock) -->
-    <div id="calendlyWidget" style="display:none;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:16px;min-height:700px">
-      <div class="calendly-inline-widget" data-url="https://calendly.com/dc-academy-team/consulenza-strategica-gratuita-clienti-su-richiesta?hide_event_type_details=1&hide_gdpr_banner=1" style="min-width:320px;height:700px;"></div>
+    <div id="calendlyWidget" style="display:none">
+      <p class="label" style="margin-bottom:12px">Prenota</p>
+      <h3 class="h-md" style="margin-bottom:8px">Parliamone <span class="gold">insieme</span></h3>
+      <p style="font-size:14px;color:rgba(255,255,255,0.3);margin-bottom:20px">Scegli il giorno e l'orario che preferisci</p>
+      <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:16px;min-height:700px">
+        <div class="calendly-inline-widget" data-url="https://calendly.com/dc-academy-team/consulenza-strategica-gratuita-clienti-su-richiesta?hide_event_type_details=1&hide_gdpr_banner=1" style="min-width:320px;height:700px;"></div>
+      </div>
     </div>
   </div>
 </section>
