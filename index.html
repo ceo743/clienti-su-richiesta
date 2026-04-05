@@ -258,7 +258,34 @@
     <p class="label" style="margin-bottom:12px">Prenota</p>
     <h3 class="h-md" style="margin-bottom:8px">Parliamone <span class="gold">insieme</span></h3>
     <p style="font-size:13px;color:rgba(255,255,255,0.3);margin-bottom:20px">Scegli il giorno e l'orario che preferisci</p>
-    <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:16px;min-height:700px">
+
+    <!-- COUNTDOWN LOCK OVERLAY -->
+    <div id="calendlyLock" style="position:relative;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:60px 32px;min-height:400px;display:flex;flex-direction:column;align-items:center;justify-content:center">
+      <div style="width:80px;height:80px;background:linear-gradient(135deg,rgba(191,149,63,0.15),rgba(212,175,55,0.08));border:1px solid rgba(212,175,55,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:24px">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1"/></svg>
+      </div>
+      <h3 style="font-family:'Playfair Display',serif;font-size:22px;font-weight:800;margin-bottom:8px">Guarda il video per sbloccare</h3>
+      <p style="font-size:14px;color:rgba(255,255,255,0.4);margin-bottom:28px;max-width:400px;line-height:1.6">La prenotazione della consulenza gratuita si sblocca tra:</p>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
+        <div style="text-align:center">
+          <span id="lockMinutes" style="font-family:'Playfair Display',serif;font-size:48px;font-weight:800;color:#D4AF37;line-height:1">15</span>
+          <p style="font-size:10px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:2px;margin-top:4px">minuti</p>
+        </div>
+        <span style="color:rgba(212,175,55,0.4);font-weight:800;font-size:28px;margin-bottom:16px">:</span>
+        <div style="text-align:center">
+          <span id="lockSeconds" style="font-family:'Playfair Display',serif;font-size:48px;font-weight:800;color:#D4AF37;line-height:1">00</span>
+          <p style="font-size:10px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:2px;margin-top:4px">secondi</p>
+        </div>
+      </div>
+      <!-- Progress bar -->
+      <div style="width:100%;max-width:300px;height:4px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden">
+        <div id="lockProgress" style="width:0%;height:100%;background:linear-gradient(90deg,#BF953F,#D4AF37);border-radius:4px;transition:width 1s linear"></div>
+      </div>
+      <p style="font-size:11px;color:rgba(255,255,255,0.2);margin-top:16px">&#9757; Intanto guarda il video qui sopra</p>
+    </div>
+
+    <!-- CALENDLY WIDGET (hidden until unlock) -->
+    <div id="calendlyWidget" style="display:none;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:16px;min-height:700px">
       <div class="calendly-inline-widget" data-url="https://calendly.com/dc-academy-team/consulenza-strategica-gratuita-clienti-su-richiesta?hide_event_type_details=1&hide_gdpr_banner=1" style="min-width:320px;height:700px;"></div>
     </div>
   </div>
@@ -873,9 +900,10 @@ function showVideoSection() {
   var ctaW = document.getElementById('heroCTAWrap'); if (ctaW) ctaW.style.display = 'none';
   var si = document.getElementById('scrollIndicator'); if (si) si.style.display = 'none';
   document.getElementById('disclaimer').style.display = 'none';
-  // Mostra video nella hero + calendly
+  // Mostra video nella hero + calendly (locked)
   document.getElementById('heroVideo').style.display = 'block';
   var calSec = document.getElementById('calendlySection'); if (calSec) calSec.style.display = 'block';
+  startCalendlyLock();
   document.getElementById('accesso-scaduto').style.display = 'none';
   // Chiudi modal form se aperto
   closeFormModal();
@@ -899,6 +927,50 @@ function showFormSection() {
   var si = document.getElementById('scrollIndicator'); if (si) si.style.display = '';
   document.getElementById('heroVideo').style.display = 'none';
   document.getElementById('accesso-scaduto').style.display = 'none';
+}
+
+// ===== CALENDLY 15-MIN LOCK =====
+var LOCK_DURATION = 15 * 60 * 1000; // 15 minuti
+var lockInterval = null;
+
+function startCalendlyLock() {
+  var lockEl = document.getElementById('calendlyLock');
+  var widgetEl = document.getElementById('calendlyWidget');
+  if (!lockEl || !widgetEl) return;
+
+  // Salva timestamp inizio video se non esiste
+  var lockKey = 'csr_video_start';
+  var videoStart = localStorage.getItem(lockKey);
+  if (!videoStart) {
+    videoStart = Date.now();
+    localStorage.setItem(lockKey, videoStart);
+  } else {
+    videoStart = parseInt(videoStart);
+  }
+
+  function updateLock() {
+    var elapsed = Date.now() - videoStart;
+    var remaining = LOCK_DURATION - elapsed;
+
+    if (remaining <= 0) {
+      // Sblocca Calendly
+      clearInterval(lockInterval);
+      lockEl.style.display = 'none';
+      widgetEl.style.display = 'block';
+      return;
+    }
+
+    var mins = Math.floor(remaining / 60000);
+    var secs = Math.floor((remaining % 60000) / 1000);
+    var progress = (elapsed / LOCK_DURATION) * 100;
+
+    document.getElementById('lockMinutes').textContent = String(mins).padStart(2, '0');
+    document.getElementById('lockSeconds').textContent = String(secs).padStart(2, '0');
+    document.getElementById('lockProgress').style.width = progress + '%';
+  }
+
+  updateLock();
+  lockInterval = setInterval(updateLock, 1000);
 }
 
 function startCountdown() {
