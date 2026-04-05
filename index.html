@@ -187,7 +187,7 @@
 </div>
 
 <!-- ===== HERO ===== -->
-<section style="position:relative;overflow:hidden;padding:20px 32px 40px">
+<section id="heroSection" style="position:relative;overflow:hidden;padding:20px 32px 40px">
   <div class="orb" style="width:700px;height:700px;background:#D4AF37;top:-350px;right:-250px;opacity:0.06"></div>
   <div class="orb" style="width:500px;height:500px;background:#127059;bottom:-250px;left:-200px;opacity:0.04;animation-delay:4s"></div>
 
@@ -237,7 +237,7 @@
         </span>
       </div>
       <!-- Video FULL WIDTH -->
-      <div style="position:relative;width:100%;background:#0a0d12;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.04);box-shadow:0 20px 60px rgba(0,0,0,0.4);margin-bottom:0">
+      <div style="position:relative;width:100%;background:#0a0d12;border-radius:16px;overflow:hidden">
         <div id="vidalytics_embed_FC_2OFL5X3cYyfd0" style="width:100%;position:relative;padding-top:56.25%"></div>
       </div>
     </div>
@@ -253,7 +253,7 @@
 </section>
 
 <!-- ===== CALENDLY SECTION (shown only with active session) ===== -->
-<section id="calendlySection" class="section" style="padding:0 32px 60px;position:relative;z-index:1;display:none">
+<section id="calendlySection" style="padding:0 32px 60px;position:relative;z-index:1;display:none">
   <div style="max-width:800px;margin:0 auto;text-align:center">
     <!-- COUNTDOWN LOCK OVERLAY -->
     <div id="calendlyLock" style="position:relative;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:64px 32px;display:flex;flex-direction:column;align-items:center;justify-content:center">
@@ -902,7 +902,7 @@ function showVideoSection() {
   var si = document.getElementById('scrollIndicator'); if (si) si.style.display = 'none';
   document.getElementById('disclaimer').style.display = 'none';
   // Riduci padding hero per eliminare spazio vuoto sotto video
-  document.getElementById('heroVideo').parentElement.parentElement.style.paddingBottom = '0';
+  document.getElementById('heroSection').style.paddingBottom = '0';
   // Mostra video nella hero + calendly (locked)
   document.getElementById('heroVideo').style.display = 'block';
   var calSec = document.getElementById('calendlySection'); if (calSec) calSec.style.display = 'block';
