@@ -273,11 +273,18 @@
       </div>
 
       <!-- CALENDLY WIDGET (hidden until unlock) -->
-      <div id="calendlyWidget" style="display:none;margin-top:24px;text-align:center">
-        <p class="label" style="margin-bottom:12px">Prenota</p>
-        <h3 class="h-md" style="margin-bottom:8px">Parliamone <span class="gold">insieme</span></h3>
-        <p style="font-size:14px;color:rgba(255,255,255,0.3);margin-bottom:20px">Scegli il giorno e l'orario che preferisci</p>
-        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:16px;min-height:700px">
+      <div id="calendlyWidget" style="display:none;margin-top:0;text-align:center;position:relative;background:linear-gradient(180deg,rgba(10,13,18,0.95) 0%,rgba(15,19,28,0.98) 100%);border:1px solid rgba(212,175,55,0.1);border-top:1px solid rgba(255,255,255,0.06);border-radius:0 0 20px 20px;padding:48px 40px 40px;overflow:hidden">
+        <div style="position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:300px;height:200px;background:radial-gradient(ellipse,rgba(212,175,55,0.08) 0%,transparent 70%);pointer-events:none"></div>
+        <div style="display:flex;align-items:center;gap:24px;margin-bottom:32px;justify-content:center;position:relative;z-index:1">
+          <div style="width:72px;height:72px;min-width:72px;background:linear-gradient(135deg,rgba(18,112,89,0.2),rgba(18,112,89,0.08));border:1px solid rgba(18,112,89,0.3);border-radius:20px;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 32px rgba(18,112,89,0.1),inset 0 1px 0 rgba(255,255,255,0.05)">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M9 16l2 2 4-4"/></svg>
+          </div>
+          <div style="text-align:left">
+            <h3 style="font-family:'Playfair Display',serif;font-size:clamp(22px,3vw,30px);font-weight:800;line-height:1.15;background:linear-gradient(135deg,#fff 0%,rgba(255,255,255,0.7) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Parliamone <span style="-webkit-text-fill-color:transparent;background:linear-gradient(135deg,#BF953F,#FCF6BA,#D4AF37);background-size:400% 400%;-webkit-background-clip:text;background-clip:text;animation:goldShimmer 6s ease infinite">insieme</span></h3>
+            <p style="font-size:14px;color:rgba(255,255,255,0.35);margin-top:6px;letter-spacing:0.3px">Scegli il giorno e l'orario che preferisci</p>
+          </div>
+        </div>
+        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:16px;min-height:700px;position:relative;z-index:1">
           <div class="calendly-inline-widget" data-url="https://calendly.com/dc-academy-team/consulenza-strategica-gratuita-clienti-su-richiesta?hide_event_type_details=1&hide_gdpr_banner=1" style="min-width:320px;height:700px;"></div>
         </div>
       </div>
