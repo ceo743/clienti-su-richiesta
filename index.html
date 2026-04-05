@@ -943,8 +943,8 @@ function showVideoSection() {
   var ctaW = document.getElementById('heroCTAWrap'); if (ctaW) ctaW.style.display = 'none';
   var si = document.getElementById('scrollIndicator'); if (si) si.style.display = 'none';
   document.getElementById('disclaimer').style.display = 'none';
-  // Riduci padding hero per eliminare spazio vuoto sotto video
-  document.getElementById('heroSection').style.paddingBottom = '0';
+  // Fix padding: abbastanza top per header fisso, zero bottom
+  document.getElementById('heroSection').style.padding = '100px 32px 0';
   // Mostra video nella hero + calendly (locked)
   document.getElementById('heroVideo').style.display = 'block';
   // Lock e widget Calendly sono ora dentro heroVideo, non serve mostrare sezione separata
