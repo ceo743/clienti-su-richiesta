@@ -1116,18 +1116,23 @@ function submitForm(e) {
   if (!c.checked) ok = false;
   if (!ok) { document.getElementById('formError').style.display = 'block'; return; }
   document.getElementById('formError').style.display = 'none';
-  // Send to Zapier
-  fetch('https://hooks.zapier.com/hooks/catch/6421650/unehste/', {
-    method: 'POST',
-    body: new URLSearchParams({ name: f.value + ' ' + l.value, email: m.value, phone: p.value, company: document.getElementById('fieldCompany').value.trim() || 'N/A' })
-  }).catch(() => {});
-  // Se esiste già una sessione valida, NON sovrascrivere il timestamp
+  // Se esiste già una sessione (attiva o scaduta), NON inviare a Zapier
   const existingSession = getSession();
   if (existingSession && (existingSession.timestamp + ACCESS_DURATION) > Date.now()) {
     // Sessione ancora valida, mostra video senza resettare il timer
     showVideoSection();
     return;
   }
+  if (existingSession) {
+    // Sessione scaduta: mostra sezione scaduto, NON re-inviare a Zapier
+    showExpiredSection();
+    return;
+  }
+  // Solo per nuovi utenti: invia a Zapier
+  fetch('https://hooks.zapier.com/hooks/catch/6421650/unehste/', {
+    method: 'POST',
+    body: new URLSearchParams({ name: f.value + ' ' + l.value, email: m.value, phone: p.value, company: document.getElementById('fieldCompany').value.trim() || 'N/A' })
+  }).catch(() => {});
   // Nuova sessione: salva su tutti i layer con fingerprint
   const sessionData = {
     timestamp: Date.now(),
