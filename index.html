@@ -949,9 +949,9 @@ function getTimeRemaining() {
 
 // --- Modal form open/close ---
 function openFormModal() {
-  // Se sessione valida, non aprire il form
   const session = getSession();
-  if (session && getTimeRemaining() > 0) return;
+  if (session && getTimeRemaining() > 0) return; // sessione attiva: non aprire
+  if (session && getTimeRemaining() <= 0) { showExpiredSection(); return; } // sessione scaduta: mostra scaduto, non il form
   document.getElementById('formModal').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
