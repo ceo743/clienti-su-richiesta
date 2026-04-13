@@ -19,18 +19,18 @@
     .gold{background:linear-gradient(135deg,#BF953F 0%,#FCF6BA 25%,#B38728 50%,#FBF5B7 75%,#AA771C 100%);background-size:400% 400%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:goldShimmer 6s ease infinite}
     @keyframes goldShimmer{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 
-    .container{max-width:800px;margin:0 auto;padding:0 24px}
+    .container{max-width:1100px;margin:0 auto;padding:0 40px}
 
     /* Main content */
-    .main{padding:24px 24px 16px}
-    .main h1{font-family:'Playfair Display',serif;font-size:clamp(22px,4vw,34px);font-weight:800;text-align:center;margin-bottom:6px;line-height:1.15}
-    .main .subtitle{text-align:center;font-size:15px;color:rgba(255,255,255,0.45);margin-bottom:20px;font-weight:300}
+    .main{padding:40px 40px 24px}
+    .main h1{font-family:'Playfair Display',serif;font-size:clamp(22px,2vw,44px);font-weight:800;text-align:center;margin-bottom:10px;line-height:1.15}
+    .main .subtitle{text-align:center;font-size:clamp(15px,1.4vw,18px);color:rgba(255,255,255,0.45);margin-bottom:28px;font-weight:300}
 
     /* Video */
-    .video-wrap{width:100%;max-width:680px;margin:0 auto 24px;background:#0a0d12;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);box-shadow:0 16px 48px rgba(0,0,0,0.4)}
+    .video-wrap{width:100%;max-width:100%;margin:0 auto 32px;background:#0a0d12;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);box-shadow:0 24px 72px rgba(0,0,0,0.5)}
 
     /* Step cards */
-    .cards{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+    .cards{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px;max-width:900px;margin-left:auto;margin-right:auto}
     .card{background:linear-gradient(160deg,rgba(255,255,255,0.04) 0%,rgba(255,255,255,0.01) 100%);border:1px solid rgba(255,255,255,0.06);border-radius:18px;padding:24px 22px;position:relative;overflow:hidden;transition:all 0.4s}
     .card:hover{border-color:rgba(212,175,55,0.15);transform:translateY(-2px);box-shadow:0 16px 48px rgba(0,0,0,0.3)}
     .card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#BF953F,#D4AF37);opacity:0;transition:opacity 0.4s}
@@ -78,9 +78,20 @@
     .modal-btn{display:block;width:100%;padding:18px;background:linear-gradient(135deg,#BF953F,#D4AF37);color:#000;font-family:'Inter',sans-serif;font-size:17px;font-weight:700;border:none;border-radius:14px;cursor:pointer;transition:all 0.3s;letter-spacing:0.3px}
     .modal-btn:hover{transform:translateY(-2px);box-shadow:0 12px 36px rgba(212,175,55,0.3)}
 
+    /* Desktop enhancements */
+    @media(min-width:900px){
+      .card{padding:32px 28px}
+      .card-icon{width:56px;height:56px}
+      .card p{font-size:15px}
+      .signoff{padding:32px 0}
+      .signoff p{font-size:17px}
+      .signoff .name{font-size:22px}
+    }
+
     @media(max-width:700px){
-      .cards{grid-template-columns:1fr;gap:16px}
+      .cards{grid-template-columns:1fr;gap:16px;margin-bottom:16px}
       .main{padding:28px 16px 36px}
+      .container{padding:0 16px}
       .modal-box{padding:36px 24px 28px;border-radius:20px}
       .modal-icon{width:72px;height:72px;margin-bottom:20px}
       .modal-alert{padding:16px 18px;gap:12px}
@@ -176,7 +187,5 @@
   vsl(l+'loader.min.js',function(){if(!vli){var vlc=v[c][vl];vli=new vlc();}vli.loadScript(l+'player.min.js',function(){var vec=v[d][ve];t=new vec();t.run(a);});});
 })(window, document, 'Vidalytics', 'vidalytics_embed_KLJmhSvYJzVt98bL', 'https://fast.vidalytics.com/embeds/NyDZYQqV/KLJmhSvYJzVt98bL/');
 </script>
-<!-- DC Academy Chatbot Widget -->
-<script src="https://dc-chatbot-vswb.onrender.com/widget.js" data-bot="linkedin"></script>
 </body>
 </html>
