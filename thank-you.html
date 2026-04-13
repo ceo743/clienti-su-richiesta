@@ -75,8 +75,9 @@
     .modal-alert svg{flex-shrink:0;margin-top:2px}
     .modal-alert p{font-size:16px;color:rgba(255,255,255,0.6);line-height:1.65}
     .modal-alert strong{color:rgba(255,255,255,0.9);font-weight:700}
-    .modal-btn{display:block;width:100%;padding:18px;background:linear-gradient(135deg,#BF953F,#D4AF37);color:#000;font-family:'Inter',sans-serif;font-size:17px;font-weight:700;border:none;border-radius:14px;cursor:pointer;transition:all 0.3s;letter-spacing:0.3px}
-    .modal-btn:hover{transform:translateY(-2px);box-shadow:0 12px 36px rgba(212,175,55,0.3)}
+    .modal-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:18px;background:#ff4444;color:#fff;font-family:'Inter',sans-serif;font-size:17px;font-weight:700;border:none;border-radius:14px;cursor:pointer;letter-spacing:0.3px;animation:btnPulse 1.5s ease-in-out infinite}
+    .modal-btn:hover{transform:translateY(-2px);box-shadow:0 12px 36px rgba(255,68,68,0.4)}
+    @keyframes btnPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,68,68,0.5)}50%{box-shadow:0 0 0 14px rgba(255,68,68,0)}}
 
     /* Desktop enhancements */
     @media(min-width:900px){
@@ -117,7 +118,7 @@
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ff4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
       <p><strong style="color:#ff4444">VIDEO OBBLIGATORIO</strong><br/>Clicca il bottone qui sotto e guarda il video di 5 minuti. &Egrave; fondamentale per arrivare preparato alla sessione.</p>
     </div>
-    <button class="modal-btn" onclick="document.getElementById('callModal').style.display='none'" style="margin-top:32px">Ho capito, guardo il Video &rarr;</button>
+    <button class="modal-btn" onclick="document.getElementById('callModal').style.display='none'" style="margin-top:32px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Ho capito, guardo il Video</button>
   </div>
 </div>
 
