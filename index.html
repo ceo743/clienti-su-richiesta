@@ -356,6 +356,8 @@
         <span style="font-size:11px;color:rgba(255,255,255,0.3);line-height:1.5">Acconsento a ricevere comunicazioni commerciali via email (facoltativo)</span>
       </label>
       <p id="formError" style="color:#ff4444;font-size:12px;text-align:center;display:none">Compila tutti i campi e accetta la privacy policy</p>
+      <p id="formErrorEmail" style="color:#ff4444;font-size:12px;text-align:center;display:none">Inserisci un indirizzo email valido (es. nome@email.com)</p>
+      <p id="formErrorPhone" style="color:#ff4444;font-size:12px;text-align:center;display:none">Inserisci un numero di telefono valido (minimo 8 cifre)</p>
       <button type="submit" class="btn-gold" style="width:100%;justify-content:center;margin-top:6px"><span>Accedi alla Video Lezione →</span></button>
       <p style="text-align:center;font-size:10px;color:rgba(255,255,255,0.12);margin-top:2px">🔒 I tuoi dati sono al sicuro. Zero spam.</p>
     </form>
@@ -1113,6 +1115,37 @@ function scrollToAccess() {
 })();
 
 // ===== FORM SUBMIT =====
+function isValidEmail(email) {
+  // Regex robusta: local@domain.tld con TLD minimo 2 char, no doppi punti, no spazi
+  var e = email.trim().toLowerCase();
+  if (!e) return false;
+  // Pattern: local part (lettere, cifre, ._%+-), @, domain (lettere, cifre, .-), TLD (2-10 lettere)
+  var re = /^[a-z0-9._%+\-]+@[a-z0-9][a-z0-9.\-]*[a-z0-9]\.[a-z]{2,10}$/;
+  if (!re.test(e)) return false;
+  // No doppi punti nel dominio
+  if (e.split('@')[1].indexOf('..') >= 0) return false;
+  // No doppi punti nel local
+  if (e.split('@')[0].indexOf('..') >= 0) return false;
+  return true;
+}
+
+function isValidPhone(phone) {
+  // Rimuovi spazi, trattini, parentesi, + iniziale
+  var cleaned = phone.replace(/[\s\-\(\)\.]/g, '');
+  // Accetta prefisso internazionale (+39, +1, ecc.)
+  if (cleaned.startsWith('+')) cleaned = cleaned.slice(1);
+  // Deve contenere solo cifre dopo la pulizia
+  if (!/^\d+$/.test(cleaned)) return false;
+  // Lunghezza: minimo 8 cifre, massimo 15 (standard E.164)
+  if (cleaned.length < 8 || cleaned.length > 15) return false;
+  return true;
+}
+
+function cleanPhone(phone) {
+  // Restituisce il telefono pulito per l'invio a Zapier
+  return phone.replace(/[\s\-\(\)\.]/g, '').replace(/^(\+?\d+)/, '$1');
+}
+
 function submitForm(e) {
   e.preventDefault();
   const f = document.getElementById('fieldName'),
@@ -1121,13 +1154,22 @@ function submitForm(e) {
         p = document.getElementById('fieldPhone'),
         c = document.getElementById('fieldPrivacy');
   [f, l, m, p].forEach(x => x.classList.remove('error'));
+  document.getElementById('formError').style.display = 'none';
+  document.getElementById('formErrorEmail').style.display = 'none';
+  document.getElementById('formErrorPhone').style.display = 'none';
   let ok = true;
+  let emailBad = false, phoneBad = false;
   if (!f.value.trim()) { f.classList.add('error'); ok = false; }
   if (!l.value.trim()) { l.classList.add('error'); ok = false; }
-  if (!m.value.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(m.value)) { m.classList.add('error'); ok = false; }
-  if (!p.value.trim()) { p.classList.add('error'); ok = false; }
+  if (!m.value.trim() || !isValidEmail(m.value)) { m.classList.add('error'); ok = false; emailBad = true; }
+  if (!p.value.trim() || !isValidPhone(p.value)) { p.classList.add('error'); ok = false; phoneBad = true; }
   if (!c.checked) ok = false;
-  if (!ok) { document.getElementById('formError').style.display = 'block'; return; }
+  if (!ok) {
+    if (emailBad && m.value.trim()) { document.getElementById('formErrorEmail').style.display = 'block'; }
+    else if (phoneBad && p.value.trim()) { document.getElementById('formErrorPhone').style.display = 'block'; }
+    else { document.getElementById('formError').style.display = 'block'; }
+    return;
+  }
   document.getElementById('formError').style.display = 'none';
   // Se esiste già una sessione (attiva o scaduta), NON inviare a Zapier
   const existingSession = getSession();
@@ -1144,7 +1186,7 @@ function submitForm(e) {
   // Solo per nuovi utenti: invia a Zapier
   fetch('https://hooks.zapier.com/hooks/catch/6421650/unehste/', {
     method: 'POST',
-    body: new URLSearchParams({ name: f.value + ' ' + l.value, email: m.value, phone: p.value, company: document.getElementById('fieldCompany').value.trim() || 'N/A' })
+    body: new URLSearchParams({ name: f.value.trim() + ' ' + l.value.trim(), email: m.value.trim().toLowerCase(), phone: cleanPhone(p.value), company: document.getElementById('fieldCompany').value.trim() || 'N/A' })
   }).catch(() => {});
   // Nuova sessione: salva su tutti i layer con fingerprint
   const sessionData = {
