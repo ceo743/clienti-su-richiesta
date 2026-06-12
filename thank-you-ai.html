@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Grazie! - DC Academy</title>
+  <meta name="description" content="Abbiamo ricevuto la tua candidatura. Preparati alla Consulenza Strategica AI con Davide Caiazzo."/>
+  <link rel="icon" type="image/png" href="favicon.png"/>
+  <link rel="apple-touch-icon" href="favicon.png"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,700;1,800&display=swap" rel="stylesheet"/>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{font-family:'Inter',sans-serif;background:#080b10;color:#fff;overflow-x:hidden;min-height:100vh}
+    ::selection{background:rgba(212,175,55,0.3);color:#fff}
+
+    .gold{background:linear-gradient(135deg,#BF953F 0%,#FCF6BA 25%,#B38728 50%,#FBF5B7 75%,#AA771C 100%);background-size:400% 400%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:goldShimmer 6s ease infinite}
+    @keyframes goldShimmer{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+
+    .container{max-width:1100px;margin:0 auto;padding:0 40px}
+
+    /* Main content */
+    .main{padding:40px 40px 24px}
+    .main h1{font-family:'Playfair Display',serif;font-size:clamp(22px,3vw,44px);font-weight:800;text-align:center;margin-bottom:10px;line-height:1.15}
+    .main .subtitle{text-align:center;font-size:clamp(15px,1.4vw,18px);color:rgba(255,255,255,0.45);margin-bottom:28px;font-weight:300}
+
+    /* Video */
+    .video-wrap{width:100%;max-width:100%;margin:0 auto 32px;background:#0a0d12;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);box-shadow:0 24px 72px rgba(0,0,0,0.5)}
+
+    /* Step cards */
+    .cards{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px;max-width:900px;margin-left:auto;margin-right:auto}
+    .card{background:linear-gradient(160deg,rgba(255,255,255,0.04) 0%,rgba(255,255,255,0.01) 100%);border:1px solid rgba(255,255,255,0.06);border-radius:18px;padding:24px 22px;position:relative;overflow:hidden;transition:all 0.4s}
+    .card:hover{border-color:rgba(212,175,55,0.15);transform:translateY(-2px);box-shadow:0 16px 48px rgba(0,0,0,0.3)}
+    .card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#BF953F,#D4AF37);opacity:0;transition:opacity 0.4s}
+    .card:hover::before{opacity:1}
+    .card-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+    .card-icon.red{background:rgba(255,68,68,0.08);border:1px solid rgba(255,68,68,0.12)}
+    .card-icon.gold-bg{background:rgba(212,175,55,0.08);border:1px solid rgba(212,175,55,0.12)}
+    .card h3{font-family:'Playfair Display',serif;font-size:clamp(17px,2.2vw,21px);font-weight:800;margin-bottom:8px;line-height:1.25}
+    .card p{font-size:14px;color:rgba(255,255,255,0.45);line-height:1.7;font-weight:300}
+    .card .highlight{display:inline-block;margin-top:10px;font-size:13px;font-weight:600;color:#D4AF37;letter-spacing:0.3px}
+
+    /* Sign off */
+    .signoff{text-align:center;padding:20px 0;border-top:1px solid rgba(255,255,255,0.04)}
+    .signoff p{font-size:15px;color:rgba(255,255,255,0.5);margin-bottom:4px}
+    .signoff .name{font-family:'Playfair Display',serif;font-size:18px;font-weight:800;color:#D4AF37}
+
+    /* Footer */
+    .footer{padding:32px 24px;text-align:center;border-top:1px solid rgba(255,255,255,0.03)}
+    .footer .brand{font-family:'Playfair Display',serif;font-size:18px;font-weight:800;margin-bottom:12px}
+    .footer .brand span{color:#D4AF37}
+    .footer .info{font-size:11px;color:rgba(255,255,255,0.12);line-height:2;margin-bottom:12px}
+    .footer .links{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-bottom:12px}
+    .footer .links a{color:rgba(255,255,255,0.15);text-decoration:none;font-size:10px;transition:color 0.3s}
+    .footer .links a:hover{color:#D4AF37}
+    .footer .copy{color:rgba(255,255,255,0.05);font-size:10px}
+
+    /* WhatsApp */
+    .whatsapp{position:fixed;bottom:28px;right:28px;z-index:90;width:56px;height:56px;background:#25D366;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 24px rgba(37,211,102,0.35);transition:all 0.4s;text-decoration:none;animation:waPulse 3s ease-in-out infinite}
+    .whatsapp:hover{transform:scale(1.12);box-shadow:0 8px 36px rgba(37,211,102,0.5)}
+    .whatsapp svg{width:28px;height:28px;fill:#fff}
+    @keyframes waPulse{0%,100%{box-shadow:0 4px 24px rgba(37,211,102,0.35)}50%{box-shadow:0 4px 24px rgba(37,211,102,0.35),0 0 0 12px rgba(37,211,102,0.08)}}
+
+    /* Modal overlay */
+    .modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.8);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:24px;animation:fadeIn 0.3s ease}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    .modal-box{background:linear-gradient(160deg,#12151c 0%,#0a0d12 100%);border:1px solid rgba(212,175,55,0.15);border-radius:24px;max-width:520px;width:100%;padding:48px 40px 40px;position:relative;box-shadow:0 32px 100px rgba(0,0,0,0.7),0 0 0 1px rgba(212,175,55,0.05);animation:slideUp 0.4s cubic-bezier(0.16,1,0.3,1)}
+    @keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+    .modal-icon{width:88px;height:88px;background:linear-gradient(135deg,rgba(18,112,89,0.2),rgba(18,112,89,0.06));border:2px solid rgba(25,200,130,0.25);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 28px;box-shadow:0 16px 48px rgba(18,112,89,0.12)}
+    .modal-box h2{font-family:'Playfair Display',serif;font-size:clamp(26px,5vw,34px);font-weight:900;text-align:center;margin-bottom:12px;line-height:1.15}
+    .modal-box .modal-sub{text-align:center;font-size:17px;color:rgba(255,255,255,0.45);margin-bottom:28px;line-height:1.6;font-weight:300}
+    .modal-alert{background:rgba(255,200,50,0.05);border:1px solid rgba(212,175,55,0.12);border-radius:16px;padding:20px 24px;display:flex;gap:16px;align-items:flex-start;margin-bottom:32px}
+    .modal-alert svg{flex-shrink:0;margin-top:2px}
+    .modal-alert p{font-size:16px;color:rgba(255,255,255,0.6);line-height:1.65}
+    .modal-alert strong{color:rgba(255,255,255,0.9);font-weight:700}
+    .modal-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:18px;background:#ff4444;color:#fff;font-family:'Inter',sans-serif;font-size:17px;font-weight:700;border:none;border-radius:14px;cursor:pointer;letter-spacing:0.3px;animation:btnPulse 1.5s ease-in-out infinite}
+    .modal-btn:hover{transform:translateY(-2px);box-shadow:0 12px 36px rgba(255,68,68,0.4)}
+    @keyframes btnPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,68,68,0.5)}50%{box-shadow:0 0 0 14px rgba(255,68,68,0)}}
+
+    /* Desktop enhancements */
+    @media(min-width:900px){
+      .card{padding:32px 28px}
+      .card-icon{width:56px;height:56px}
+      .card p{font-size:15px}
+      .signoff{padding:32px 0}
+      .signoff p{font-size:17px}
+      .signoff .name{font-size:22px}
+    }
+
+    @media(max-width:700px){
+      .cards{grid-template-columns:1fr;gap:16px;margin-bottom:16px}
+      .main{padding:28px 16px 36px}
+      .container{padding:0 16px}
+      .modal-box{padding:36px 24px 28px;border-radius:20px}
+      .modal-icon{width:72px;height:72px;margin-bottom:20px}
+      .modal-alert{padding:16px 18px;gap:12px}
+      .modal-alert p{font-size:15px}
+    }
+  </style>
+</head>
+<body>
+
+<!-- MODAL - Ti chiameremo -->
+<div class="modal-overlay" id="callModal">
+  <div class="modal-box">
+    <div class="modal-icon" style="background:linear-gradient(135deg,rgba(255,68,68,0.2),rgba(255,68,68,0.06));border-color:rgba(255,68,68,0.25)">
+      <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#ff4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    </div>
+    <h2>Ancora un <span class="gold">Passaggio!</span></h2>
+    <p class="modal-sub">La tua candidatura &egrave; arrivata,<br/>ma la consulenza gratuita<br/><strong style="color:#fff">NON &Egrave; ANCORA CONFERMATA.</strong></p>
+    <div class="modal-alert" style="margin-bottom:16px">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ff4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      <p><strong style="color:#ff4444">RISPONDI AL TELEFONO</strong><br/>Ti chiameremo a brevissimo per confermare la sessione. Se non rispondi NON FARAI LA CHIAMATA CON DAVIDE CAIAZZO ma con un altro consulente.</p>
+    </div>
+    <div class="modal-alert">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ff4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+      <p><strong style="color:#ff4444">VIDEO OBBLIGATORIO</strong><br/>Clicca il bottone qui sotto e guarda il video (sono solo 5 MINUTI!) che &egrave; fondamentale per preparare la consulenza strategica AI con Davide Caiazzo.</p>
+    </div>
+    <button class="modal-btn" onclick="document.getElementById('callModal').style.display='none'" style="margin-top:32px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Ho capito, guardo il Video</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="container">
+    <h1>Guarda questo video per arrivare <span class="gold">Preparato</span></h1>
+    <p class="subtitle">Prima della Consulenza Strategica AI, guarda il video qui sotto</p>
+
+    <!-- VIDEO -->
+    <!-- TODO: sostituire l'ID Vidalytics con quello del video sulla consulenza AI -->
+    <div class="video-wrap">
+      <div id="vidalytics_embed_nJqTqO94XanpLSvh" style="width: 100%; position:relative; padding-top: 56.25%;"></div>
+    </div>
+
+    <!-- CARDS -->
+    <div class="cards">
+
+      <div class="card">
+        <div class="card-icon red">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ff4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <h3>Sii <span class="gold">Puntuale</span></h3>
+        <p>Annulliamo circa l'80% delle domande che riceviamo. Assicurati di entrare nella video chiamata qualche minuto prima.</p>
+        <span class="highlight">Se cambi idea, cancella per dare spazio ad altri.</span>
+      </div>
+
+      <div class="card">
+        <div class="card-icon gold-bg">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </div>
+        <h3>Zero <span class="gold">Distrazioni</span></h3>
+        <p>Stanza silenziosa e massima attenzione. Dobbiamo capire i tuoi obiettivi e come integrare l'intelligenza artificiale nel tuo business.</p>
+        <span class="highlight">Preparati a parlare dei tuoi obiettivi di business.</span>
+      </div>
+
+    </div>
+
+    <!-- SIGN OFF -->
+    <div class="signoff">
+      <p>Non vedo l'ora di iniziare a lavorare con te!</p>
+      <p class="name">Davide Caiazzo</p>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <p class="brand">DC<span>.</span> Academy</p>
+  <div class="info">
+    <p>P.IVA: 05125350750 &middot; Via I. Adriano 9, Lecce</p>
+    <p>academy@davidecaiazzo.it</p>
+  </div>
+  <div class="links">
+    <a href="https://docs.google.com/document/d/1qUNgRcZ0W9aZxutDu1Fv2k5aM6Nti4V0/edit" target="_blank">Privacy Policy</a>
+    <a href="https://docs.google.com/document/d/1PTTs2QFMqBtZaefLHPrrfMxJRnlGewih/edit?usp=sharing&ouid=101002448876750781490&rtpof=true&sd=true" target="_blank">Cookie Policy</a>
+    <a href="https://docs.google.com/document/d/1K6WGjt9aFTRN-zWMvEOh5bw2A32nNag-/edit?usp=sharing&ouid=101002448876750781490&rtpof=true&sd=true" target="_blank">Condizioni di Vendita</a>
+  </div>
+  <p class="copy">&copy; 2026 DC Academy S.r.l.</p>
+</div>
+
+<!-- WHATSAPP -->
+<a href="https://bit.ly/clienti-su-richiesta-info" target="_blank" class="whatsapp" aria-label="WhatsApp">
+  <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+</a>
+
+<!-- VIDALYTICS -->
+<script type="text/javascript">
+(function (v, i, d, a, l, y, t, c, s) {
+    y='_'+d.toLowerCase();c=d+'L';if(!v[d]){v[d]={};}if(!v[c]){v[c]={};}if(!v[y]){v[y]={};}var vl='Loader',vli=v[y][vl],vsl=v[c][vl + 'Script'],vlf=v[c][vl + 'Loaded'],ve='Embed';
+    if (!vsl){vsl=function(u,cb){
+        if(t){cb();return;}s=i.createElement("script");s.type="text/javascript";s.async=1;s.src=u;
+        if(s.readyState){s.onreadystatechange=function(){if(s.readyState==="loaded"||s.readyState=="complete"){s.onreadystatechange=null;vlf=1;cb();}};}else{s.onload=function(){vlf=1;cb();};}
+        i.getElementsByTagName("head")[0].appendChild(s);
+    };}
+    vsl(l+'loader.min.js',function(){if(!vli){var vlc=v[c][vl];vli=new vlc();}vli.loadScript(l+'player.min.js',function(){var vec=v[d][ve];t=new vec();t.run(a);});});
+})(window, document, 'Vidalytics', 'vidalytics_embed_nJqTqO94XanpLSvh', 'https://fast.vidalytics.com/embeds/NyDZYQqV/nJqTqO94XanpLSvh/');
+</script>
+</body>
+</html>
