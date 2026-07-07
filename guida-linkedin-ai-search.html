@@ -167,9 +167,9 @@
     <div class="box">
       <div class="check">✓</div>
       <h4>Guida inviata!</h4>
-      <p>Controlla la tua casella email, la guida sta arrivando.</p>
+      <p>La guida sta arrivando nella tua email. Intanto fai il passo che conta: 30 minuti con Davide, gratis, per applicarla al tuo caso.</p>
       <p class="spam">Non la trovi? Controlla la cartella Spam o Promozioni.</p>
-      <a class="btn-gold" style="text-decoration:none;margin-top:14px" href="https://automazioni.davidecaiazzo.it/">SCOPRI AUTOMATIZZA TUTTO &rarr;</a>
+      <a class="btn-gold" id="modalCta" style="text-decoration:none;margin-top:14px" href="https://clienti.davidecaiazzo.it/prenota-call.html">PRENOTA LA CALL GRATUITA CON ME &rarr;</a>
       <p class="count">Verrai reindirizzato tra <span id="countdownSec">3</span> secondi...</p>
     </div>
   </div>
@@ -224,6 +224,10 @@ function submitForm(e){
     body:data
   }).catch(function(){});
   setTimeout(function(){
+    var qsCall = new URLSearchParams({utm_source:'guida_optin',utm_medium:'post_optin'});
+    var campVal = document.getElementById('utm_campaign').value;
+    qsCall.set('utm_campaign', campVal || 'guida-linkedin-ai-search');
+    document.getElementById('modalCta').href = 'https://clienti.davidecaiazzo.it/prenota-call.html?' + qsCall.toString();
     document.getElementById('confirmModal').classList.add('open');
     var sec = 3;
     var countEl = document.getElementById('countdownSec');
@@ -232,7 +236,8 @@ function submitForm(e){
       countEl.textContent = sec;
       if(sec <= 0){
         clearInterval(timer);
-        window.location.href = 'https://automazioni.davidecaiazzo.it/';
+        var cta = document.getElementById('modalCta');
+        window.location.href = cta ? cta.href : 'https://clienti.davidecaiazzo.it/prenota-call.html';
       }
     }, 1000);
   }, 800);
