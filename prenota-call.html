@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Prenota la tua call gratuita con Davide Caiazzo</title>
-  <meta name="description" content="30 minuti con Davide Caiazzo per costruire il tuo sistema di acquisizione clienti su LinkedIn. Gratis, senza impegno, niente pitch. Scegli il tuo orario."/>
+  <title>Call gratuita con Davide Caiazzo</title>
+  <meta name="description" content="Prenota 30 minuti gratuiti con Davide Caiazzo: il piano per acquisire clienti su LinkedIn. Senza impegno, niente pitch. Scegli il tuo orario."/>
   <link rel="canonical" href="https://clienti.davidecaiazzo.it/prenota-call.html"/>
   <meta property="og:type" content="website"/>
   <meta property="og:url" content="https://clienti.davidecaiazzo.it/prenota-call.html"/>
-  <meta property="og:title" content="Prenota la tua call gratuita con Davide Caiazzo"/>
-  <meta property="og:description" content="30 minuti per costruire il tuo sistema di acquisizione clienti su LinkedIn. Gratis, senza impegno."/>
+  <meta property="og:title" content="Call gratuita con Davide Caiazzo"/>
+  <meta property="og:description" content="30 minuti gratuiti: il piano per acquisire clienti su LinkedIn. Scegli il tuo orario."/>
   <meta property="og:image" content="https://clienti.davidecaiazzo.it/guida-cia-og.jpg"/>
   <meta name="twitter:card" content="summary_large_image"/>
-  <meta name="twitter:title" content="Prenota la tua call gratuita con Davide Caiazzo"/>
-  <meta name="twitter:description" content="30 minuti per costruire il tuo sistema di acquisizione clienti su LinkedIn."/>
+  <meta name="twitter:title" content="Call gratuita con Davide Caiazzo"/>
+  <meta name="twitter:description" content="30 minuti gratuiti: il piano per acquisire clienti su LinkedIn."/>
   <meta name="twitter:image" content="https://clienti.davidecaiazzo.it/guida-cia-og.jpg"/>
   <link rel="icon" type="image/png" href="https://automazioni.davidecaiazzo.it/favicon.png"/>
   <link rel="apple-touch-icon" href="https://automazioni.davidecaiazzo.it/favicon.png"/>
@@ -32,7 +32,7 @@
       background:radial-gradient(120% 80% at 50% -10%, #16161f 0%, #0b0b0f 60%);
       min-height:100vh;overflow-x:hidden;
     }
-    .wrap{max-width:980px;margin:0 auto;padding:0 26px}
+    .wrap{max-width:1220px;margin:0 auto;padding:0 26px}
     .disclaimer{font-size:10.5px;color:#5f5f6a;letter-spacing:.4px;padding:11px 0 0;text-align:center}
     .disclaimer a{color:#8a8a95}
     .brand{display:flex;align-items:center;justify-content:space-between;padding:22px 0 6px}
@@ -40,39 +40,47 @@
     .brand h2::after{content:"";display:block;width:104px;height:4px;background:var(--gold);margin-top:6px}
     .brand .domain{font-weight:700;font-size:12.5px;color:var(--grey);letter-spacing:2px}
 
-    .hero{text-align:center;padding:34px 0 10px}
-    .chip{display:inline-block;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12.5px;color:var(--gold);background:rgba(240,180,41,.14);border-radius:999px;padding:8px 16px;letter-spacing:1px;margin-bottom:20px}
-    h1{font-family:'Outfit',sans-serif;font-weight:900;font-size:clamp(34px,4.6vw,54px);line-height:1.05;text-transform:uppercase;margin-bottom:14px}
+    .hero{display:grid;grid-template-columns:0.92fr 1.08fr;gap:44px;align-items:start;padding:18px 0 30px}
+
+    /* sinistra: messaggio + foto */
+    .left{position:relative}
+    .chip{display:inline-block;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12.5px;color:var(--gold);background:rgba(240,180,41,.14);border-radius:999px;padding:8px 16px;letter-spacing:1px;margin-bottom:18px}
+    h1{font-family:'Outfit',sans-serif;font-weight:900;font-size:clamp(36px,3.9vw,52px);line-height:1.04;text-transform:uppercase;margin-bottom:14px}
     h1 .gold{color:var(--gold)}
-    .sub{font-family:'Outfit',sans-serif;font-weight:400;font-size:clamp(16px,1.6vw,20px);color:var(--grey);line-height:1.45;max-width:620px;margin:0 auto 8px}
-    .me{font-size:13.5px;color:#dcdce3;font-weight:600;margin-top:10px}
-    .me .gold{color:var(--gold)}
+    .sub{font-family:'Outfit',sans-serif;font-weight:400;font-size:clamp(16px,1.5vw,19px);color:var(--grey);line-height:1.4;max-width:430px;margin-bottom:16px}
+    .benefits{list-style:none;margin-bottom:6px}
+    .benefits li{display:flex;gap:10px;align-items:flex-start;padding:4px 0;font-size:15px;color:#dcdce3;line-height:1.4}
+    .benefits li .ck{color:var(--gold);font-weight:900;flex:0 0 auto;margin-top:1px}
 
-    .points{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin:26px auto 8px;max-width:860px}
-    .point{flex:1 1 250px;background:var(--ink2);border:1px solid var(--line);border-radius:16px;padding:18px 18px;text-align:left;display:flex;gap:10px;align-items:flex-start}
-    .point .ck{color:var(--gold);font-weight:900;font-size:16px;flex:0 0 auto;margin-top:1px}
-    .point span{font-size:14px;color:#dcdce3;line-height:1.45}
+    .photo{position:relative;margin-top:10px;height:470px}
+    .photo .circle{position:absolute;left:46%;bottom:44px;transform:translateX(-50%);width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,#f0b429 0%,#e8890c 100%);opacity:.92}
+    .photo .ring{position:absolute;left:46%;bottom:24px;transform:translateX(-50%);width:366px;height:366px;border-radius:50%;border:2px solid rgba(240,180,41,.35)}
+    .photo img{position:absolute;left:0;bottom:44px;height:426px;width:auto;filter:drop-shadow(0 30px 60px rgba(0,0,0,.55))}
+    .credit{position:absolute;left:0;bottom:0;z-index:2}
+    .credit .nome{font-family:'Outfit',sans-serif;font-weight:900;color:var(--gold);font-size:15px;letter-spacing:.5px}
+    .credit .role{font-size:12px;color:var(--grey);margin-top:2px}
 
-    .cal-card{position:relative;background:var(--ink2);border:1px solid var(--line);border-radius:22px;padding:14px 10px 6px;box-shadow:0 24px 70px rgba(0,0,0,.55);margin:22px 0 8px}
+    /* destra: card calendario */
+    .cal-card{position:relative;background:var(--ink2);border:1px solid var(--line);border-radius:22px;padding:18px 12px 8px;box-shadow:0 24px 70px rgba(0,0,0,.55)}
     .cal-card::before{content:"";position:absolute;inset:-1px;border-radius:22px;pointer-events:none;background:radial-gradient(420px 170px at 50% 0%,rgba(240,180,41,.13),transparent 70%)}
-    .cal-head{text-align:center;font-family:'Outfit',sans-serif;font-weight:900;font-size:19px;padding:10px 14px 4px}
+    .cal-head{text-align:center;font-family:'Outfit',sans-serif;font-weight:900;font-size:20px;padding:4px 14px 10px}
     .cal-head .gold{color:var(--gold)}
     .calendly-inline-widget{border-radius:16px;overflow:hidden}
-    .reassure{text-align:center;font-size:12.5px;color:#8a8a95;margin:12px 0 6px}
+    .reassure{text-align:center;font-size:12.5px;color:#8a8a95;padding:10px 0 8px}
     .reassure b{color:#dcdce3}
 
-    .bio{text-align:center;padding:16px 0 8px}
-    .bio .nome{font-family:'Outfit',sans-serif;font-weight:900;color:var(--gold);font-size:15px;letter-spacing:.5px}
-    .bio .role{font-size:12px;color:var(--grey);margin-top:4px;line-height:1.5;max-width:560px;margin-left:auto;margin-right:auto}
-
-    footer{border-top:1px solid var(--line);margin-top:22px;padding:22px 0 30px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+    footer{border-top:1px solid var(--line);margin-top:14px;padding:22px 0 30px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
     footer .fb{font-weight:700;font-size:12.5px;color:var(--gold);letter-spacing:1px}
     footer .fright{font-size:11px;color:#6f6f79;max-width:660px}
     footer a{color:#8a8a95;text-decoration:none;font-size:11px;margin-left:10px}
 
-    @media(max-width:700px){
-      .points{gap:10px}
-      .point{flex:1 1 100%}
+    @media(max-width:920px){
+      .hero{grid-template-columns:1fr;gap:18px;padding-top:12px}
+      h1{font-size:clamp(32px,8vw,44px)}
+      .photo{height:340px}
+      .photo .circle{left:50%}.photo .ring{left:50%}
+      .photo img{left:50%;transform:translateX(-50%);height:330px}
+      .credit{left:50%;transform:translateX(-50%);text-align:center;bottom:-2px}
     }
   </style>
 </head>
@@ -85,28 +93,32 @@
     </header>
 
     <section class="hero">
-      <span class="chip">CALL GRATUITA: 30 MINUTI //</span>
-      <h1>ORA FACCIAMO<br/><span class="gold">SUL SERIO</span></h1>
-      <p class="sub">La guida ti dà il metodo. In 30 minuti lo applichiamo al tuo caso: usciamo dalla call con il piano per acquisire clienti su LinkedIn. Gratis, senza impegno, niente pitch.</p>
-      <p class="me">La call la faccio <span class="gold">io con te</span>. Non un team, non un assistente.</p>
+      <div class="left">
+        <span class="chip">30 MINUTI · GRATIS //</span>
+        <h1>CALL GRATUITA CON<br/><span class="gold">DAVIDE CAIAZZO</span></h1>
+        <p class="sub">Esci dalla call con il tuo piano per acquisire clienti su LinkedIn.</p>
+        <ul class="benefits">
+          <li><span class="ck">✓</span> Analisi del tuo profilo in diretta</li>
+          <li><span class="ck">✓</span> Il sistema per acquisire clienti senza ads</li>
+          <li><span class="ck">✓</span> La call la faccio io, non un assistente</li>
+        </ul>
+        <div class="photo">
+          <div class="circle"></div>
+          <div class="ring"></div>
+          <img src="guida-cia-hero.png" alt="Davide Caiazzo"/>
+          <div class="credit">
+            <div class="nome">DAVIDE CAIAZZO</div>
+            <div class="role">TOP 20 al Mondo in "LinkedIn® Growth", Favikon 2025</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cal-card">
+        <div class="cal-head">Scegli il tuo orario 👇 <span class="gold">I posti sono limitati</span></div>
+        <div id="calendlyWidget" class="calendly-inline-widget" data-url="" style="min-width:320px;height:720px"></div>
+        <p class="reassure"><b>Zero impegno:</b> niente pitch, solo il tuo piano.</p>
+      </div>
     </section>
-
-    <div class="points">
-      <div class="point"><span class="ck">✓</span><span>Analizziamo il tuo profilo e i tuoi contenuti: cosa ti blocca oggi</span></div>
-      <div class="point"><span class="ck">✓</span><span>Ti mostro il sistema che uso ogni giorno per acquisire clienti, senza ads</span></div>
-      <div class="point"><span class="ck">✓</span><span>Esci con un piano concreto da applicare, che lavoriamo insieme o no</span></div>
-    </div>
-
-    <div class="cal-card">
-      <div class="cal-head">Scegli il tuo orario: <span class="gold">i posti in agenda sono limitati</span></div>
-      <div id="calendlyWidget" class="calendly-inline-widget" data-url="" style="min-width:320px;height:760px"></div>
-    </div>
-    <p class="reassure"><b>Zero rischio:</b> se in 30 minuti non ti do almeno 1 idea che vale la call, ti chiedo scusa io.</p>
-
-    <div class="bio">
-      <div class="nome">DAVIDE CAIAZZO</div>
-      <div class="role">TOP 20 al Mondo in "LinkedIn® Growth" secondo Favikon 2025 | Imprenditore | CEO di 4 società | 2x TEDx Speaker | Investitore | Docente | Avvocato | Autore Feltrinelli</div>
-    </div>
 
     <footer>
       <span class="fb">DC ACADEMY</span>
@@ -124,6 +136,7 @@
   var params = new URLSearchParams(window.location.search);
   var qs = new URLSearchParams({
     hide_gdpr_banner:'1',
+    hide_event_type_details:'1',
     background_color:'14141b',
     text_color:'ffffff',
     primary_color:'f0b429'
