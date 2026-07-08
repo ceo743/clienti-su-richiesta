@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Qualificare i contatti LinkedIn con l'IA: guida gratuita</title>
+  <meta name="description" content="Scarica la guida gratuita: come usare l'IA per capire quali contatti LinkedIn sono davvero pronti a diventare clienti. Il metodo per non perdere tempo con i nomi sbagliati."/>
+  <link rel="canonical" href="https://clienti.davidecaiazzo.it/guida-qualificare-contatti-ia-linkedin.html"/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:url" content="https://clienti.davidecaiazzo.it/guida-qualificare-contatti-ia-linkedin.html"/>
+  <meta property="og:title" content="Qualificare i contatti LinkedIn con l'IA. Guida gratuita."/>
+  <meta property="og:description" content="Il metodo per capire, tra i contatti che ti guardano su LinkedIn, chi è davvero pronto a diventare cliente."/>
+  <meta property="og:image" content="https://clienti.davidecaiazzo.it/guida-qcl-og.jpg"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="Qualificare i contatti LinkedIn con l'IA: guida gratuita"/>
+  <meta name="twitter:description" content="Scopri chi, tra i tuoi contatti LinkedIn, è davvero pronto a diventare cliente."/>
+  <meta name="twitter:image" content="https://clienti.davidecaiazzo.it/guida-qcl-og.jpg"/>
+  <link rel="icon" type="image/png" href="https://automazioni.davidecaiazzo.it/favicon.png"/>
+  <link rel="apple-touch-icon" href="https://automazioni.davidecaiazzo.it/favicon.png"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Work+Sans:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <script type="text/javascript" charset="UTF-8" src="//cdn.cookie-script.com/s/5b24cef87a160ab3ee3c8e35c1c61ff9.js"></script>
+  <script src="https://dc-chatbot-production.up.railway.app/static/widget.js" defer></script>
+  <link rel="stylesheet" href="https://dc-chatbot-production.up.railway.app/static/widget.css"/>
+  <style>
+    :root{
+      --ink:#0b0b0f; --ink2:#14141b; --line:#2a2a35; --grey:#a7a7b3;
+      --gold:#f0b429; --gold2:#e8890c;
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+      font-family:'Work Sans',sans-serif;color:#fff;
+      background:radial-gradient(120% 80% at 50% -10%, #16161f 0%, #0b0b0f 60%);
+      min-height:100vh;overflow-x:hidden;
+    }
+    .wrap{max-width:1120px;margin:0 auto;padding:0 26px}
+    .disclaimer{font-size:10.5px;color:#5f5f6a;letter-spacing:.4px;padding:11px 0 0;text-align:center}
+    .brand{display:flex;align-items:center;justify-content:space-between;padding:22px 0 6px}
+    .brand h2{font-family:'Outfit',sans-serif;font-weight:900;font-size:21px;letter-spacing:1px}
+    .brand h2::after{content:"";display:block;width:104px;height:4px;background:var(--gold);margin-top:6px}
+    .brand .domain{font-weight:700;font-size:12.5px;color:var(--grey);letter-spacing:2px}
+
+    .hero{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start;padding:20px 0 40px}
+
+    .left{position:relative}
+    .chip{display:inline-block;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12.5px;color:var(--gold);background:rgba(240,180,41,.14);border-radius:999px;padding:8px 16px;letter-spacing:1px;margin-bottom:20px}
+    h1{font-family:'Outfit',sans-serif;font-weight:900;font-size:clamp(36px,4.8vw,58px);line-height:1.03;text-transform:uppercase;margin-bottom:16px}
+    h1 .gold{color:var(--gold)}
+    .sub{font-family:'Outfit',sans-serif;font-weight:400;font-size:clamp(16px,1.5vw,20px);color:var(--grey);line-height:1.4;max-width:440px;margin-bottom:22px}
+
+    .photo{position:relative;margin-top:14px;height:500px}
+    .photo .circle{position:absolute;left:42%;bottom:44px;transform:translateX(-50%);width:340px;height:340px;border-radius:50%;background:radial-gradient(circle,#f0b429 0%,#e8890c 100%);opacity:.92}
+    .photo .ring{position:absolute;left:42%;bottom:24px;transform:translateX(-50%);width:388px;height:388px;border-radius:50%;border:2px solid rgba(240,180,41,.35)}
+    .photo img{position:absolute;left:0;bottom:44px;height:452px;width:auto;filter:drop-shadow(0 30px 60px rgba(0,0,0,.55))}
+    .credit{position:absolute;left:0;bottom:0;z-index:2}
+    .credit .nome{font-family:'Outfit',sans-serif;font-weight:900;color:var(--gold);font-size:15px;letter-spacing:.5px}
+    .credit .role{font-size:12px;color:var(--grey);margin-top:2px}
+
+    .card{position:relative;background:var(--ink2);border:1px solid var(--line);border-radius:22px;padding:32px 30px;box-shadow:0 24px 70px rgba(0,0,0,.55)}
+    .card::before{content:"";position:absolute;inset:-1px;border-radius:22px;pointer-events:none;background:radial-gradient(360px 160px at 50% 0%,rgba(240,180,41,.15),transparent 70%)}
+    .card h3{font-family:'Outfit',sans-serif;font-weight:900;font-size:22px;line-height:1.12;margin-bottom:16px;text-align:center}
+    .card h3 .gold{color:var(--gold)}
+    .benefits{list-style:none;margin-bottom:20px}
+    .benefits li{display:flex;gap:10px;align-items:flex-start;padding:5px 0;font-size:14px;color:#dcdce3;line-height:1.4}
+    .benefits li .ck{color:var(--gold);font-weight:900;flex:0 0 auto;margin-top:1px}
+    .divider{height:1px;background:var(--line);margin:4px 0 18px}
+    form{display:flex;flex-direction:column;gap:12px}
+    .form-field{width:100%;background:#0e0e14;border:1px solid var(--line);border-radius:12px;color:#fff;font-family:'Work Sans',sans-serif;font-size:15px;padding:14px 15px;outline:none;transition:border .15s}
+    .form-field:focus{border-color:var(--gold)}
+    .form-field.error{border-color:#e5484d}
+    .privacy{display:flex;gap:9px;align-items:flex-start;font-size:11.5px;color:var(--grey);line-height:1.45}
+    .privacy a{color:var(--gold);text-decoration:none}
+    .privacy input{margin-top:2px;accent-color:var(--gold)}
+    .privacy input.checkbox-error{outline:2px solid #e5484d;outline-offset:2px}
+    .btn-gold{display:block;width:100%;border:0;cursor:pointer;font-family:'Outfit',sans-serif;font-weight:900;font-size:16px;letter-spacing:.4px;color:#131313;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:999px;padding:18px 20px;margin-top:4px;transition:transform .12s;box-shadow:0 10px 32px rgba(240,180,41,.35)}
+    .btn-gold:hover{transform:translateY(-2px)}
+    .btn-gold:disabled{opacity:.7;cursor:default;transform:none}
+    .reassure{text-align:center;font-size:11.5px;color:#7c7c86;margin-top:10px}
+
+    .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(5,5,8,.82);z-index:60;padding:24px}
+    .modal.open{display:flex}
+    .modal .box{background:var(--ink2);border:1px solid var(--line);border-radius:22px;max-width:430px;width:100%;padding:38px 32px;text-align:center}
+    .modal .check{width:64px;height:64px;border-radius:50%;background:rgba(240,180,41,.15);display:flex;align-items:center;justify-content:center;margin:0 auto 18px;color:var(--gold);font-size:32px;font-family:'Outfit',sans-serif;font-weight:900}
+    .modal h4{font-family:'Outfit',sans-serif;font-weight:900;font-size:23px;margin-bottom:10px}
+    .modal p{color:var(--grey);font-size:14px;line-height:1.55;margin-bottom:8px}
+    .modal .spam{font-size:12px;color:#8a8a95}
+    .modal .count{margin-top:16px;font-size:12.5px;color:var(--grey)}
+
+    footer{border-top:1px solid var(--line);padding:22px 0 30px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+    footer .fb{font-weight:700;font-size:12.5px;color:var(--gold);letter-spacing:1px}
+    footer .fright{font-size:11px;color:#6f6f79;max-width:660px}
+    footer a{color:#8a8a95;text-decoration:none;font-size:11px;margin-left:10px}
+
+    @media(max-width:900px){
+      .hero{grid-template-columns:1fr;gap:20px;padding-top:14px;min-height:auto}
+      .photo{height:360px;margin-top:14px}
+      .photo .circle{left:44%}.photo .ring{left:44%}
+      .photo img{left:50%;transform:translateX(-50%);height:400px}
+      .credit{left:50%;transform:translateX(-50%);text-align:center;bottom:-2px}
+      .card{margin-top:6px}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <p class="disclaimer">Sito di DC Academy S.r.l. LinkedIn® è un marchio registrato di LinkedIn Corporation: pubblicazione indipendente e non affiliata.<br/>I contenuti di questo sito hanno natura pubblicitaria a favore della DC Academy S.r.l. · Per qualsiasi approfondimento sui nostri servizi, clienti, testimonianze, testate e sui numeri citati su questo sito visita la pagina: <a href="https://www.davidecaiazzo.it/trasparenza" target="_blank" rel="noopener" style="color:#8a8a95;text-decoration:underline">www.davidecaiazzo.it/trasparenza</a></p>
+    <header class="brand">
+      <h2>DC ACADEMY</h2>
+      <span class="domain">DAVIDECAIAZZO.IT</span>
+    </header>
+
+    <section class="hero">
+      <div class="left">
+        <span class="chip">GUIDA GRATUITA //</span>
+        <h1>SCOPRI CHI<br/><span class="gold">È PRONTO</span><br/>A DIVENTARE <span class="gold">CLIENTE</span></h1>
+        <p class="sub">LinkedIn ti mostra chi ti guarda. Ecco come capire chi vale davvero il tuo tempo, con l'IA.</p>
+        <div class="photo">
+          <div class="circle"></div>
+          <div class="ring"></div>
+          <img src="guida-qcl-hero.png" alt="Davide Caiazzo"/>
+          <div class="credit">
+            <div class="nome">DAVIDE CAIAZZO</div>
+            <div class="role">TOP 20 al Mondo in "LinkedIn® Growth", Favikon 2025</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>VUOI INIZIARE A<br/><span class="gold">FARE SUL SERIO?</span></h3>
+        <ul class="benefits">
+          <li><span class="ck">✓</span> La novità di aprile 2026 su Sales Navigator (e cosa cambia per te)</li>
+          <li><span class="ck">✓</span> I 3 criteri per riconoscere un contatto pronto a comprare</li>
+          <li><span class="ck">✓</span> Il metodo in 5 passi per qualificare con l'IA</li>
+          <li><span class="ck">✓</span> Il primo messaggio giusto, in 3 blocchi</li>
+          <li><span class="ck">✓</span> Il prompt che ordina la tua lista contatti per priorità</li>
+        </ul>
+        <div class="divider"></div>
+        <form id="leadForm" onsubmit="submitForm(event)" novalidate>
+          <input type="text" id="fieldName" name="name" class="form-field" placeholder="Nome e Cognome" required/>
+          <input type="email" id="fieldEmail" name="email" class="form-field" placeholder="Email" required/>
+          <input type="tel" inputmode="tel" pattern="^(?=(?:\D*\d){9,13}\D*$)[\d\s+().\-]+$" title="Inserisci un numero di telefono valido (da 9 a 13 cifre)" id="fieldPhone" name="phone" class="form-field" placeholder="Telefono" required/>
+          <input type="hidden" name="utm_source" id="utm_source"/>
+          <input type="hidden" name="utm_medium" id="utm_medium"/>
+          <input type="hidden" name="utm_campaign" id="utm_campaign"/>
+          <input type="hidden" name="utm_content" id="utm_content"/>
+          <label class="privacy"><input type="checkbox" id="fieldPrivacy" required/><span>Accetto la <a href="https://www.iubenda.com/privacy-policy/58787879" target="_blank" rel="noopener">Privacy Policy</a> e il trattamento dei dati per ricevere la guida.</span></label>
+          <label class="privacy"><input type="checkbox" id="fieldMarketing"/><span>Voglio ricevere anche consigli su automazioni e intelligenza artificiale.</span></label>
+          <button type="submit" class="btn-gold" id="submitBtn"><span id="btnText">SCARICA LA GUIDA GRATUITA</span></button>
+        </form>
+        <p class="reassure">Nessuno spam. La guida arriva subito via email.</p>
+      </div>
+    </section>
+
+    <footer>
+      <span class="fb">DC ACADEMY</span>
+      <span class="fright">DC Academy S.r.l. | P.IVA 12856080964 | academy@davidecaiazzo.it
+        <a href="https://www.iubenda.com/privacy-policy/58787879" target="_blank" rel="noopener">Privacy</a>
+        <a href="https://www.iubenda.com/privacy-policy/58787879/cookie-policy" target="_blank" rel="noopener">Cookie</a>
+      </span>
+    </footer>
+  </div>
+
+  <div class="modal" id="confirmModal">
+    <div class="box">
+      <div class="check">✓</div>
+      <h4>Guida inviata!</h4>
+      <p>La guida sta arrivando nella tua email. Intanto fai il passo che conta: 30 minuti con Davide, gratis, per applicarla al tuo caso.</p>
+      <p class="spam">Non la trovi? Controlla la cartella Spam o Promozioni.</p>
+      <a class="btn-gold" id="modalCta" style="text-decoration:none;margin-top:14px" href="https://clienti.davidecaiazzo.it/prenota-call.html">PRENOTA LA CALL GRATUITA CON ME &rarr;</a>
+      <p class="count">Verrai reindirizzato tra <span id="countdownSec">3</span> secondi...</p>
+    </div>
+  </div>
+
+<script>
+(function(){
+  var params = new URLSearchParams(window.location.search);
+  ['utm_source','utm_medium','utm_campaign','utm_content'].forEach(function(key){
+    var val = params.get(key);
+    if(val){ var el = document.getElementById(key); if(el) el.value = val; }
+  });
+})();
+
+function dcPhoneOk(raw){var p=String(raw||'').replace(/[\s\-\+\.\(\)]/g,'');if(p.slice(0,2)==='00')p=p.slice(2);if(!/^\d+$/.test(p))return false;if(p.length<9||p.length>13)return false;if(/^(\d)\1+$/.test(p))return false;if('01234567890'.indexOf(p)>=0||'09876543210'.indexOf(p)>=0)return false;var u={},n=0,i;for(i=0;i<p.length;i++){if(!u[p[i]]){u[p[i]]=1;n++;}}if(n<3)return false;return true;}
+function submitForm(e){
+  e.preventDefault();
+  var fieldName=document.getElementById('fieldName');
+  var fieldEmail=document.getElementById('fieldEmail');
+  var fieldPhone=document.getElementById('fieldPhone');
+  var privacy=document.getElementById('fieldPrivacy');
+  var fields=[fieldName,fieldEmail,fieldPhone];
+  var hasError=false;
+  fields.forEach(function(f){f.classList.remove('error')});
+  privacy.classList.remove('checkbox-error');
+  fields.forEach(function(f){
+    if(!f.value.trim()){f.classList.add('error');hasError=true}
+  });
+  if(fieldEmail.value.trim()&&!/^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/.test(fieldEmail.value.trim())){fieldEmail.classList.add('error');hasError=true;}
+  if(!dcPhoneOk(fieldPhone.value)){fieldPhone.classList.add('error');hasError=true;}
+  if(!privacy.checked){privacy.classList.add('checkbox-error');hasError=true}
+  if(hasError) return;
+  fields.forEach(function(f){f.addEventListener('input',function(){f.classList.remove('error')},{once:true})});
+  privacy.addEventListener('change',function(){privacy.classList.remove('checkbox-error')},{once:true});
+  var btn=document.getElementById('submitBtn');
+  var btnText=document.getElementById('btnText');
+  btn.disabled=true;
+  btnText.textContent='INVIO IN CORSO...';
+  var data=new URLSearchParams({
+    'form_submission[name]':fieldName.value.trim(),
+    'form_submission[email]':fieldEmail.value.trim(),
+    'form_submission[phone]':fieldPhone.value.trim(),
+    'form_submission[utm_source]':document.getElementById('utm_source').value,
+    'form_submission[utm_medium]':document.getElementById('utm_medium').value,
+    'form_submission[utm_campaign]':document.getElementById('utm_campaign').value,
+    'form_submission[utm_content]':document.getElementById('utm_content').value
+  });
+  // POST diretto al form Kajabi (form 2149636435) -> automazione consegna guida via email
+  fetch('https://www.davidecaiazzo.it/forms/2149636435/form_submissions',{
+    method:'POST',
+    mode:'no-cors',
+    headers:{'Content-Type':'application/x-www-form-urlencoded'},
+    body:data
+  }).catch(function(){});
+  setTimeout(function(){
+    var qsCall = new URLSearchParams({utm_source:'guida_optin',utm_medium:'post_optin'});
+    var campVal = document.getElementById('utm_campaign').value;
+    qsCall.set('utm_campaign', campVal || 'guida-qualificare-contatti-ia-linkedin');
+    document.getElementById('modalCta').href = 'https://clienti.davidecaiazzo.it/prenota-call.html?' + qsCall.toString();
+    document.getElementById('confirmModal').classList.add('open');
+    var sec = 3;
+    var countEl = document.getElementById('countdownSec');
+    var timer = setInterval(function(){
+      sec--;
+      countEl.textContent = sec;
+      if(sec <= 0){
+        clearInterval(timer);
+        var cta = document.getElementById('modalCta');
+        window.location.href = cta ? cta.href : 'https://clienti.davidecaiazzo.it/prenota-call.html';
+      }
+    }, 1000);
+  }, 800);
+}
+</script>
+</body>
+</html>
