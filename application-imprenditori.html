@@ -112,6 +112,25 @@ footer a{color:#8a8a95;text-decoration:none;font-size:11px;margin-left:10px}
 .reveal{opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s ease}
 .reveal.in{opacity:1;transform:translateY(0)}
 
+/* STORIA DI SUCCESSO */
+.storia{background:var(--ink2);border:1px solid var(--line);border-radius:24px;padding:14px;overflow:hidden}
+.storia img{width:100%;display:block;border-radius:16px}
+
+/* VIDEO TESTIMONIANZE */
+.video-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.video-card{background:var(--ink2);border:1px solid var(--line);border-radius:18px;overflow:hidden;transition:all .35s}
+.video-card:hover{border-color:rgba(240,180,41,.35);transform:translateY(-4px)}
+.video-embed{position:relative;width:100%;padding-top:56.25%;background:#000}
+.video-embed .wistia_embed{position:absolute;top:0;left:0;width:100%;height:100%}
+.video-card-name{padding:16px 18px;font-size:13.5px;font-weight:700}
+.video-card-name span{display:block;font-size:11.5px;font-weight:500;color:var(--grey2);margin-top:2px}
+
+/* STICKY CTA BAR */
+.sticky-cta{position:fixed;left:0;right:0;bottom:0;z-index:999;background:rgba(11,11,15,.92);backdrop-filter:blur(10px);border-top:1px solid var(--line);padding:12px 16px;display:none;align-items:center;justify-content:center;gap:16px}
+.sticky-cta.show{display:flex}
+.sticky-cta span{font-size:13.5px;color:var(--grey);display:none}
+.sticky-cta .btn-gold{padding:12px 26px;font-size:14.5px}
+
 @media(max-width:980px){
   .hero{grid-template-columns:1fr;gap:24px;padding-top:12px}
   h1{font-size:clamp(30px,8vw,40px)}
@@ -122,6 +141,10 @@ footer a{color:#8a8a95;text-decoration:none;font-size:11px;margin-left:10px}
   .cal-card{position:static}
   .testi-grid{grid-template-columns:1fr}
   .metodo-grid{grid-template-columns:1fr}
+  .video-grid{grid-template-columns:1fr}
+}
+@media(min-width:640px){
+  .sticky-cta span{display:inline}
 }
 </style>
 </head>
@@ -166,6 +189,33 @@ footer a{color:#8a8a95;text-decoration:none;font-size:11px;margin-left:10px}
     <div class="garanzia">
       <span class="icon">🛡️</span>
       <p><b>Garanzia contrattuale di risultato:</b> moltiplico per 10 volte le impressioni medie dei tuoi post o lavoro gratis.</p>
+    </div>
+  </section>
+
+  <section class="reveal">
+    <p class="section-title">La storia di successo di <span class="gold">Andrea Pietrini</span></p>
+    <p class="section-sub">Chairman YOURgroup, imprenditore, ex CFO e CEO. Da 26.266 a 62.614 follower, oltre 100 clienti di fascia alta e un solo post arrivato a 1 milione di visualizzazioni.</p>
+    <div class="storia">
+      <img src="pietrini-risultati.png" alt="Risultati LinkedIn di Andrea Pietrini, prima e dopo la strategia DC Academy"/>
+    </div>
+  </section>
+
+  <section class="reveal">
+    <p class="section-title">Guardali raccontare <span class="gold">i loro risultati</span></p>
+    <p class="section-sub">Video reali di imprenditori che hanno lavorato con me. Nessuna comparsa, nessuno script.</p>
+    <div class="video-grid">
+      <div class="video-card">
+        <div class="video-embed"><div class="wistia_embed wistia_async_2uvl8qkghz" style="width:100%;height:100%"></div></div>
+        <p class="video-card-name">Andrea Campagnolo<span>CEO, Natural Boom</span></p>
+      </div>
+      <div class="video-card">
+        <div class="video-embed"><div class="wistia_embed wistia_async_qvum8ue5ai" style="width:100%;height:100%"></div></div>
+        <p class="video-card-name">Claudia Marchi<span>CEO, Airsea</span></p>
+      </div>
+      <div class="video-card">
+        <div class="video-embed"><div class="wistia_embed wistia_async_6nq5r0iclb" style="width:100%;height:100%"></div></div>
+        <p class="video-card-name">Antonio De Vasconcelos<span>CEO, Bofil</span></p>
+      </div>
     </div>
   </section>
 
@@ -245,6 +295,12 @@ footer a{color:#8a8a95;text-decoration:none;font-size:11px;margin-left:10px}
   </footer>
 </div>
 
+<div class="sticky-cta" id="stickyCta">
+  <span>30 minuti gratuiti, garanzia contrattuale</span>
+  <a href="#calendlyWidget" class="btn-gold" onclick="document.getElementById('calendlyWidget').scrollIntoView({behavior:'smooth'});return false;">Prenota la call →</a>
+</div>
+
+<script charset="ISO-8859-1" src="//fast.wistia.com/assets/external/E-v1.js" async></script>
 <script>
 (function(){
   var base = 'https://calendly.com/dc-academy-team/consulenza-strategica-gratuita-linkedin-dc-clone';
@@ -272,6 +328,15 @@ footer a{color:#8a8a95;text-decoration:none;font-size:11px;margin-left:10px}
     entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); } });
   },{threshold:0.12});
   els.forEach(function(el){ io.observe(el); });
+
+  var heroEl = document.querySelector('.hero');
+  var stickyCta = document.getElementById('stickyCta');
+  var stickyIo = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      stickyCta.classList.toggle('show', !e.isIntersecting);
+    });
+  },{threshold:0});
+  stickyIo.observe(heroEl);
 })();
 </script>
 </body>
