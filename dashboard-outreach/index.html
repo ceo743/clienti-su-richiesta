@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Dashboard Outreach — DC Academy</title>
+<style>
+:root {
+  color-scheme: light;
+  --surface-1: #fcfcfb;
+  --page: #f9f9f7;
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e;
+  --muted: #898781;
+  --grid: #e1e0d9;
+  --baseline: #c3c2b7;
+  --border: rgba(11,11,11,0.10);
+  --series-1: #2a78d6;
+  --seq-250: #86b6ef; --seq-300: #6da7ec; --seq-400: #3987e5; --seq-500: #256abf; --seq-600: #184f95;
+  --good: #0ca30c; --good-text: #006300;
+  --critical: #d03b3b;
+  --accent: #2a78d6;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface-1: #1a1a19;
+  --page: #0d0d0d;
+  --text-primary: #ffffff;
+  --text-secondary: #c3c2b7;
+  --muted: #898781;
+  --grid: #2c2c2a;
+  --baseline: #383835;
+  --border: rgba(255,255,255,0.10);
+  --series-1: #3987e5;
+  --seq-250: #86b6ef; --seq-300: #6da7ec; --seq-400: #3987e5; --seq-500: #256abf; --seq-600: #184f95;
+  --good: #0ca30c; --good-text: #0ca30c;
+  --critical: #d03b3b;
+  --accent: #3987e5;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --surface-1: #1a1a19; --page: #0d0d0d;
+    --text-primary: #ffffff; --text-secondary: #c3c2b7;
+    --grid: #2c2c2a; --baseline: #383835;
+    --border: rgba(255,255,255,0.10);
+    --series-1: #3987e5; --good-text: #0ca30c; --accent: #3987e5;
+  }
+}
+* { box-sizing: border-box; margin: 0; }
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: var(--page); color: var(--text-primary);
+  min-height: 100vh; font-size: 15px; line-height: 1.45;
+}
+header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 22px; border-bottom: 1px solid var(--border);
+  background: var(--surface-1); position: sticky; top: 0; z-index: 10;
+}
+header h1 { font-size: 16px; font-weight: 700; letter-spacing: -0.01em; }
+header .sub { color: var(--muted); font-size: 13px; }
+header .spacer { flex: 1; }
+button, .btn {
+  font: inherit; cursor: pointer; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--surface-1);
+  color: var(--text-primary); padding: 7px 14px;
+}
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+button.ghost { border: none; background: none; color: var(--text-secondary); }
+button:hover { filter: brightness(0.96); }
+main { max-width: 1080px; margin: 0 auto; padding: 24px 22px 60px; }
+
+/* ---- login ---- */
+.login-wrap { max-width: 380px; margin: 8vh auto; }
+.card {
+  background: var(--surface-1); border: 1px solid var(--border);
+  border-radius: 14px; padding: 20px;
+}
+.login-wrap h2 { font-size: 20px; margin-bottom: 4px; }
+.login-wrap p.hint { color: var(--text-secondary); font-size: 13.5px; margin-bottom: 16px; }
+.field { margin-bottom: 12px; }
+.field label { display: block; font-size: 13px; color: var(--text-secondary); margin-bottom: 4px; }
+.field input {
+  width: 100%; font: inherit; padding: 9px 11px; border-radius: 8px;
+  border: 1px solid var(--baseline); background: var(--page); color: var(--text-primary);
+}
+.login-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+.msg { font-size: 13.5px; margin-top: 12px; padding: 9px 11px; border-radius: 8px; display: none; }
+.msg.err { display: block; color: var(--critical); border: 1px solid var(--critical); }
+.msg.ok { display: block; color: var(--good-text); border: 1px solid var(--good); }
+.linkish { background: none; border: none; color: var(--accent); padding: 0; font-size: 13.5px; text-decoration: underline; }
+
+/* ---- dashboard ---- */
+.topline { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+.topline h2 { font-size: 22px; letter-spacing: -0.015em; }
+.topline .agg { color: var(--muted); font-size: 13px; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 22px; }
+.tile { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+.tile .k { font-size: 12.5px; color: var(--text-secondary); margin-bottom: 2px; }
+.tile .v { font-size: 30px; font-weight: 700; letter-spacing: -0.02em; }
+.tile .d { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.tile .v small { font-size: 16px; font-weight: 600; color: var(--text-secondary); }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 22px; }
+@media (max-width: 760px) { .grid2 { grid-template-columns: 1fr; } }
+.panel { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+.panel h3 { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+.panel h3 .n { color: var(--muted); font-weight: 400; }
+
+/* funnel */
+.funnel-row { display: grid; grid-template-columns: 110px 1fr 52px; align-items: center; gap: 10px; margin-bottom: 8px; }
+.funnel-row .lbl { font-size: 13px; color: var(--text-secondary); text-align: right; }
+.funnel-row .bar-track { height: 22px; position: relative; }
+.funnel-row .bar {
+  height: 22px; border-radius: 0 4px 4px 0; min-width: 2px;
+  transition: width .4s ease;
+}
+.funnel-row .val { font-size: 13px; font-variant-numeric: tabular-nums; }
+
+/* tables */
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+th { text-align: left; color: var(--muted); font-weight: 500; font-size: 12.5px; padding: 6px 8px; border-bottom: 1px solid var(--grid); }
+td { padding: 7px 8px; border-bottom: 1px solid var(--grid); vertical-align: top; font-variant-numeric: tabular-nums; }
+tr:last-child td { border-bottom: none; }
+.pill { display: inline-block; font-size: 12px; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--border); }
+.pill.pos { color: var(--good-text); border-color: var(--good); }
+.pill.neg { color: var(--critical); border-color: var(--critical); }
+.pill.neu { color: var(--text-secondary); }
+.table-scroll { overflow-x: auto; }
+
+/* line chart */
+.chart-wrap { position: relative; }
+svg text { font-family: inherit; }
+.tooltip {
+  position: absolute; pointer-events: none; display: none; z-index: 5;
+  background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px;
+  padding: 6px 10px; font-size: 12.5px; box-shadow: 0 4px 14px rgba(0,0,0,.15);
+  white-space: nowrap;
+}
+.legend { display: flex; gap: 16px; font-size: 12.5px; color: var(--text-secondary); margin-top: 6px; }
+.legend .sw { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+
+/* admin */
+.client-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; margin-bottom: 26px; }
+.client-card { cursor: pointer; transition: transform .12s ease; }
+.client-card:hover { transform: translateY(-2px); }
+.client-card h3 { font-size: 16px; margin-bottom: 2px; }
+.client-card .b { color: var(--muted); font-size: 13px; margin-bottom: 12px; }
+.client-card .mini { display: flex; gap: 18px; }
+.client-card .mini div { text-align: left; }
+.client-card .mini .mv { font-size: 22px; font-weight: 700; }
+.client-card .mini .mk { font-size: 11.5px; color: var(--muted); }
+.back { margin-bottom: 14px; }
+.empty { color: var(--muted); font-size: 13.5px; padding: 8px 0; }
+#loading { text-align: center; color: var(--muted); padding: 60px 0; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Dashboard Outreach</h1>
+  <span class="sub">DC Academy</span>
+  <div class="spacer"></div>
+  <span id="userEmail" class="sub"></span>
+  <button class="ghost" id="themeBtn" title="Tema chiaro/scuro">◐</button>
+  <button class="ghost" id="logoutBtn" style="display:none">Esci</button>
+</header>
+
+<main>
+  <!-- LOGIN -->
+  <div id="loginView" class="login-wrap" style="display:none">
+    <div class="card">
+      <h2 id="loginTitle">Accedi</h2>
+      <p class="hint" id="loginHint">Entra con la tua email e la password che hai creato.</p>
+      <div class="field"><label>Email</label><input type="email" id="inEmail" autocomplete="username"></div>
+      <div class="field" id="pwField"><label>Password</label><input type="password" id="inPw" autocomplete="current-password"></div>
+      <div class="field" id="pw2Field" style="display:none"><label>Ripeti password</label><input type="password" id="inPw2" autocomplete="new-password"></div>
+      <div class="login-actions">
+        <button class="primary" id="mainBtn">Accedi</button>
+        <button class="linkish" id="firstBtn">Primo accesso? Crea la tua password</button>
+        <button class="linkish" id="resetBtn">Password dimenticata</button>
+        <button class="linkish" id="backLoginBtn" style="display:none">Torna all'accesso</button>
+      </div>
+      <div class="msg" id="loginMsg"></div>
+    </div>
+  </div>
+
+  <div id="loading" style="display:none">Caricamento…</div>
+
+  <!-- ADMIN: elenco clienti -->
+  <div id="adminView" style="display:none">
+    <div class="topline"><h2>Tutti i clienti</h2><span class="agg" id="adminAgg"></span></div>
+    <div class="client-cards" id="clientCards"></div>
+  </div>
+
+  <!-- DASHBOARD cliente -->
+  <div id="dashView" style="display:none">
+    <div class="back" id="backWrap" style="display:none"><button id="backBtn">← Tutti i clienti</button></div>
+    <div class="topline">
+      <h2 id="dTitle"></h2>
+      <span class="agg" id="dAgg"></span>
+    </div>
+    <div class="tiles" id="dTiles"></div>
+    <div class="grid2">
+      <div class="panel">
+        <h3>Funnel <span class="n">— dal primo invito alla call</span></h3>
+        <div id="dFunnel"></div>
+      </div>
+      <div class="panel">
+        <h3>Andamento <span class="n">— inviti e accettazioni per giorno</span></h3>
+        <div class="chart-wrap" id="dChartWrap">
+          <div id="dChart"></div>
+          <div class="tooltip" id="dTip"></div>
+        </div>
+        <div class="legend" id="dLegend"></div>
+      </div>
+    </div>
+    <div class="panel" style="margin-bottom:16px">
+      <h3>Risposte ricevute <span class="n" id="dRispN"></span></h3>
+      <div class="table-scroll" id="dRisposte"></div>
+    </div>
+    <div class="panel">
+      <h3>Diario attività <span class="n">— cosa è stato fatto giorno per giorno</span></h3>
+      <div class="table-scroll" id="dLog"></div>
+    </div>
+  </div>
+</main>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script>
+/* ================= tema ================= */
+const themeBtn = document.getElementById('themeBtn');
+const savedTheme = localStorage.getItem('theme');
+if (savedTheme) document.documentElement.dataset.theme = savedTheme;
+themeBtn.onclick = () => {
+  const cur = document.documentElement.dataset.theme ||
+    (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  const next = cur === 'dark' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = next;
+  localStorage.setItem('theme', next);
+  if (window.__lastRender) window.__lastRender();
+};
+
+/* ================= firebase ================= */
+if (typeof FIREBASE_CONFIG === 'undefined' || !FIREBASE_CONFIG.apiKey || FIREBASE_CONFIG.apiKey.startsWith('INCOLLA')) {
+  document.getElementById('loading').style.display = 'block';
+  document.getElementById('loading').textContent =
+    'Configurazione mancante: compila firebase-config.js con i dati del progetto Firebase (vedi SETUP.md).';
+  throw new Error('config mancante');
+}
+firebase.initializeApp(FIREBASE_CONFIG);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+/* ================= viste ================= */
+const $ = id => document.getElementById(id);
+const views = ['loginView', 'loading', 'adminView', 'dashView'];
+function show(v) { views.forEach(x => $(x).style.display = x === v ? 'block' : 'none'); }
+
+/* ================= login ================= */
+let firstAccessMode = false;
+function setMode(first) {
+  firstAccessMode = first;
+  $('loginTitle').textContent = first ? 'Crea la tua password' : 'Accedi';
+  $('loginHint').textContent = first
+    ? 'Inserisci la tua email e scegli una password (minimo 8 caratteri). La password è solo tua: nessuno può vederla, nemmeno noi.'
+    : 'Entra con la tua email e la password che hai creato.';
+  $('pw2Field').style.display = first ? 'block' : 'none';
+  $('mainBtn').textContent = first ? 'Crea password ed entra' : 'Accedi';
+  $('firstBtn').style.display = first ? 'none' : 'block';
+  $('resetBtn').style.display = first ? 'none' : 'block';
+  $('backLoginBtn').style.display = first ? 'block' : 'none';
+  msg('');
+}
+function msg(t, ok) {
+  const m = $('loginMsg');
+  m.className = 'msg' + (t ? (ok ? ' ok' : ' err') : '');
+  m.textContent = t;
+}
+const ERRORI = {
+  'auth/invalid-credential': 'Email o password sbagliata.',
+  'auth/wrong-password': 'Password sbagliata.',
+  'auth/user-not-found': 'Nessun account con questa email. Se è il tuo primo accesso, usa "Crea la tua password".',
+  'auth/email-already-in-use': 'Esiste già un account con questa email: usa "Accedi" oppure "Password dimenticata".',
+  'auth/weak-password': 'Password troppo debole: usa almeno 8 caratteri.',
+  'auth/invalid-email': 'Email non valida.',
+  'auth/too-many-requests': 'Troppi tentativi: riprova tra qualche minuto.',
+};
+$('firstBtn').onclick = () => setMode(true);
+$('backLoginBtn').onclick = () => setMode(false);
+$('mainBtn').onclick = async () => {
+  const email = $('inEmail').value.trim().toLowerCase();
+  const pw = $('inPw').value;
+  if (!email || !pw) return msg('Inserisci email e password.');
+  try {
+    if (firstAccessMode) {
+      if (pw.length < 8) return msg('La password deve avere almeno 8 caratteri.');
+      if (pw !== $('inPw2').value) return msg('Le due password non coincidono.');
+      await auth.createUserWithEmailAndPassword(email, pw);
+    } else {
+      await auth.signInWithEmailAndPassword(email, pw);
+    }
+  } catch (e) {
+    msg(ERRORI[e.code] || 'Errore: ' + (e.message || e.code));
+  }
+};
+$('inPw').addEventListener('keydown', e => { if (e.key === 'Enter') $('mainBtn').click(); });
+$('resetBtn').onclick = async () => {
+  const email = $('inEmail').value.trim().toLowerCase();
+  if (!email) return msg('Scrivi prima la tua email nel campo sopra.');
+  try {
+    await auth.sendPasswordResetEmail(email);
+    msg('Ti abbiamo mandato una email per creare una nuova password. Controlla la posta (anche lo spam).', true);
+  } catch (e) { msg(ERRORI[e.code] || 'Errore: ' + e.code); }
+};
+$('logoutBtn').onclick = () => auth.signOut();
+
+/* ================= dati ================= */
+let isAdmin = false, allClients = [], currentClient = null;
+
+auth.onAuthStateChanged(async user => {
+  if (!user) {
+    $('userEmail').textContent = '';
+    $('logoutBtn').style.display = 'none';
+    setMode(false);
+    show('loginView');
+    return;
+  }
+  $('userEmail').textContent = user.email;
+  $('logoutBtn').style.display = 'inline-block';
+  show('loading');
+  try {
+    // admin? (la lettura riesce solo se la mia email è in config/admins)
+    let adminEmails = null;
+    try {
+      const adm = await db.collection('config').doc('admins').get();
+      adminEmails = adm.exists ? adm.data().emails : null;
+    } catch (_) { /* non admin */ }
+    isAdmin = !!(adminEmails && adminEmails.includes(user.email.toLowerCase()));
+
+    if (isAdmin) {
+      const snap = await db.collection('clienti').get();
+      allClients = snap.docs.map(d => d.data()).sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
+      renderAdmin();
+    } else {
+      const acc = await db.collection('accessi').doc(user.email.toLowerCase()).get();
+      if (!acc.exists) {
+        show('loginView');
+        msg('Questa email non è ancora abilitata alla dashboard. Scrivi a academy@davidecaiazzo.it per l\'attivazione.');
+        await auth.signOut();
+        return;
+      }
+      const doc = await db.collection('clienti').doc(acc.data().slug).get();
+      if (!doc.exists) { show('loginView'); msg('Dati non ancora disponibili: riprova più tardi.'); return; }
+      currentClient = doc.data();
+      renderClient(currentClient, false);
+    }
+  } catch (e) {
+    show('loginView');
+    msg('Errore di caricamento dati: ' + (e.message || e.code));
+  }
+});
+
+/* ================= render admin ================= */
+function renderAdmin() {
+  const tot = allClients.reduce((a, c) => ({
+    inviti: a.inviti + (c.kpi?.inviti_totali || 0),
+    risposte: a.risposte + (c.kpi?.risposte || 0),
+    call: a.call + (c.kpi?.call_fissate || 0),
+  }), { inviti: 0, risposte: 0, call: 0 });
+  $('adminAgg').textContent = `${allClients.length} clienti · ${tot.inviti} inviti · ${tot.risposte} risposte · ${tot.call} call`;
+  $('clientCards').innerHTML = '';
+  allClients.forEach((c, i) => {
+    const el = document.createElement('div');
+    el.className = 'card client-card';
+    el.innerHTML = `
+      <h3>${esc(c.nome)}</h3>
+      <div class="b">${esc(c.brand || '')} · agg. ${dataIt(c.aggiornato)}</div>
+      <div class="mini">
+        <div><div class="mv">${c.kpi?.inviti_totali ?? 0}</div><div class="mk">Inviti</div></div>
+        <div><div class="mv">${c.kpi?.accettati ?? 0}</div><div class="mk">Accettati</div></div>
+        <div><div class="mv">${c.kpi?.risposte ?? 0}</div><div class="mk">Risposte</div></div>
+        <div><div class="mv">${c.kpi?.call_fissate ?? 0}</div><div class="mk">Call</div></div>
+      </div>`;
+    el.onclick = () => { currentClient = allClients[i]; renderClient(currentClient, true); };
+    $('clientCards').appendChild(el);
+  });
+  show('adminView');
+}
+$('backBtn').onclick = () => renderAdmin();
+
+/* ================= render cliente ================= */
+function renderClient(c, fromAdmin) {
+  window.__lastRender = () => renderClient(c, fromAdmin);
+  show('dashView');
+  $('backWrap').style.display = fromAdmin ? 'block' : 'none';
+  $('dTitle').textContent = c.nome + (c.brand ? ' — ' + c.brand : '');
+  $('dAgg').textContent = 'aggiornato ' + dataIt(c.aggiornato);
+  const k = c.kpi || {};
+  const tiles = [
+    ['Inviti mandati', k.inviti_totali, null],
+    ['Collegamenti accettati', k.accettati, pct(k.tasso_accettazione_maturi, 'accettazione')],
+    ['Persone contattate', k.messaggiati, null],
+    ['Risposte ricevute', k.risposte, pct(k.tasso_risposta, 'risposta')],
+    ['Risposte interessate', k.risposte_positive, null],
+    ['Call fissate', k.call_fissate, null],
+  ];
+  $('dTiles').innerHTML = tiles.map(([lbl, v, d]) => `
+    <div class="tile"><div class="k">${lbl}</div><div class="v">${v ?? 0}</div>${d ? `<div class="d">${d}</div>` : ''}</div>
+  `).join('');
+
+  // funnel — barre ordinali, blu chiaro→scuro
+  const steps = ['--seq-250', '--seq-300', '--seq-400', '--seq-500', '--seq-600'];
+  const f = c.funnel || [];
+  const max = Math.max(1, ...f.map(x => x.v));
+  $('dFunnel').innerHTML = f.length ? f.map((x, i) => `
+    <div class="funnel-row">
+      <div class="lbl">${esc(x.fase)}</div>
+      <div class="bar-track"><div class="bar" style="width:${Math.max(1.5, x.v / max * 100)}%;background:var(${steps[Math.min(i, steps.length - 1)]})"></div></div>
+      <div class="val">${x.v}</div>
+    </div>`).join('') : '<div class="empty">Ancora nessun dato: il funnel si riempie con i primi inviti.</div>';
+
+  drawLineChart(c.serie_giornaliera || []);
+  renderRisposte(c.registro_risposte || []);
+  renderLog(c.log || []);
+}
+
+function pct(v, nome) { return (v === null || v === undefined) ? null : `tasso di ${nome}: ${v}%`; }
+
+function renderRisposte(rows) {
+  $('dRispN').textContent = rows.length ? `— ${rows.length} totali` : '';
+  if (!rows.length) { $('dRisposte').innerHTML = '<div class="empty">Nessuna risposta ancora: è normale nelle prime settimane.</div>'; return; }
+  $('dRisposte').innerHTML = `<table><thead><tr><th>Chi</th><th>Canale</th><th>Esito</th><th>Seguito</th></tr></thead><tbody>` +
+    rows.map(r => `<tr>
+      <td><strong>${esc(r.chi)}</strong>${r.azienda ? `<br><span style="color:var(--muted);font-size:12px">${esc(r.azienda)}</span>` : ''}</td>
+      <td>${esc(r.canale || '')}</td>
+      <td><span class="pill ${r.tipo === 'positiva' ? 'pos' : r.tipo === 'negativa' ? 'neg' : 'neu'}">${esc(r.tipo || '—')}</span></td>
+      <td>${esc(r.seguito || '')}</td></tr>`).join('') + '</tbody></table>';
+}
+
+function renderLog(rows) {
+  if (!rows.length) { $('dLog').innerHTML = '<div class="empty">Il diario si riempie a ogni giornata di lavoro.</div>'; return; }
+  $('dLog').innerHTML = `<table><thead><tr><th>Data</th><th>Inviti</th><th>Messaggi</th><th>Accettazioni</th><th>Risposte</th><th>Note</th></tr></thead><tbody>` +
+    rows.map(r => `<tr>
+      <td style="white-space:nowrap">${dataIt(r.data)}</td>
+      <td>${r.inviti ?? 0}</td><td>${r.dm ?? 0}</td><td>${r.accettazioni ?? 0}</td><td>${r.risposte ?? 0}</td>
+      <td style="color:var(--text-secondary)">${esc(r.note || '')}</td></tr>`).join('') + '</tbody></table>';
+}
+
+/* ================= line chart (SVG) ================= */
+function cssVar(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+function drawLineChart(serie) {
+  const wrap = $('dChart'), tip = $('dTip');
+  if (!serie.length) {
+    wrap.innerHTML = '<div class="empty">Ancora nessun andamento da mostrare.</div>';
+    $('dLegend').innerHTML = ''; return;
+  }
+  const W = 460, H = 190, PL = 30, PR = 22, PT = 12, PB = 26;
+  const xs = serie.map(d => d.data);
+  const maxY = Math.max(2, ...serie.map(d => Math.max(d.inviti || 0, d.accettati || 0)));
+  const x = i => PL + i * (W - PL - PR) / Math.max(1, xs.length - 1);
+  const y = v => PT + (H - PT - PB) * (1 - v / maxY);
+  const c1 = cssVar('--series-1') || '#2a78d6', c2 = '#1baf7a';
+  const ink2 = cssVar('--text-secondary'), gridC = cssVar('--grid'), baseC = cssVar('--baseline'), muted = cssVar('--muted');
+  const path = key => serie.map((d, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(d[key] || 0).toFixed(1)}`).join('');
+  const ticks = [0, Math.round(maxY / 2), maxY];
+  let g = `<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block">`;
+  ticks.forEach(t => {
+    g += `<line x1="${PL}" x2="${W - PR}" y1="${y(t)}" y2="${y(t)}" stroke="${gridC}" stroke-width="1"/>`;
+    g += `<text x="${PL - 6}" y="${y(t) + 4}" text-anchor="end" font-size="10" fill="${muted}">${t}</text>`;
+  });
+  g += `<line x1="${PL}" x2="${W - PR}" y1="${y(0)}" y2="${y(0)}" stroke="${baseC}" stroke-width="1"/>`;
+  const lblStep = Math.ceil(xs.length / 6);
+  xs.forEach((d, i) => {
+    if (i % lblStep === 0 || i === xs.length - 1)
+      g += `<text x="${x(i)}" y="${H - 8}" text-anchor="middle" font-size="10" fill="${muted}">${d.slice(8)}/${d.slice(5, 7)}</text>`;
+  });
+  g += `<path d="${path('inviti')}" fill="none" stroke="${c1}" stroke-width="2" stroke-linejoin="round"/>`;
+  g += `<path d="${path('accettati')}" fill="none" stroke="${c2}" stroke-width="2" stroke-linejoin="round"/>`;
+  serie.forEach((d, i) => {
+    g += `<circle data-i="${i}" cx="${x(i)}" cy="${y(d.inviti || 0)}" r="4" fill="${c1}" stroke="${cssVar('--surface-1')}" stroke-width="2"/>`;
+    g += `<circle data-i="${i}" cx="${x(i)}" cy="${y(d.accettati || 0)}" r="4" fill="${c2}" stroke="${cssVar('--surface-1')}" stroke-width="2"/>`;
+  });
+  g += `</svg>`;
+  wrap.innerHTML = g;
+  $('dLegend').innerHTML =
+    `<span><span class="sw" style="background:${c1}"></span>Inviti</span>` +
+    `<span><span class="sw" style="background:${c2}"></span>Accettazioni</span>`;
+  const svg = wrap.querySelector('svg');
+  svg.addEventListener('mousemove', e => {
+    const r = svg.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width * W;
+    let best = 0, bd = 1e9;
+    xs.forEach((_, i) => { const d = Math.abs(x(i) - px); if (d < bd) { bd = d; best = i; } });
+    const d = serie[best];
+    tip.style.display = 'block';
+    tip.innerHTML = `<strong>${dataIt(d.data)}</strong><br>Inviti: ${d.inviti || 0} · Accettazioni: ${d.accettati || 0}`;
+    const wr = $('dChartWrap').getBoundingClientRect();
+    tip.style.left = Math.min(e.clientX - wr.left + 12, wr.width - 170) + 'px';
+    tip.style.top = (e.clientY - wr.top - 40) + 'px';
+  });
+  svg.addEventListener('mouseleave', () => tip.style.display = 'none');
+}
+
+/* ================= util ================= */
+function esc(s) { return String(s ?? '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])); }
+function dataIt(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  if (isNaN(d)) return iso;
+  return d.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+</script>
+</body>
+</html>
