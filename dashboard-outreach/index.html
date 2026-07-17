@@ -107,6 +107,8 @@ main { max-width: 1080px; margin: 0 auto; padding: 24px 22px 60px; }
 .panel { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
 .panel h3 { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
 .panel h3 .n { color: var(--muted); font-weight: 400; }
+.panel.urgent { border-color: var(--critical); box-shadow: 0 0 0 1px var(--critical); }
+.panel.urgent h3 .n { color: var(--critical); font-weight: 600; }
 
 /* funnel */
 .funnel-row { display: grid; grid-template-columns: 110px 1fr 52px; align-items: center; gap: 10px; margin-bottom: 8px; }
@@ -228,7 +230,7 @@ svg text { font-family: inherit; }
         <div class="legend" id="dLegend"></div>
       </div>
     </div>
-    <div class="panel" style="margin-bottom:16px">
+    <div class="panel" id="dMsgPanel" style="margin-bottom:16px">
       <h3>Messaggi da approvare <span class="n" id="dMsgN"></span></h3>
       <div id="dMsgToast" class="msg ok" style="display:none;margin-bottom:10px"></div>
       <div id="dMsgQueue"></div>
@@ -508,6 +510,7 @@ function stopWatchCoda() {
 
 function renderMsgQueue(slug, items) {
   $('dMsgN').textContent = items.length ? `— ${items.length} in coda` : '';
+  $('dMsgPanel').classList.toggle('urgent', items.length > 0);
   const box = $('dMsgQueue');
   if (!items.length) { box.innerHTML = '<div class="empty">Nessun messaggio in coda al momento.</div>'; return; }
 
