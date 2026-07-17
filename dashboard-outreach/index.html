@@ -499,14 +499,14 @@ function renderMsgQueue(slug, items) {
     } else if (isApprovatore) {
       azioni = `<button class="primary" data-act="approva">Approva</button>
         <button data-act="modinvia">Modifica e invia</button>
-        <button class="ghost" data-act="cancella">Cancella</button>`;
+        <button class="ghost" data-act="cancella">Escludi lead</button>`;
     } else if (!isAdmin) {
       azioni = it.stato === 'in_coda'
         ? `<button class="primary" data-act="conferma">Conferma</button>
            <button data-act="modifica">Modifica</button>
-           <button class="ghost" data-act="cancella">Cancella</button>`
+           <button class="ghost" data-act="cancella">Escludi lead</button>`
         : `<span class="pill pos">Grazie, ricevuto — in attesa di approvazione</span>
-           <button class="ghost" data-act="cancella">Cancella</button>`;
+           <button class="ghost" data-act="cancella">Escludi lead</button>`;
     } else {
       azioni = `<span class="pill neu">${esc(it.stato)}</span>`;
     }
@@ -533,7 +533,7 @@ function renderMsgQueue(slug, items) {
           if (act === 'approva') await ref.update({ stato: 'approvato_max', approvato_max_il: now });
           if (act === 'modinvia') await ref.update({ stato: 'approvato_max', messaggio_cliente: ta.value, approvato_max_il: now });
           if (act === 'urgente') await ref.update({ invio_urgente: true });
-          if (act === 'cancella') showMsgToast(`Grazie, richiesta per ${nome} annullata.`);
+          if (act === 'cancella') showMsgToast(`${nome} escluso: non verrà più ricontattato.`);
           // nessun reload manuale: watchCoda() è live, si aggiorna da sola
         } catch (e) { alert('Errore: ' + (e.message || e.code)); }
       };
