@@ -147,7 +147,7 @@ svg text { font-family: inherit; }
 .client-card:hover { transform: translateY(-2px); }
 .client-card h3 { font-size: 16px; margin-bottom: 2px; }
 .client-card .b { color: var(--muted); font-size: 13px; margin-bottom: 12px; }
-.client-card .mini { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px 10px; }
+.client-card .mini { display: flex; gap: 18px; }
 .client-card .mini div { text-align: left; }
 .client-card .mini .mv { font-size: 22px; font-weight: 700; }
 .client-card .mini .mk { font-size: 11.5px; color: var(--muted); }
@@ -370,9 +370,9 @@ function renderAdmin() {
   const tot = allClients.reduce((a, c) => ({
     inviti: a.inviti + (c.kpi?.inviti_totali || 0),
     risposte: a.risposte + (c.kpi?.risposte || 0),
-    lead: a.lead + (c.kpi?.risposte_positive || 0),
-  }), { inviti: 0, risposte: 0, lead: 0 });
-  $('adminAgg').textContent = `${allClients.length} clienti · ${tot.inviti} inviti · ${tot.risposte} risposte · ${tot.lead} lead`;
+    call: a.call + (c.kpi?.call_fissate || 0),
+  }), { inviti: 0, risposte: 0, call: 0 });
+  $('adminAgg').textContent = `${allClients.length} clienti · ${tot.inviti} inviti · ${tot.risposte} risposte · ${tot.call} call`;
   $('clientCards').innerHTML = '';
   allClients.forEach((c, i) => {
     const el = document.createElement('div');
@@ -383,10 +383,8 @@ function renderAdmin() {
       <div class="mini">
         <div><div class="mv">${c.kpi?.inviti_totali ?? 0}</div><div class="mk">Inviti</div></div>
         <div><div class="mv">${c.kpi?.accettati ?? 0}</div><div class="mk">Accettati</div></div>
-        <div><div class="mv">${(c.kpi?.messaggi_totali ?? c.kpi?.messaggiati) ?? 0}</div><div class="mk">Messaggi</div></div>
         <div><div class="mv">${c.kpi?.risposte ?? 0}</div><div class="mk">Risposte</div></div>
-        <div><div class="mv">${c.kpi?.da_approvare ?? 0}</div><div class="mk">Da approvare</div></div>
-        <div><div class="mv">${c.kpi?.risposte_positive ?? 0}</div><div class="mk">Lead</div></div>
+        <div><div class="mv">${c.kpi?.call_fissate ?? 0}</div><div class="mk">Call</div></div>
       </div>`;
     el.onclick = () => { currentClient = allClients[i]; renderClient(currentClient, true); };
     $('clientCards').appendChild(el);
@@ -404,12 +402,12 @@ function renderClient(c, fromAdmin) {
   $('dAgg').textContent = 'aggiornato ' + dataIt(c.aggiornato);
   const k = c.kpi || {};
   const tiles = [
-    ['Inviti', k.inviti_totali, 'richieste di collegamento inviate'],
-    ['Accettati', k.accettati, pct(k.tasso_accettazione_maturi, 'accettazione')],
-    ['Messaggi', k.messaggi_totali ?? k.messaggiati, 'messaggi inviati in totale'],
-    ['Risposte', k.risposte, pct(k.tasso_risposta, 'risposta')],
-    ['Da approvare', k.da_approvare, 'messaggi in attesa di conferma'],
-    ['Lead', k.risposte_positive, 'persone interessate'],
+    ['Inviti mandati', k.inviti_totali, null],
+    ['Collegamenti accettati', k.accettati, pct(k.tasso_accettazione_maturi, 'accettazione')],
+    ['Persone contattate', k.messaggiati, null],
+    ['Risposte ricevute', k.risposte, pct(k.tasso_risposta, 'risposta')],
+    ['Risposte interessate', k.risposte_positive, null],
+    ['Call fissate', k.call_fissate, null],
   ];
   $('dTiles').innerHTML = tiles.map(([lbl, v, d]) => `
     <div class="tile"><div class="k">${lbl}</div><div class="v">${v ?? 0}</div>${d ? `<div class="d">${d}</div>` : ''}</div>
