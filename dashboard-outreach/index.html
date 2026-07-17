@@ -422,17 +422,40 @@ function renderAdmin() {
         <div><div class="mv">${(c.kpi?.messaggi_totali ?? c.kpi?.messaggiati) ?? 0}</div><div class="mk">Messaggi</div></div>
         <div><div class="mv">${c.kpi?.risposte ?? 0}</div><div class="mk">Risposte</div></div>
         <div><div class="mv">${c.kpi?.risposte_positive ?? 0}</div><div class="mk">Lead</div></div>
-        <div><div class="mv"${(c.kpi?.da_approvare ?? 0) > 0 ? ' style="color:var(--critical)"' : ''}>${c.kpi?.da_approvare ?? 0}</div><div class="mk">Da approvare</div></div>
+        <div><div class="mv" data-daapprovare="${esc(c.slug)}">${c.kpi?.da_approvare ?? 0}</div><div class="mk">Da approvare</div></div>
       </div>`;
     el.onclick = () => { currentClient = allClients[i]; renderClient(currentClient, true); };
     $('clientCards').appendChild(el);
   });
   show('adminView');
+  watchAdminDaApprovare();
+}
+
+/* conteggio "Da approvare" live sulle card admin, un listener per cliente */
+let __adminCodaUnsubs = [];
+function stopAdminDaApprovare() {
+  __adminCodaUnsubs.forEach(u => u());
+  __adminCodaUnsubs = [];
+}
+function watchAdminDaApprovare() {
+  stopAdminDaApprovare();
+  allClients.forEach(c => {
+    const unsub = db.collection('clienti').doc(c.slug).collection('coda_messaggi')
+      .where('stato', 'in', ['in_coda', 'confermato_cliente', 'modificato_cliente'])
+      .onSnapshot(snap => {
+        const el = document.querySelector(`[data-daapprovare="${CSS.escape(c.slug)}"]`);
+        if (!el) return;
+        el.textContent = snap.size;
+        el.style.color = snap.size > 0 ? 'var(--critical)' : '';
+      }, () => {});
+    __adminCodaUnsubs.push(unsub);
+  });
 }
 $('backBtn').onclick = () => renderAdmin();
 
 /* ================= render cliente ================= */
 function renderClient(c, fromAdmin) {
+  stopAdminDaApprovare();
   window.__lastRender = () => renderClient(c, fromAdmin);
   show('dashView');
   $('backWrap').style.display = fromAdmin ? 'block' : 'none';
