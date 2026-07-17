@@ -364,7 +364,8 @@ auth.onAuthStateChanged(async user => {
       const apr = await db.collection('config').doc('approvatori_messaggi').get();
       approvatoreEmails = apr.exists ? apr.data().emails : null;
     } catch (_) { /* non approvatore */ }
-    isApprovatore = !!(approvatoreEmails && approvatoreEmails.includes(user.email.toLowerCase()));
+    // Davide (isAdmin, super admin) approva sempre; la lista aggiunge chi non è admin (es. Max, admin cliente)
+    isApprovatore = isAdmin || !!(approvatoreEmails && approvatoreEmails.includes(user.email.toLowerCase()));
 
     if (isAdmin) {
       const snap = await db.collection('clienti').get();
