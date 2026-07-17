@@ -151,6 +151,18 @@ svg text { font-family: inherit; }
 .client-card .mini div { text-align: left; }
 .client-card .mini .mv { font-size: 22px; font-weight: 700; }
 .client-card .mini .mk { font-size: 11.5px; color: var(--muted); }
+/* coda messaggi da approvare */
+.msgq-row { display: grid; grid-template-columns: 160px 1fr auto; gap: 12px; align-items: start; padding: 10px 0; border-bottom: 1px solid var(--grid); }
+.msgq-row:last-child { border-bottom: none; }
+.msgq-row textarea {
+  width: 100%; min-height: 64px; font: inherit; padding: 8px 10px; border-radius: 8px;
+  border: 1px solid var(--baseline); background: var(--page); color: var(--text-primary); resize: vertical;
+}
+.msgq-row textarea[readonly] { color: var(--text-secondary); background: var(--surface-1); }
+.msgq-azioni { display: flex; flex-direction: column; gap: 6px; min-width: 130px; }
+.msgq-azioni button { font-size: 12.5px; padding: 6px 10px; }
+@media (max-width: 640px) { .msgq-row { grid-template-columns: 1fr; } }
+
 .back { margin-bottom: 14px; }
 .empty { color: var(--muted); font-size: 13.5px; padding: 8px 0; }
 #loading { text-align: center; color: var(--muted); padding: 60px 0; }
@@ -215,6 +227,10 @@ svg text { font-family: inherit; }
         </div>
         <div class="legend" id="dLegend"></div>
       </div>
+    </div>
+    <div class="panel" style="margin-bottom:16px">
+      <h3>Messaggi da approvare <span class="n" id="dMsgN"></span></h3>
+      <div id="dMsgQueue"></div>
     </div>
     <div class="panel" style="margin-bottom:16px">
       <h3>Risposte ricevute <span class="n" id="dRispN"></span></h3>
@@ -320,7 +336,7 @@ $('resetBtn').onclick = async () => {
 $('logoutBtn').onclick = () => auth.signOut();
 
 /* ================= dati ================= */
-let isAdmin = false, allClients = [], currentClient = null;
+let isAdmin = false, isApprovatore = false, allClients = [], currentClient = null;
 
 auth.onAuthStateChanged(async user => {
   if (!user) {
@@ -341,6 +357,14 @@ auth.onAuthStateChanged(async user => {
       adminEmails = adm.exists ? adm.data().emails : null;
     } catch (_) { /* non admin */ }
     isAdmin = !!(adminEmails && adminEmails.includes(user.email.toLowerCase()));
+
+    // approvatore messaggi (Task C)? stesso schema di isAdmin, elenco a parte
+    let approvatoreEmails = null;
+    try {
+      const apr = await db.collection('config').doc('approvatori_messaggi').get();
+      approvatoreEmails = apr.exists ? apr.data().emails : null;
+    } catch (_) { /* non approvatore */ }
+    isApprovatore = !!(approvatoreEmails && approvatoreEmails.includes(user.email.toLowerCase()));
 
     if (isAdmin) {
       const snap = await db.collection('clienti').get();
@@ -427,6 +451,72 @@ function renderClient(c, fromAdmin) {
   drawLineChart(c.serie_giornaliera || []);
   renderRisposte(c.registro_risposte || []);
   renderLog(c.log || []);
+  loadCoda(c.slug).then(items => renderMsgQueue(c.slug, items));
+}
+
+/* ================= coda messaggi da approvare (Task C) ================= */
+async function loadCoda(slug) {
+  try {
+    const snap = await db.collection('clienti').doc(slug).collection('coda_messaggi')
+      .where('stato', 'in', ['in_coda', 'confermato_cliente', 'modificato_cliente', 'approvato_max']).get();
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch (e) { return []; }
+}
+
+function renderMsgQueue(slug, items) {
+  $('dMsgN').textContent = items.length ? `— ${items.length} in coda` : '';
+  const box = $('dMsgQueue');
+  if (!items.length) { box.innerHTML = '<div class="empty">Nessun messaggio in coda al momento.</div>'; return; }
+
+  box.innerHTML = items.map(it => {
+    const testo = it.messaggio_cliente ?? it.messaggio_originale ?? '';
+    const editabile = it.stato !== 'approvato_max' && (it.stato === 'in_coda' || isApprovatore);
+    let azioni = '';
+    if (it.stato === 'approvato_max') {
+      azioni = isApprovatore
+        ? (it.invio_urgente ? '<span class="pill pos">Invio urgente richiesto</span>' : '<button data-act="urgente">Invia ora</button>')
+        : '<span class="pill pos">Approvato — in attesa di invio</span>';
+    } else if (isApprovatore) {
+      azioni = `<button class="primary" data-act="approva">Approva</button>
+        <button data-act="modinvia">Modifica e invia</button>
+        <button class="ghost" data-act="cancella">Cancella</button>`;
+    } else if (!isAdmin) {
+      azioni = it.stato === 'in_coda'
+        ? `<button class="primary" data-act="conferma">Conferma</button>
+           <button data-act="modifica">Modifica</button>
+           <button class="ghost" data-act="cancella">Cancella</button>`
+        : `<span class="pill neu">In attesa di approvazione</span>
+           <button class="ghost" data-act="cancella">Cancella</button>`;
+    } else {
+      azioni = `<span class="pill neu">${esc(it.stato)}</span>`;
+    }
+    return `<div class="msgq-row" data-id="${esc(it.id)}">
+      <div><strong>${esc(it.nome || '')}</strong>${it.ruolo ? `<br><span style="color:var(--muted);font-size:12px">${esc(it.ruolo)}</span>` : ''}</div>
+      <textarea ${editabile ? '' : 'readonly'}>${esc(testo)}</textarea>
+      <div class="msgq-azioni">${azioni}</div>
+    </div>`;
+  }).join('');
+
+  box.querySelectorAll('.msgq-row').forEach(row => {
+    const id = row.dataset.id;
+    const ta = row.querySelector('textarea');
+    row.querySelectorAll('button[data-act]').forEach(btn => {
+      btn.onclick = async () => {
+        const ref = db.collection('clienti').doc(slug).collection('coda_messaggi').doc(id);
+        const now = new Date().toISOString();
+        try {
+          const act = btn.dataset.act;
+          if (act === 'conferma') await ref.update({ stato: 'confermato_cliente' });
+          if (act === 'modifica') await ref.update({ stato: 'modificato_cliente', messaggio_cliente: ta.value, modificato_cliente_il: now });
+          if (act === 'cancella') await ref.update({ stato: 'cancellato', cancellato_il: now });
+          if (act === 'approva') await ref.update({ stato: 'approvato_max', approvato_max_il: now });
+          if (act === 'modinvia') await ref.update({ stato: 'approvato_max', messaggio_cliente: ta.value, approvato_max_il: now });
+          if (act === 'urgente') await ref.update({ invio_urgente: true });
+          renderMsgQueue(slug, await loadCoda(slug));
+        } catch (e) { alert('Errore: ' + (e.message || e.code)); }
+      };
+    });
+  });
 }
 
 function pct(v, nome) { return (v === null || v === undefined) ? null : `tasso di ${nome}: ${v}%`; }
