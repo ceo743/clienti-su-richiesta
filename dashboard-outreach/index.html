@@ -370,7 +370,16 @@ auth.onAuthStateChanged(async user => {
     if (isAdmin) {
       const snap = await db.collection('clienti').get();
       allClients = snap.docs.map(d => d.data()).sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
-      renderAdmin();
+      // admin che è ANCHE cliente (es. Davide/davide-caiazzo): atterra sulla SUA scheda, non sulla lista.
+      // "← Tutti i clienti" (già presente) resta il modo per passare alla vista admin.
+      let mySlug = null;
+      try {
+        const acc = await db.collection('accessi').doc(user.email.toLowerCase()).get();
+        mySlug = acc.exists ? acc.data().slug : null;
+      } catch (_) { /* nessun accesso cliente per questa email */ }
+      const mine = mySlug ? allClients.find(c => c.slug === mySlug) : null;
+      if (mine) { currentClient = mine; renderClient(mine, true); }
+      else renderAdmin();
     } else {
       const acc = await db.collection('accessi').doc(user.email.toLowerCase()).get();
       if (!acc.exists) {
