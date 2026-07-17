@@ -409,8 +409,8 @@ function renderAdmin() {
         <div><div class="mv">${c.kpi?.accettati ?? 0}</div><div class="mk">Accettati</div></div>
         <div><div class="mv">${(c.kpi?.messaggi_totali ?? c.kpi?.messaggiati) ?? 0}</div><div class="mk">Messaggi</div></div>
         <div><div class="mv">${c.kpi?.risposte ?? 0}</div><div class="mk">Risposte</div></div>
-        <div><div class="mv">${c.kpi?.da_approvare ?? 0}</div><div class="mk">Da approvare</div></div>
         <div><div class="mv">${c.kpi?.risposte_positive ?? 0}</div><div class="mk">Lead</div></div>
+        <div><div class="mv"${(c.kpi?.da_approvare ?? 0) > 0 ? ' style="color:var(--critical)"' : ''}>${c.kpi?.da_approvare ?? 0}</div><div class="mk">Da approvare</div></div>
       </div>`;
     el.onclick = () => { currentClient = allClients[i]; renderClient(currentClient, true); };
     $('clientCards').appendChild(el);
