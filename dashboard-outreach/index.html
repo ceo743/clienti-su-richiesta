@@ -230,6 +230,7 @@ svg text { font-family: inherit; }
     </div>
     <div class="panel" style="margin-bottom:16px">
       <h3>Messaggi da approvare <span class="n" id="dMsgN"></span></h3>
+      <div id="dMsgToast" class="msg ok" style="display:none;margin-bottom:10px"></div>
       <div id="dMsgQueue"></div>
     </div>
     <div class="panel" style="margin-bottom:16px">
@@ -504,12 +505,12 @@ function renderMsgQueue(slug, items) {
         ? `<button class="primary" data-act="conferma">Conferma</button>
            <button data-act="modifica">Modifica</button>
            <button class="ghost" data-act="cancella">Cancella</button>`
-        : `<span class="pill neu">In attesa di approvazione</span>
+        : `<span class="pill pos">Grazie, ricevuto — in attesa di approvazione</span>
            <button class="ghost" data-act="cancella">Cancella</button>`;
     } else {
       azioni = `<span class="pill neu">${esc(it.stato)}</span>`;
     }
-    return `<div class="msgq-row" data-id="${esc(it.id)}">
+    return `<div class="msgq-row" data-id="${esc(it.id)}" data-nome="${esc(it.nome || '')}">
       <div><strong>${esc(it.nome || '')}</strong>${it.ruolo ? `<br><span style="color:var(--muted);font-size:12px">${esc(it.ruolo)}</span>` : ''}</div>
       <textarea ${editabile ? '' : 'readonly'}>${esc(testo)}</textarea>
       <div class="msgq-azioni">${azioni}</div>
@@ -518,6 +519,7 @@ function renderMsgQueue(slug, items) {
 
   box.querySelectorAll('.msgq-row').forEach(row => {
     const id = row.dataset.id;
+    const nome = row.dataset.nome;
     const ta = row.querySelector('textarea');
     row.querySelectorAll('button[data-act]').forEach(btn => {
       btn.onclick = async () => {
@@ -531,11 +533,21 @@ function renderMsgQueue(slug, items) {
           if (act === 'approva') await ref.update({ stato: 'approvato_max', approvato_max_il: now });
           if (act === 'modinvia') await ref.update({ stato: 'approvato_max', messaggio_cliente: ta.value, approvato_max_il: now });
           if (act === 'urgente') await ref.update({ invio_urgente: true });
+          if (act === 'cancella') showMsgToast(`Grazie, richiesta per ${nome} annullata.`);
           // nessun reload manuale: watchCoda() è live, si aggiorna da sola
         } catch (e) { alert('Errore: ' + (e.message || e.code)); }
       };
     });
   });
+}
+
+let __toastTimer = null;
+function showMsgToast(text) {
+  const t = $('dMsgToast');
+  t.textContent = text;
+  t.style.display = 'block';
+  clearTimeout(__toastTimer);
+  __toastTimer = setTimeout(() => { t.style.display = 'none'; }, 4000);
 }
 
 function pct(v, nome) { return (v === null || v === undefined) ? null : `tasso di ${nome}: ${v}%`; }
