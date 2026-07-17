@@ -391,6 +391,7 @@ auth.onAuthStateChanged(async user => {
 
 /* ================= render admin ================= */
 function renderAdmin() {
+  stopWatchCoda();
   const tot = allClients.reduce((a, c) => ({
     inviti: a.inviti + (c.kpi?.inviti_totali || 0),
     risposte: a.risposte + (c.kpi?.risposte || 0),
@@ -453,16 +454,22 @@ function renderClient(c, fromAdmin) {
   drawLineChart(c.serie_giornaliera || []);
   renderRisposte(c.registro_risposte || []);
   renderLog(c.log || []);
-  loadCoda(c.slug).then(items => renderMsgQueue(c.slug, items));
+  watchCoda(c.slug);
 }
 
-/* ================= coda messaggi da approvare (Task C) ================= */
-async function loadCoda(slug) {
-  try {
-    const snap = await db.collection('clienti').doc(slug).collection('coda_messaggi')
-      .where('stato', 'in', ['in_coda', 'confermato_cliente', 'modificato_cliente', 'approvato_max']).get();
-    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  } catch (e) { return []; }
+/* ================= coda messaggi da approvare (Task C) — live ================= */
+let __codaUnsub = null;
+function watchCoda(slug) {
+  if (__codaUnsub) { __codaUnsub(); __codaUnsub = null; }
+  __codaUnsub = db.collection('clienti').doc(slug).collection('coda_messaggi')
+    .where('stato', 'in', ['in_coda', 'confermato_cliente', 'modificato_cliente', 'approvato_max'])
+    .onSnapshot(snap => {
+      const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderMsgQueue(slug, items);
+    }, () => { $('dMsgQueue').innerHTML = '<div class="empty">Errore nel caricare i messaggi.</div>'; });
+}
+function stopWatchCoda() {
+  if (__codaUnsub) { __codaUnsub(); __codaUnsub = null; }
 }
 
 function renderMsgQueue(slug, items) {
@@ -514,7 +521,7 @@ function renderMsgQueue(slug, items) {
           if (act === 'approva') await ref.update({ stato: 'approvato_max', approvato_max_il: now });
           if (act === 'modinvia') await ref.update({ stato: 'approvato_max', messaggio_cliente: ta.value, approvato_max_il: now });
           if (act === 'urgente') await ref.update({ invio_urgente: true });
-          renderMsgQueue(slug, await loadCoda(slug));
+          // nessun reload manuale: watchCoda() è live, si aggiorna da sola
         } catch (e) { alert('Errore: ' + (e.message || e.code)); }
       };
     });
