@@ -217,11 +217,11 @@ svg text { font-family: inherit; }
     </div>
     <div class="tiles" id="dTiles"></div>
     <div class="grid2">
-      <div class="panel">
+      <div class="panel" id="dFunnelPanel">
         <h3>Funnel <span class="n">— dal primo invito alla call</span></h3>
         <div id="dFunnel"></div>
       </div>
-      <div class="panel">
+      <div class="panel" id="dAndamentoPanel">
         <h3>Andamento <span class="n">— inviti e accettazioni per giorno</span></h3>
         <div class="chart-wrap" id="dChartWrap">
           <div id="dChart"></div>
@@ -239,7 +239,7 @@ svg text { font-family: inherit; }
       <h3>Lead esclusi <span class="n" id="dExclN"></span></h3>
       <div id="dExclQueue"></div>
     </div>
-    <div class="panel" style="margin-bottom:16px">
+    <div class="panel" id="dRispPanel" style="margin-bottom:16px">
       <h3>Risposte ricevute <span class="n" id="dRispN"></span></h3>
       <div class="table-scroll" id="dRisposte"></div>
     </div>
@@ -470,16 +470,27 @@ function renderClient(c, fromAdmin) {
   $('dAgg').textContent = 'aggiornato ' + dataIt(c.aggiornato);
   const k = c.kpi || {};
   const tiles = [
-    ['Inviti mandati', k.inviti_totali, null],
-    ['Collegamenti accettati', k.accettati, pct(k.tasso_accettazione_maturi, 'accettazione')],
-    ['Persone contattate', k.messaggiati, null],
-    ['Risposte ricevute', k.risposte, pct(k.tasso_risposta, 'risposta')],
-    ['Risposte interessate', k.risposte_positive, null],
-    ['Call fissate', k.call_fissate, null],
+    ['Inviti mandati', k.inviti_totali, null, 'dFunnelPanel'],
+    ['Collegamenti accettati', k.accettati, pct(k.tasso_accettazione_maturi, 'accettazione'), 'dAndamentoPanel'],
+    ['Persone contattate', k.messaggiati, null, 'dFunnelPanel'],
+    ['Risposte ricevute', k.risposte, pct(k.tasso_risposta, 'risposta'), 'dRispPanel'],
+    ['Risposte interessate', k.risposte_positive, null, 'dRispPanel'],
+    ['Call fissate', k.call_fissate, null, 'dRispPanel'],
   ];
   $('dTiles').innerHTML = tiles.map(([lbl, v, d]) => `
-    <div class="tile"><div class="k">${lbl}</div><div class="v">${v ?? 0}</div>${d ? `<div class="d">${d}</div>` : ''}</div>
+    <div class="tile" style="cursor:pointer"><div class="k">${lbl}</div><div class="v">${v ?? 0}</div>${d ? `<div class="d">${d}</div>` : ''}</div>
   `).join('');
+  $('dTiles').querySelectorAll('.tile').forEach((el, i) => {
+    const targetId = tiles[i][3];
+    el.onclick = () => {
+      const panel = $(targetId);
+      if (!panel) return;
+      panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      panel.style.transition = 'box-shadow .15s ease';
+      panel.style.boxShadow = '0 0 0 2px var(--accent)';
+      setTimeout(() => { panel.style.boxShadow = ''; }, 900);
+    };
+  });
 
   // funnel — barre ordinali, blu chiaro→scuro
   const steps = ['--seq-250', '--seq-300', '--seq-400', '--seq-500', '--seq-600'];
