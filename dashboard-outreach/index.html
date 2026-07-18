@@ -216,6 +216,13 @@ svg text { font-family: inherit; }
       <span class="agg" id="dAgg"></span>
     </div>
     <div class="tiles" id="dTiles"></div>
+    <div class="panel" id="dDetailPanel" style="display:none;margin-bottom:22px">
+      <h3 id="dDetailTitle" style="display:flex;align-items:center;justify-content:space-between">
+        <span></span>
+        <button class="ghost" id="dDetailClose">Chiudi ✕</button>
+      </h3>
+      <div class="table-scroll" id="dDetailBody"></div>
+    </div>
     <div class="grid2">
       <div class="panel" id="dFunnelPanel">
         <h3>Funnel <span class="n">— dal primo invito alla call</span></h3>
@@ -470,27 +477,44 @@ function renderClient(c, fromAdmin) {
   $('dAgg').textContent = 'aggiornato ' + dataIt(c.aggiornato);
   const k = c.kpi || {};
   const tiles = [
-    ['Inviti mandati', k.inviti_totali, null, 'dFunnelPanel'],
-    ['Collegamenti accettati', k.accettati, pct(k.tasso_accettazione_maturi, 'accettazione'), 'dAndamentoPanel'],
-    ['Persone contattate', k.messaggiati, null, 'dFunnelPanel'],
-    ['Risposte ricevute', k.risposte, pct(k.tasso_risposta, 'risposta'), 'dRispPanel'],
-    ['Risposte interessate', k.risposte_positive, null, 'dRispPanel'],
-    ['Call fissate', k.call_fissate, null, 'dRispPanel'],
+    ['Inviti mandati', k.inviti_totali, null, 'detail', 'dettaglio_inviti'],
+    ['Collegamenti accettati', k.accettati, pct(k.tasso_accettazione_maturi, 'accettazione'), 'detail', 'dettaglio_accettati'],
+    ['Persone contattate', k.messaggiati, null, 'detail', 'dettaglio_contattati'],
+    ['Risposte ricevute', k.risposte, pct(k.tasso_risposta, 'risposta'), 'scroll', 'dRispPanel'],
+    ['Risposte interessate', k.risposte_positive, null, 'scroll', 'dRispPanel'],
+    ['Call fissate', k.call_fissate, null, 'detail', 'dettaglio_call'],
   ];
   $('dTiles').innerHTML = tiles.map(([lbl, v, d]) => `
     <div class="tile" style="cursor:pointer"><div class="k">${lbl}</div><div class="v">${v ?? 0}</div>${d ? `<div class="d">${d}</div>` : ''}</div>
   `).join('');
   $('dTiles').querySelectorAll('.tile').forEach((el, i) => {
-    const targetId = tiles[i][3];
+    const [lbl, , , mode, target] = tiles[i];
     el.onclick = () => {
-      const panel = $(targetId);
-      if (!panel) return;
-      panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      panel.style.transition = 'box-shadow .15s ease';
-      panel.style.boxShadow = '0 0 0 2px var(--accent)';
-      setTimeout(() => { panel.style.boxShadow = ''; }, 900);
+      if (mode === 'scroll') {
+        const panel = $(target);
+        if (!panel) return;
+        $('dDetailPanel').style.display = 'none';
+        panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        panel.style.transition = 'box-shadow .15s ease';
+        panel.style.boxShadow = '0 0 0 2px var(--accent)';
+        setTimeout(() => { panel.style.boxShadow = ''; }, 900);
+      } else {
+        showDetail(lbl, c[target] || []);
+      }
     };
   });
+  $('dDetailClose').onclick = () => { $('dDetailPanel').style.display = 'none'; };
+
+  function showDetail(titolo, righe) {
+    $('dDetailTitle').querySelector('span').textContent = `${titolo} — ${righe.length}`;
+    $('dDetailBody').innerHTML = righe.length
+      ? `<table><thead><tr><th>Nome</th><th>Ruolo</th><th>Data</th></tr></thead><tbody>` +
+        righe.map(r => `<tr><td><strong>${esc(r.nome)}</strong></td><td>${esc(r.ruolo)}</td><td>${dataIt(r.data)}</td></tr>`).join('') +
+        '</tbody></table>'
+      : '<div class="empty">Nessuno ancora in questa categoria.</div>';
+    $('dDetailPanel').style.display = 'block';
+    $('dDetailPanel').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
 
   // funnel — barre ordinali, blu chiaro→scuro
   const steps = ['--seq-250', '--seq-300', '--seq-400', '--seq-500', '--seq-600'];
