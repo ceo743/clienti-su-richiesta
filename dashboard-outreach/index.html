@@ -478,9 +478,9 @@ function renderClient(c, fromAdmin) {
   const k = c.kpi || {};
   const tiles = [
     ['Inviti mandati', k.inviti_totali, null, 'detail', 'dettaglio_inviti'],
-    ['Collegamenti accettati', k.accettati, pct(k.tasso_accettazione_maturi, 'accettazione'), 'detail', 'dettaglio_accettati'],
+    ['Accettati', k.accettati, pct(k.tasso_accettazione_maturi), 'detail', 'dettaglio_accettati'],
     ['Persone contattate', k.messaggiati, null, 'detail', 'dettaglio_contattati'],
-    ['Risposte ricevute', k.risposte, pct(k.tasso_risposta, 'risposta'), 'scroll', 'dRispPanel'],
+    ['Risposte ricevute', k.risposte, pct(k.tasso_risposta), 'scroll', 'dRispPanel'],
     ['Risposte interessate', k.risposte_positive, null, 'scroll', 'dRispPanel'],
     ['Call fissate', k.call_fissate, null, 'detail', 'dettaglio_call'],
   ];
@@ -658,7 +658,7 @@ function showMsgToast(text) {
   __toastTimer = setTimeout(() => { t.style.display = 'none'; }, 4000);
 }
 
-function pct(v, nome) { return (v === null || v === undefined) ? null : `tasso di ${nome}: ${v}%`; }
+function pct(v) { return (v === null || v === undefined) ? null : `${v}%`; }
 
 function renderRisposte(rows) {
   $('dRispN').textContent = rows.length ? `— ${rows.length} totali` : '';
