@@ -21,6 +21,7 @@
   --good: #0ca30c; --good-text: #006300;
   --critical: #d03b3b;
   --accent: #2a78d6;
+  --tile-teal: #0e8f83; --tile-amber: #b8860b; --tile-orange: #d9631e;
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
@@ -37,6 +38,7 @@
   --good: #0ca30c; --good-text: #0ca30c;
   --critical: #d03b3b;
   --accent: #3987e5;
+  --tile-teal: #2bbaa9; --tile-amber: #d9a638; --tile-orange: #e0803f;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -46,6 +48,7 @@
     --grid: #2c2c2a; --baseline: #383835;
     --border: rgba(255,255,255,0.10);
     --series-1: #3987e5; --good-text: #0ca30c; --accent: #3987e5;
+    --tile-teal: #2bbaa9; --tile-amber: #d9a638; --tile-orange: #e0803f;
   }
 }
 * { box-sizing: border-box; margin: 0; }
@@ -97,10 +100,12 @@ main { max-width: 1080px; margin: 0 auto; padding: 24px 22px 60px; }
 .topline h2 { font-size: 22px; letter-spacing: -0.015em; }
 .topline .agg { color: var(--muted); font-size: 13px; }
 .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 22px; }
-.tile { background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; }
-.tile .k { font-size: 12.5px; line-height: 16px; color: var(--text-secondary); margin-bottom: 2px; min-height: 32px; }
+.tile { background: var(--surface-1); border: 1px solid var(--border); border-top: 3px solid var(--c, var(--border)); border-radius: 12px; padding: 16px 14px 14px; display: flex; flex-direction: column; align-items: center; text-align: center; transition: transform .12s ease, box-shadow .12s ease; }
+.tile:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(0,0,0,0.08); }
+.tile-icon { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; margin-bottom: 8px; background: color-mix(in srgb, var(--c, var(--muted)) 18%, transparent); }
+.tile .k { font-size: 12.5px; line-height: 16px; color: var(--text-secondary); margin-bottom: 4px; min-height: 32px; display: flex; align-items: center; justify-content: center; }
 .tile .v { font-size: 30px; font-weight: 700; letter-spacing: -0.02em; }
-.tile .d { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.tile .d { font-size: 12px; font-weight: 600; color: var(--c, var(--muted)); margin-top: 2px; }
 .tile .v small { font-size: 16px; font-weight: 600; color: var(--text-secondary); }
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 22px; }
 @media (max-width: 760px) { .grid2 { grid-template-columns: 1fr; } }
@@ -477,15 +482,15 @@ function renderClient(c, fromAdmin) {
   $('dAgg').textContent = 'aggiornato ' + dataIt(c.aggiornato);
   const k = c.kpi || {};
   const tiles = [
-    ['Inviti mandati', k.inviti_totali, null, 'detail', 'dettaglio_inviti'],
-    ['Accettati', k.accettati, pct(k.tasso_accettazione_maturi), 'detail', 'dettaglio_accettati'],
-    ['Persone contattate', k.messaggiati, null, 'detail', 'dettaglio_contattati'],
-    ['Risposte ricevute', k.risposte, pct(k.tasso_risposta), 'scroll', 'dRispPanel'],
-    ['Risposte interessate', k.risposte_positive, null, 'scroll', 'dRispPanel'],
-    ['Call fissate', k.call_fissate, null, 'detail', 'dettaglio_call'],
+    ['Inviti mandati', k.inviti_totali, null, 'detail', 'dettaglio_inviti', '📨', 'var(--accent)'],
+    ['Accettati', k.accettati, pct(k.tasso_accettazione_maturi), 'detail', 'dettaglio_accettati', '🤝', 'var(--good)'],
+    ['Persone contattate', k.messaggiati, null, 'detail', 'dettaglio_contattati', '💬', 'var(--tile-teal)'],
+    ['Risposte ricevute', k.risposte, pct(k.tasso_risposta), 'scroll', 'dRispPanel', '📩', 'var(--tile-amber)'],
+    ['Risposte interessate', k.risposte_positive, null, 'scroll', 'dRispPanel', '🔥', 'var(--tile-orange)'],
+    ['Call fissate', k.call_fissate, null, 'detail', 'dettaglio_call', '📅', 'var(--good-text)'],
   ];
-  $('dTiles').innerHTML = tiles.map(([lbl, v, d]) => `
-    <div class="tile" style="cursor:pointer"><div class="k">${lbl}</div><div class="v">${v ?? 0}</div>${d ? `<div class="d">${d}</div>` : ''}</div>
+  $('dTiles').innerHTML = tiles.map(([lbl, v, d, , , icon, color]) => `
+    <div class="tile" style="cursor:pointer;--c:${color}"><div class="tile-icon">${icon}</div><div class="k">${lbl}</div><div class="v">${v ?? 0}</div>${d ? `<div class="d">${d}</div>` : ''}</div>
   `).join('');
   $('dTiles').querySelectorAll('.tile').forEach((el, i) => {
     const [lbl, , , mode, target] = tiles[i];
