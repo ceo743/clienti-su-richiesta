@@ -4,7 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Call gratuita con Davide Caiazzo</title>
-  <meta name="description" content="Prenota 30 minuti gratuiti con Davide Caiazzo: il piano per acquisire clienti su LinkedIn. Senza impegno, niente pitch. Scegli il tuo orario."/>
+  <meta name="description" content="Prenota 30 minuti gratuiti con Davide Caiazzo: esci dalla call con il tuo piano per acquisire clienti su LinkedIn. Senza impegno, niente pitch. Scegli il tuo orario."/>
   <link rel="canonical" href="https://clienti.davidecaiazzo.it/prenota-call.html"/>
   <meta property="og:type" content="website"/>
   <meta property="og:url" content="https://clienti.davidecaiazzo.it/prenota-call.html"/>
@@ -19,72 +19,133 @@
   <link rel="apple-touch-icon" href="https://automazioni.davidecaiazzo.it/favicon.png"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Work+Sans:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,700;1,800&display=swap" rel="stylesheet"/>
   <script type="text/javascript" charset="UTF-8" src="//cdn.cookie-script.com/s/5b24cef87a160ab3ee3c8e35c1c61ff9.js"></script>
   <style>
-    :root{
-      --ink:#0b0b0f; --ink2:#14141b; --line:#2a2a35; --grey:#a7a7b3;
-      --gold:#f0b429; --gold2:#e8890c;
-    }
     *{margin:0;padding:0;box-sizing:border-box}
-    body{
-      font-family:'Work Sans',sans-serif;color:#fff;
-      background:radial-gradient(120% 80% at 50% -10%, #16161f 0%, #0b0b0f 60%);
-      min-height:100vh;overflow-x:hidden;
-    }
-    .wrap{max-width:1220px;margin:0 auto;padding:0 26px}
-    .disclaimer{font-size:10.5px;color:#5f5f6a;letter-spacing:.4px;padding:11px 0 0;text-align:center}
+    html{scroll-behavior:smooth;overflow-x:hidden}
+    body{font-family:'Inter',sans-serif;background:#080b10;color:#fff;overflow-x:hidden}
+    a,button{cursor:pointer}
+    ::selection{background:rgba(212,175,55,0.3);color:#fff}
+    ::-webkit-scrollbar{width:4px}
+    ::-webkit-scrollbar-track{background:#080b10}
+    ::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#D4AF37,#8B6914);border-radius:4px}
+    #particleCanvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+    #trailCanvas{position:fixed;inset:0;z-index:9999;pointer-events:none}
+    .wrap{max-width:1240px;margin:0 auto;padding:0 28px;position:relative;z-index:1}
+    .disclaimer{font-size:10.5px;color:#5f5f6a;letter-spacing:.4px;padding:11px 0 0;text-align:center;line-height:1.6}
     .disclaimer a{color:#8a8a95}
-    .brand{display:flex;align-items:center;justify-content:space-between;padding:22px 0 6px}
-    .brand h2{font-family:'Outfit',sans-serif;font-weight:900;font-size:21px;letter-spacing:1px}
-    .brand h2::after{content:"";display:block;width:104px;height:4px;background:var(--gold);margin-top:6px}
-    .brand .domain{font-weight:700;font-size:12.5px;color:var(--grey);letter-spacing:2px}
+    .brand{display:flex;align-items:center;justify-content:space-between;padding:24px 0 4px}
+    .brand h2{font-family:'Playfair Display',serif;font-weight:900;font-size:22px;letter-spacing:1px}
+    .brand h2::after{content:"";display:block;width:104px;height:3px;background:linear-gradient(90deg,#BF953F,#FCF6BA,#AA771C);margin-top:6px}
+    .brand .domain{font-weight:700;font-size:12px;color:rgba(255,255,255,0.4);letter-spacing:3px}
+    .gold{background:linear-gradient(135deg,#BF953F 0%,#FCF6BA 25%,#B38728 50%,#FBF5B7 75%,#AA771C 100%);background-size:400% 400%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:goldShimmer 6s ease infinite}
+    @keyframes goldShimmer{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+    .gold-line{height:1px;background:linear-gradient(90deg,transparent 0%,rgba(212,175,55,0.08) 20%,rgba(212,175,55,0.3) 50%,rgba(212,175,55,0.08) 80%,transparent 100%)}
+    .badge{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;background:rgba(212,175,55,0.06);border:1px solid rgba(212,175,55,0.18);border-radius:40px;font-size:11px;font-weight:600;color:#D4AF37;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:20px}
+    .reveal{opacity:0;transform:translateY(60px);transition:all 1s cubic-bezier(0.16,1,0.3,1)}
+    .reveal.visible{opacity:1;transform:translateY(0)}
+    .orb{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none}
 
-    .hero{display:grid;grid-template-columns:1fr 560px;gap:48px;align-items:start;padding:18px 0 30px}
+    .hero{display:grid;grid-template-columns:1fr 560px;gap:52px;align-items:start;padding:26px 0 20px;position:relative}
+    .h-hero{font-family:'Playfair Display',serif;font-size:clamp(34px,3.8vw,58px);font-weight:900;line-height:1.05;letter-spacing:-0.02em;margin-bottom:18px}
+    .sub{font-size:clamp(16px,1.4vw,19px);color:rgba(255,255,255,0.72);line-height:1.7;font-weight:300;max-width:480px;margin-bottom:22px}
+    .sub b{color:#fff;font-weight:600}
+    .benefits{list-style:none;margin-bottom:8px}
+    .benefits li{display:flex;gap:12px;align-items:flex-start;padding:7px 0;font-size:16.5px;color:rgba(255,255,255,0.85);line-height:1.5;font-weight:500}
+    .benefits li .ck{color:#D4AF37;font-weight:900;flex:0 0 auto;margin-top:1px}
 
-    /* sinistra: messaggio + foto */
-    .left{position:relative}
-    .chip{display:inline-block;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12.5px;color:var(--gold);background:rgba(240,180,41,.14);border-radius:999px;padding:8px 16px;letter-spacing:1px;margin-bottom:18px}
-    h1{font-family:'Outfit',sans-serif;font-weight:900;font-size:clamp(38px,4.2vw,56px);line-height:1.04;text-transform:uppercase;margin-bottom:16px}
-    h1 .gold{color:var(--gold)}
-    .sub{font-family:'Outfit',sans-serif;font-weight:400;font-size:clamp(18px,1.7vw,22px);color:var(--grey);line-height:1.4;max-width:460px;margin-bottom:18px}
-    .benefits{list-style:none;margin-bottom:6px}
-    .benefits li{display:flex;gap:11px;align-items:flex-start;padding:6px 0;font-size:17.5px;color:#dcdce3;line-height:1.4;font-weight:600}
-    .benefits li .ck{color:var(--gold);font-weight:900;flex:0 0 auto;margin-top:1px}
+    .photo{position:relative;margin-top:16px;height:460px}
+    .photo .circle{position:absolute;left:46%;bottom:44px;transform:translateX(-50%);width:315px;height:315px;border-radius:50%;background:radial-gradient(circle,#D4AF37 0%,#8B6914 100%);opacity:.9}
+    .photo .ring{position:absolute;left:46%;bottom:24px;transform:translateX(-50%);width:362px;height:362px;border-radius:50%;border:1px solid rgba(212,175,55,0.35)}
+    .photo img{position:absolute;left:0;bottom:44px;height:416px;width:auto;filter:drop-shadow(0 30px 60px rgba(0,0,0,.55))}
+    .credit{position:absolute;left:0;bottom:-6px;z-index:2}
+    .credit .nome{font-family:'Playfair Display',serif;font-weight:900;color:#D4AF37;font-size:16px;letter-spacing:.5px}
+    .credit .role{font-size:12px;color:rgba(255,255,255,0.5);margin-top:3px;max-width:340px}
 
-    .photo{position:relative;margin-top:10px;height:470px}
-    .photo .circle{position:absolute;left:46%;bottom:44px;transform:translateX(-50%);width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,#f0b429 0%,#e8890c 100%);opacity:.92}
-    .photo .ring{position:absolute;left:46%;bottom:24px;transform:translateX(-50%);width:366px;height:366px;border-radius:50%;border:2px solid rgba(240,180,41,.35)}
-    .photo img{position:absolute;left:0;bottom:44px;height:426px;width:auto;filter:drop-shadow(0 30px 60px rgba(0,0,0,.55))}
-    .credit{position:absolute;left:0;bottom:0;z-index:2}
-    .credit .nome{font-family:'Outfit',sans-serif;font-weight:900;color:var(--gold);font-size:15px;letter-spacing:.5px}
-    .credit .role{font-size:12px;color:var(--grey);margin-top:2px}
-
-    /* destra: card calendario */
-    .cal-card{position:relative;background:var(--ink2);border:1px solid var(--line);border-radius:22px;padding:16px 8px 2px;box-shadow:0 24px 70px rgba(0,0,0,.55)}
-    .cal-card::before{content:"";position:absolute;inset:-1px;border-radius:22px;pointer-events:none;background:radial-gradient(420px 170px at 50% 0%,rgba(240,180,41,.13),transparent 70%)}
-    .cal-head{text-align:center;font-family:'Outfit',sans-serif;font-weight:900;font-size:20px;padding:4px 14px 10px}
-    .cal-head .gold{color:var(--gold)}
+    .cal-card{position:relative;background:linear-gradient(160deg,#12151c 0%,#0a0d12 100%);border:1px solid rgba(212,175,55,0.18);border-radius:26px;padding:20px 12px 6px;box-shadow:0 24px 80px rgba(0,0,0,.6)}
+    .cal-card::before{content:"";position:absolute;inset:0;border-radius:26px;pointer-events:none;background:radial-gradient(420px 180px at 50% 0%,rgba(212,175,55,.1),transparent 70%)}
+    .cal-head{text-align:center;font-family:'Playfair Display',serif;font-weight:900;font-size:22px;padding:2px 14px 4px}
+    .cal-scarcity{text-align:center;font-size:12px;font-weight:600;color:#D4AF37;letter-spacing:1.5px;text-transform:uppercase;padding-bottom:10px}
     .calendly-inline-widget{border-radius:16px;overflow:hidden}
-    .reassure{text-align:center;font-size:13px;color:#8a8a95;padding:6px 0 10px}
-    .reassure b{color:#dcdce3}
+    .reassure{text-align:center;font-size:13px;color:rgba(255,255,255,0.45);padding:8px 0 12px}
+    .reassure b{color:rgba(255,255,255,0.85)}
 
-    footer{border-top:1px solid var(--line);margin-top:14px;padding:22px 0 30px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
-    footer .fb{font-weight:700;font-size:12.5px;color:var(--gold);letter-spacing:1px}
-    footer .fright{font-size:11px;color:#6f6f79;max-width:660px}
+    .press{padding:36px 0 10px;text-align:center}
+    .press-label{font-size:11px;text-transform:uppercase;letter-spacing:3px;color:rgba(255,255,255,0.25);margin-bottom:18px}
+    .press-row{display:flex;flex-wrap:wrap;justify-content:center;gap:22px;align-items:center;opacity:.45}
+    .press-row span.testata{font-size:15px;font-weight:700;letter-spacing:1px;color:rgba(255,255,255,0.75)}
+    .press-row span.dot{color:rgba(255,255,255,0.15)}
+
+    .section{padding:70px 0 30px;position:relative}
+    .section-label{font-size:11px;text-transform:uppercase;letter-spacing:4px;color:#D4AF37;font-weight:600;margin-bottom:14px;text-align:center}
+    .section-title{font-family:'Playfair Display',serif;font-size:clamp(26px,3.4vw,42px);font-weight:900;line-height:1.15;margin-bottom:14px;text-align:center}
+    .section-sub{font-size:clamp(14px,1.3vw,17px);color:rgba(255,255,255,0.5);line-height:1.8;font-weight:300;max-width:620px;margin:0 auto 44px;text-align:center}
+    .testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+    .testi-card{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-left:2px solid rgba(212,175,55,0.35);border-radius:20px;padding:30px 28px;display:flex;flex-direction:column;gap:12px;transition:all 0.4s}
+    .testi-card:hover{border-color:rgba(212,175,55,0.25);border-left-color:#D4AF37;background:rgba(212,175,55,0.03);transform:translateY(-4px)}
+    .tc-header{display:flex;align-items:center;gap:12px}
+    .tc-avatar{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#BF953F,#D4AF37);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#000;font-family:'Playfair Display',serif;flex-shrink:0}
+    .tc-name{font-size:14.5px;font-weight:700;color:rgba(255,255,255,0.9)}
+    .tc-role{font-size:11.5px;color:rgba(255,255,255,0.35);margin-top:2px}
+    .tc-stat{font-size:22px;font-weight:800;color:#D4AF37;font-family:'Playfair Display',serif}
+    .tc-numbers{font-size:12.5px;color:rgba(255,255,255,0.4);line-height:1.7}
+    .testi-more{text-align:center;margin-top:36px}
+    .testi-more a{color:rgba(212,175,55,0.7);font-size:14px;text-decoration:none;border-bottom:1px solid rgba(212,175,55,0.3);padding-bottom:2px;transition:color .3s}
+    .testi-more a:hover{color:#D4AF37}
+
+    .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;max-width:980px;margin:0 auto}
+    .step-card{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:20px;padding:32px 28px;transition:all .4s}
+    .step-card:hover{border-color:rgba(212,175,55,0.15);background:rgba(255,255,255,0.04);transform:translateY(-4px)}
+    .step-num{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#BF953F,#D4AF37);color:#000;font-family:'Playfair Display',serif;font-weight:900;font-size:20px;display:flex;align-items:center;justify-content:center;margin-bottom:18px}
+    .step-title{font-size:17px;font-weight:700;margin-bottom:10px}
+    .step-text{font-size:14px;color:rgba(255,255,255,0.5);line-height:1.8;font-weight:300}
+
+    .faq-wrap{max-width:720px;margin:0 auto}
+    .faq-item{border-bottom:1px solid rgba(255,255,255,0.06);overflow:hidden}
+    .faq-q{width:100%;background:none;border:none;color:#fff;font-family:'Inter',sans-serif;font-size:16px;font-weight:600;text-align:left;padding:22px 0;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:16px;transition:color 0.3s}
+    .faq-q:hover{color:#D4AF37}
+    .faq-q .faq-icon{width:24px;height:24px;border-radius:50%;border:1px solid rgba(212,175,55,0.3);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.3s;font-size:14px;color:#D4AF37}
+    .faq-item.open .faq-q .faq-icon{background:rgba(212,175,55,0.1);transform:rotate(45deg)}
+    .faq-a{max-height:0;overflow:hidden;transition:max-height 0.4s cubic-bezier(0.4,0,0.2,1)}
+    .faq-item.open .faq-a{max-height:300px}
+    .faq-a p{color:rgba(255,255,255,0.55);font-size:15px;line-height:1.8;padding-bottom:22px}
+
+    .final-cta{text-align:center;padding:80px 0 60px}
+    .btn-gold{display:inline-flex;align-items:center;gap:10px;padding:20px 48px;background:linear-gradient(135deg,#BF953F,#D4AF37);color:#000;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:2.5px;border:none;border-radius:60px;text-decoration:none;transition:all 0.5s cubic-bezier(0.4,0,0.2,1);position:relative;overflow:hidden;font-family:'Inter',sans-serif;box-shadow:0 4px 30px rgba(212,175,55,0.2)}
+    .btn-gold::before{content:'';position:absolute;inset:-2px;background:linear-gradient(135deg,#FCF6BA,#D4AF37,#BF953F,#FCF6BA);background-size:300% 300%;border-radius:60px;z-index:-1;animation:goldShimmer 4s ease infinite;filter:blur(8px);opacity:0;transition:opacity 0.5s}
+    .btn-gold:hover{transform:translateY(-3px) scale(1.02);box-shadow:0 20px 60px rgba(212,175,55,0.35)}
+    .btn-gold:hover::before{opacity:1}
+    .btn-gold span{position:relative;z-index:1}
+
+    #stickyCta{position:fixed;bottom:0;left:0;right:0;z-index:300;background:linear-gradient(180deg,rgba(6,8,14,0.97) 0%,rgba(10,12,18,1) 100%);border-top:1px solid rgba(212,175,55,0.2);padding:12px 20px;display:none;justify-content:center;transform:translateY(100%);transition:transform .4s;box-shadow:0 -8px 60px rgba(0,0,0,0.7)}
+
+    footer{border-top:1px solid rgba(255,255,255,0.06);margin-top:20px;padding:24px 0 34px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;position:relative;z-index:1}
+    footer .fb{font-family:'Playfair Display',serif;font-weight:900;font-size:14px;color:#D4AF37;letter-spacing:1px}
+    footer .fright{font-size:11px;color:#6f6f79;max-width:660px;line-height:1.7}
     footer a{color:#8a8a95;text-decoration:none;font-size:11px;margin-left:10px}
 
-    @media(max-width:980px){
-      .hero{grid-template-columns:1fr;gap:18px;padding-top:12px}
-      h1{font-size:clamp(32px,8vw,44px)}
-      .photo{height:340px}
-      .photo .circle{left:50%}.photo .ring{left:50%}
-      .photo img{left:50%;transform:translateX(-50%);height:330px}
-      .credit{left:50%;transform:translateX(-50%);text-align:center;bottom:-2px}
+    @media(max-width:1024px){
+      .hero{grid-template-columns:1fr;gap:22px;padding-top:14px}
+      .photo{display:none}
+      .testi-grid{grid-template-columns:1fr}
+      .steps{grid-template-columns:1fr}
+      #stickyCta{display:flex}
+      .section{padding:52px 0 20px}
+      .final-cta{padding:56px 0 90px}
+    }
+    @media(max-width:480px){
+      .wrap{padding:0 18px}
+      .h-hero{font-size:31px}
+      .cal-card{padding:16px 6px 4px}
     }
   </style>
 </head>
 <body>
+  <canvas id="particleCanvas"></canvas>
+  <canvas id="trailCanvas"></canvas>
+  <div class="orb" style="top:-120px;left:50%;transform:translateX(-50%);width:640px;height:420px;background:rgba(212,175,55,0.07)"></div>
+
   <div class="wrap">
     <p class="disclaimer">Sito di DC Academy S.r.l. LinkedIn® è un marchio registrato di LinkedIn Corporation: pubblicazione indipendente e non affiliata.<br/>I contenuti di questo sito hanno natura pubblicitaria a favore della DC Academy S.r.l. · Per qualsiasi approfondimento sui nostri servizi, clienti, testimonianze, testate e sui numeri citati su questo sito visita la pagina: <a href="https://www.davidecaiazzo.it/trasparenza" target="_blank" rel="noopener" style="text-decoration:underline">www.davidecaiazzo.it/trasparenza</a></p>
     <header class="brand">
@@ -94,12 +155,12 @@
 
     <section class="hero">
       <div class="left">
-        <span class="chip">30 MINUTI · GRATIS //</span>
-        <h1>CALL GRATUITA CON<br/><span class="gold">DAVIDE CAIAZZO</span></h1>
-        <p class="sub">Esci dalla call con il tuo piano per acquisire clienti su LinkedIn.</p>
+        <span class="badge">30 minuti · gratis · senza impegno</span>
+        <h1 class="h-hero">Esci dalla call con il tuo piano per <span class="gold">acquisire clienti</span> su LinkedIn®</h1>
+        <p class="sub">Niente teoria, niente pitch di vendita. Analizzo il tuo profilo in diretta e ti dico <b>esattamente cosa farei al posto tuo</b> per trasformare LinkedIn nel tuo primo canale di acquisizione clienti.</p>
         <ul class="benefits">
-          <li><span class="ck">✓</span> Analisi del tuo profilo in diretta</li>
-          <li><span class="ck">✓</span> Il sistema per acquisire clienti senza ads</li>
+          <li><span class="ck">✓</span> Analisi del tuo profilo in diretta, davanti a te</li>
+          <li><span class="ck">✓</span> Il sistema per acquisire clienti senza spendere in ads</li>
           <li><span class="ck">✓</span> Le automazioni AI che lavorano al posto tuo</li>
           <li><span class="ck">✓</span> La call la faccio io, non un assistente</li>
         </ul>
@@ -114,12 +175,108 @@
         </div>
       </div>
 
-      <div class="cal-card">
-        <div class="cal-head">Scegli il tuo orario 👇 <span class="gold">I posti sono limitati</span></div>
-        <div id="calendlyWidget" class="calendly-inline-widget" data-url="" style="min-width:320px;height:540px"></div>
+      <div class="cal-card" id="calendario">
+        <div class="cal-head">Scegli il tuo orario <span class="gold">👇</span></div>
+        <div class="cal-scarcity">I posti sono limitati</div>
+        <div id="calendlyWidget" class="calendly-inline-widget" data-url="" style="min-width:320px;height:600px"></div>
         <p class="reassure"><b>Zero impegno:</b> niente pitch, solo il tuo piano.</p>
       </div>
     </section>
+
+    <div class="press reveal">
+      <p class="press-label">Parlano di me</p>
+      <div class="press-row">
+        <span class="testata">Il Sole 24 Ore</span><span class="dot">&bull;</span>
+        <span class="testata">Vanity Fair</span><span class="dot">&bull;</span>
+        <span class="testata">Affaritaliani</span><span class="dot">&bull;</span>
+        <span class="testata">Il Tempo</span><span class="dot">&bull;</span>
+        <span class="testata">Leggo</span>
+      </div>
+    </div>
+
+    <div class="gold-line" style="margin-top:40px"></div>
+
+    <section class="section">
+      <p class="section-label">Risultati reali</p>
+      <h2 class="section-title">Chi ha già fatto questa call, <span class="gold">oggi è qui</span></h2>
+      <p class="section-sub">Numeri veri di chi ha applicato il metodo, tutti verificabili sulla pagina trasparenza.</p>
+      <div class="testi-grid reveal">
+        <div class="testi-card">
+          <div class="tc-header">
+            <div class="tc-avatar">AP</div>
+            <div><p class="tc-name">Andrea Pietrini</p><p class="tc-role">Presidente YourGroup</p></div>
+          </div>
+          <p class="tc-stat">+100 clienti premium</p>
+          <p class="tc-numbers">26k &rarr; 62k follower, 1M di visualizzazioni su un post, da 53 a 14.723 consiglia</p>
+        </div>
+        <div class="testi-card">
+          <div class="tc-header">
+            <div class="tc-avatar">LZ</div>
+            <div><p class="tc-name">Luca Zerbini</p><p class="tc-role">VC Growth Investor</p></div>
+          </div>
+          <p class="tc-stat">+100M EUR raccolti</p>
+          <p class="tc-numbers">8.208 &rarr; 16.416 follower, LinkedIn diventato il canale N.1 per il deal flow</p>
+        </div>
+        <div class="testi-card">
+          <div class="tc-header">
+            <div class="tc-avatar">AB</div>
+            <div><p class="tc-name">Alfio Bardolla</p><p class="tc-role">Investitore, Autore Bestseller</p></div>
+          </div>
+          <p class="tc-stat">+9.000% engagement</p>
+          <p class="tc-numbers">Da 23 a 476 interazioni medie per post</p>
+        </div>
+      </div>
+      <div class="testi-more">
+        <a href="https://davidecaiazzo.it/testimonianze" target="_blank" rel="noopener">Vedi la pagina completa delle testimonianze &rarr;</a>
+      </div>
+    </section>
+
+    <section class="section">
+      <p class="section-label">Come funziona</p>
+      <h2 class="section-title">30 minuti, <span class="gold">3 passaggi</span></h2>
+      <p class="section-sub">Nessuna preparazione richiesta, ti basta il tuo profilo LinkedIn.</p>
+      <div class="steps reveal">
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <p class="step-title">Analizzo il tuo profilo in diretta</p>
+          <p class="step-text">Guardiamo insieme il tuo profilo e ti mostro cosa ti sta bloccando: posizionamento, contenuti, rete di contatti.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <p class="step-title">Costruiamo il tuo piano</p>
+          <p class="step-text">Ti dico esattamente cosa farei al posto tuo nei prossimi 90 giorni per portare clienti dal tuo profilo, passo per passo.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <p class="step-title">Il piano resta tuo, comunque</p>
+          <p class="step-text">Se vuoi farti aiutare a metterlo in pratica ne parliamo, altrimenti te lo porti via gratis e lo applichi da solo.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <p class="section-label">Domande frequenti</p>
+      <h2 class="section-title">Prima che me lo chiedi</h2>
+      <div class="faq-wrap reveal" style="margin-top:40px">
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">È davvero gratis? Dov'è la fregatura?<span class="faq-icon">+</span></button>
+          <div class="faq-a"><p>È gratis davvero: 30 minuti in cui analizzo la tua situazione e ti do un piano concreto. Se poi vorrai farti aiutare a implementarlo ne parliamo, altrimenti il piano resta tuo e finisce lì.</p></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">Con chi farò la call?<span class="faq-icon">+</span></button>
+          <div class="faq-a"><p>Con me, Davide Caiazzo, non con un venditore o un assistente. Sono tra i TOP 20 al mondo in "LinkedIn® Growth" secondo Favikon 2025 e la call la tengo personalmente.</p></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">Funziona anche nel mio settore?<span class="faq-icon">+</span></button>
+          <div class="faq-a"><p>Il metodo l'ho applicato con presidenti di gruppi, investitori, formatori, medici e CEO: il sistema si adatta al settore, in call lo caliamo sul tuo caso specifico.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="final-cta reveal">
+      <h2 class="section-title" style="margin-bottom:24px">Il tuo piano ti aspetta, <span class="gold">scegli l'orario</span></h2>
+      <a href="#calendario" class="btn-gold"><span>Prenota la tua call gratuita</span></a>
+    </div>
 
     <footer>
       <span class="fb">DC ACADEMY</span>
@@ -131,17 +288,19 @@
     </footer>
   </div>
 
+  <div id="stickyCta"><a href="#calendario" class="btn-gold" style="padding:14px 36px"><span>Prenota la tua call gratuita</span></a></div>
+
 <script>
+// ===== CALENDLY (tema oro DC) + passthrough UTM dalla query string =====
 (function(){
-  // Calendly DC (tema LinkedIn) + passthrough UTM dalla query string
   var base = 'https://calendly.com/dc-academy-team/consulenza-strategica-gratuita-linkedin-dc-academy';
   var params = new URLSearchParams(window.location.search);
   var qs = new URLSearchParams({
     hide_gdpr_banner:'1',
     hide_event_type_details:'1',
-    background_color:'14141b',
+    background_color:'0d1016',
     text_color:'ffffff',
-    primary_color:'f0b429'
+    primary_color:'D4AF37'
   });
   ['utm_source','utm_medium','utm_campaign','utm_content','utm_term'].forEach(function(k){
     var v = params.get(k);
@@ -153,6 +312,63 @@
   s.src = 'https://assets.calendly.com/assets/external/widget.js';
   s.async = true;
   document.body.appendChild(s);
+})();
+
+// ===== PARTICELLE =====
+const canvas=document.getElementById('particleCanvas');const ctx=canvas.getContext('2d');
+function drawParticles(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;const n=Math.min(30,Math.floor(window.innerWidth/40));for(let i=0;i<n;i++){const x=Math.random()*canvas.width,y=Math.random()*canvas.height,s=Math.random()*1.3+0.3,o=Math.random()*0.12+0.02;ctx.beginPath();ctx.arc(x,y,s,0,Math.PI*2);ctx.fillStyle='rgba(212,175,55,'+o+')';ctx.fill()}}
+drawParticles();window.addEventListener('resize',drawParticles);
+
+// ===== SCIA ORO (mouse) =====
+(function(){
+  if(window.innerWidth<768)return;
+  var tc=document.getElementById('trailCanvas');if(!tc)return;
+  var ctx2=tc.getContext('2d');var trail=[];
+  function resizeTrail(){tc.width=window.innerWidth;tc.height=window.innerHeight}
+  resizeTrail();window.addEventListener('resize',resizeTrail);
+  document.addEventListener('mousemove',function(e){trail.push({x:e.clientX,y:e.clientY,alpha:1,size:3})});
+  function drawTrail(){
+    ctx2.clearRect(0,0,tc.width,tc.height);
+    for(var i=trail.length-1;i>=0;i--){
+      var p=trail[i];p.alpha-=0.03;p.size*=0.97;
+      if(p.alpha<=0){trail.splice(i,1);continue}
+      ctx2.beginPath();ctx2.arc(p.x,p.y,p.size,0,Math.PI*2);ctx2.fillStyle='rgba(212,175,55,'+p.alpha*0.6+')';ctx2.fill();
+      ctx2.beginPath();ctx2.arc(p.x,p.y,p.size*3,0,Math.PI*2);ctx2.fillStyle='rgba(212,175,55,'+p.alpha*0.08+')';ctx2.fill();
+    }
+    if(trail.length>75)trail.splice(0,trail.length-75);
+    requestAnimationFrame(drawTrail);
+  }
+  drawTrail();
+})();
+
+// ===== SCROLL REVEAL =====
+(function(){
+  var els=document.querySelectorAll('.reveal');
+  if(!els.length)return;
+  var io=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){if(e.isIntersecting)e.target.classList.add('visible')});
+  },{threshold:0.1});
+  els.forEach(function(el){io.observe(el)});
+})();
+
+// ===== FAQ ACCORDION =====
+function toggleFaq(btn){
+  var item=btn.closest('.faq-item');
+  var isOpen=item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(function(el){el.classList.remove('open')});
+  if(!isOpen)item.classList.add('open');
+}
+
+// ===== STICKY CTA (mobile, appare dopo scroll, sparisce sul calendario) =====
+(function(){
+  var bar=document.getElementById('stickyCta');
+  if(!bar)return;
+  var cal=document.getElementById('calendario');
+  window.addEventListener('scroll',function(){
+    var r=cal.getBoundingClientRect();
+    var calVisible=r.top<window.innerHeight&&r.bottom>0;
+    bar.style.transform=(window.scrollY>500&&!calVisible)?'translateY(0)':'translateY(100%)';
+  },{passive:true});
 })();
 </script>
 </body>
