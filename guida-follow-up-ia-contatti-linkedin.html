@@ -146,7 +146,8 @@
           <input type="hidden" name="utm_content" id="utm_content"/>
           <label class="privacy"><input type="checkbox" id="fieldPrivacy" required/><span>Accetto la <a href="https://docs.google.com/document/d/1qUNgRcZ0W9aZxutDu1Fv2k5aM6Nti4V0/edit" target="_blank" rel="noopener">Privacy Policy</a> e il trattamento dei dati per ricevere la guida.</span></label>
           <label class="privacy"><input type="checkbox" id="fieldMarketing"/><span>Voglio ricevere anche consigli su automazioni e intelligenza artificiale.</span></label>
-          <button type="submit" class="btn-gold" id="submitBtn"><span id="btnText">SCARICA LA GUIDA GRATUITA</span></button>
+          <div id="formErrore" role="alert" style="display:none;background:rgba(229,72,77,0.12);border:1px solid #e5484d;border-radius:10px;padding:11px 13px;font-size:13px;color:#ff9b9b;line-height:1.55;text-align:left;margin:4px 0"></div>
+<button type="submit" class="btn-gold" id="submitBtn"><span id="btnText">SCARICA LA GUIDA GRATUITA</span></button>
         </form>
         <p class="reassure">Nessuno spam. La guida arriva subito via email.</p>
       </div>
@@ -183,6 +184,47 @@
 })();
 
 function dcPhoneOk(raw){var p=String(raw||'').replace(/[\s\-\+\.\(\)]/g,'');if(p.slice(0,2)==='00')p=p.slice(2);if(!/^\d+$/.test(p))return false;if(p.length<9||p.length>13)return false;if(/^(\d)\1+$/.test(p))return false;if('01234567890'.indexOf(p)>=0||'09876543210'.indexOf(p)>=0)return false;var u={},n=0,i;for(i=0;i<p.length;i++){if(!u[p[i]]){u[p[i]]=1;n++;}}if(n<3)return false;return true;}
+/* La conferma non parte piu' da un timer. Kajabi non manda intestazioni CORS,
+   quindi un invio diretto dal browser e' cieco: si passa dal nostro ponte, che
+   inoltra la registrazione e legge la risposta vera. */
+var KAJABI_FORM_GUIDA='2149642907';
+var PONTE_ISCRIZIONI='https://dc-chatbot-vswb.onrender.com/lead-kajabi';
+var ERR_RIFIUTO_ISCRIZIONE='Non siamo riusciti a registrare la tua richiesta. Controlla i dati e riprova, oppure scrivi a <a href=\"mailto:academy@davidecaiazzo.it\" style=\"color:#ff3d2e\">academy@davidecaiazzo.it</a> e ci pensiamo noi.';
+var ERR_RETE_ISCRIZIONE='Invio non riuscito: la connessione si &egrave; interrotta. Riprova tra un istante, oppure scrivi a <a href=\"mailto:academy@davidecaiazzo.it\" style=\"color:#ff3d2e\">academy@davidecaiazzo.it</a> e ci pensiamo noi.';
+(function(){
+  function cattura(){var b=document.getElementById('btnText');if(b&&!window.__testoPulsante)window.__testoPulsante=b.textContent;}
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',cattura);}else{cattura();}
+})();
+function mostraErroreIscrizione(testo){
+  var btn=document.getElementById('submitBtn');
+  if(btn){btn.disabled=false;}
+  var bt=document.getElementById('btnText');
+  if(bt&&window.__testoPulsante){bt.textContent=window.__testoPulsante;}
+  var box=document.getElementById('formErrore');
+  if(!box){alert(testo.replace(/<[^>]*>/g,''));return;}
+  box.innerHTML=testo;
+  box.style.display='block';
+  box.scrollIntoView({behavior:'smooth',block:'center'});
+}
+function mostraConfermaIscrizione(){
+      var qsCall = new URLSearchParams({utm_source:'guida_optin',utm_medium:'post_optin'});
+      var campVal = document.getElementById('utm_campaign').value;
+      qsCall.set('utm_campaign', campVal || 'guida-follow-up-ia-contatti-linkedin');
+      document.getElementById('modalCta').href = 'https://clienti.davidecaiazzo.it/prenota-call.html?' + qsCall.toString();
+      document.getElementById('confirmModal').classList.add('open');
+      var sec = 3;
+      var countEl = document.getElementById('countdownSec');
+      var timer = setInterval(function(){
+        sec--;
+        countEl.textContent = sec;
+        if(sec <= 0){
+          clearInterval(timer);
+          var cta = document.getElementById('modalCta');
+          window.location.href = cta ? cta.href : 'https://clienti.davidecaiazzo.it/prenota-call.html';
+        }
+      }, 1000);
+  
+}
 function submitForm(e){
   e.preventDefault();
   var fieldName=document.getElementById('fieldName');
@@ -206,40 +248,38 @@ function submitForm(e){
   var btnText=document.getElementById('btnText');
   btn.disabled=true;
   btnText.textContent='INVIO IN CORSO...';
-  var data=new URLSearchParams({
-    'form_submission[name]':fieldName.value.trim(),
-    'form_submission[email]':fieldEmail.value.trim(),
-    'form_submission[phone]':fieldPhone.value.trim(),
-    'form_submission[utm_source]':document.getElementById('utm_source').value,
-    'form_submission[utm_medium]':document.getElementById('utm_medium').value,
-    'form_submission[utm_campaign]':document.getElementById('utm_campaign').value,
-    'form_submission[utm_content]':document.getElementById('utm_content').value
-  });
-  // POST diretto al form Kajabi -> automazione consegna guida via email (form_id da confermare dopo la creazione)
-  fetch('https://www.davidecaiazzo.it/forms/2149642907/form_submissions',{
-    method:'POST',
-    mode:'no-cors',
-    headers:{'Content-Type':'application/x-www-form-urlencoded'},
-    body:data
-  }).catch(function(){});
-  setTimeout(function(){
-    var qsCall = new URLSearchParams({utm_source:'guida_optin',utm_medium:'post_optin'});
-    var campVal = document.getElementById('utm_campaign').value;
-    qsCall.set('utm_campaign', campVal || 'guida-follow-up-ia-contatti-linkedin');
-    document.getElementById('modalCta').href = 'https://clienti.davidecaiazzo.it/prenota-call.html?' + qsCall.toString();
-    document.getElementById('confirmModal').classList.add('open');
-    var sec = 3;
-    var countEl = document.getElementById('countdownSec');
-    var timer = setInterval(function(){
-      sec--;
-      countEl.textContent = sec;
-      if(sec <= 0){
-        clearInterval(timer);
-        var cta = document.getElementById('modalCta');
-        window.location.href = cta ? cta.href : 'https://clienti.davidecaiazzo.it/prenota-call.html';
-      }
-    }, 1000);
-  }, 800);
+  var campi={
+    name:fieldName.value.trim(),
+    email:fieldEmail.value.trim(),
+    phone_number:fieldPhone.value.trim(),
+    custom_70:document.getElementById('utm_source').value,
+    custom_71:document.getElementById('utm_medium').value,
+    custom_74:document.getElementById('utm_campaign').value,
+    custom_75:document.getElementById('utm_content').value
+  };
+  var data=new URLSearchParams();
+  Object.keys(campi).forEach(function(k){data.append('form_submission['+k+']',campi[k]);});
+  var box=document.getElementById('formErrore');
+  if(box){box.style.display='none';}
+
+  // Il ponte sta su un piano gratuito che puo' dormire: se non risponde entro
+  // 8 secondi si passa all'invio diretto, senza lasciare fermo chi si iscrive.
+  var taglia=(typeof AbortController!=='undefined')?new AbortController():null;
+  var scaduto=setTimeout(function(){if(taglia){taglia.abort();}},8000);
+  fetch(PONTE_ISCRIZIONI,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({form_id:KAJABI_FORM_GUIDA,campi:campi}),signal:taglia?taglia.signal:undefined})
+    .then(function(r){clearTimeout(scaduto);return r.json();},function(err){clearTimeout(scaduto);throw err;})
+    .then(function(esito){
+      if(!esito||typeof esito.ok!=='boolean'){throw new Error('risposta non leggibile');}
+      return esito.ok;
+    })
+    .then(function(accettata){
+      if(accettata){mostraConfermaIscrizione();}else{mostraErroreIscrizione(ERR_RIFIUTO_ISCRIZIONE);}
+    },function(){
+      // Ponte irraggiungibile: invio diretto, cosi' la richiesta non si perde.
+      // L'esito resta illeggibile, ma se non parte proprio la conferma non compare.
+      fetch('https://www.davidecaiazzo.it/forms/'+KAJABI_FORM_GUIDA+'/form_submissions',{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:data})
+        .then(function(){mostraConfermaIscrizione();},function(){mostraErroreIscrizione(ERR_RETE_ISCRIZIONE);});
+    });
 }
 </script>
 </body>
