@@ -277,7 +277,9 @@ function renderQ(){
  var box=document.getElementById('qopts');box.innerHTML='';
  q.o.forEach(function(op){
   var b=document.createElement('button');b.className='opt';b.textContent=op[0];
-  b.onclick=function(){answers[idx]=op[1];idx++;
+  b.onclick=function(){answers[idx]=op[1];
+   if(idx===0&&op[1]!==-1){idx=QUESTIONS.length;document.getElementById('pfill').style.width='100%';showResult();return;}
+   idx++;
    document.getElementById('pfill').style.width=Math.round(idx/QUESTIONS.length*100)+'%';
    if(idx<QUESTIONS.length){renderQ();document.getElementById('qbox').classList.remove('fade-swap');void document.getElementById('qbox').offsetWidth;document.getElementById('qbox').classList.add('fade-swap');}
    else{showResult();}
