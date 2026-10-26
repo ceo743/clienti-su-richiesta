@@ -6,13 +6,14 @@ window.createOutreachMonitoraggio = function (options) {
   const esc = value => String(value ?? '').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   const pretty = value => value ? new Date(value).toLocaleString('it-IT',{timeZone:'Europe/Rome'}) : 'non disponibile';
   const labels = Object.fromEntries(D.STAGES.map((s,i)=>[s,D.LABELS[i]]));
-  const words = {da_classificare:'Da classificare',cortesia:'Cortesia / grazie',proposta:'Risposta alla proposta / CTA',negativa:'Negativa',bisogno_call:'Bisogno concreto / call',materiale:'Solo materiale',richiesta:'Da eseguire · non ancora inviata',annullata:'Richiesta annullata',inviato:'Invio provato',consegnato:'Consegna provata',errore:'Errore'};
+  const words = {da_classificare:'Da classificare',cortesia:'Cortesia / grazie',proposta:'Risposta alla proposta / CTA',negativa:'Negativa',bisogno_call:'Bisogno concreto / call',materiale:'Solo materiale',richiesta:'Da eseguire · non ancora inviata',sospesa:'Sospesa · nuova conferma necessaria',in_corso:'Presa in carico · invio non provato',da_verificare:'Esito incerto · nessun ritentativo',annullata:'Richiesta annullata',inviato:'Invio provato',consegnato:'Consegna provata',errore:'Errore · nessun ritentativo'};
   let client = null, state = null, stopListener = null, active = 0, filters = null, draftImport = null, editing = false;
   const box = document.getElementById('monitoraggio');
   function stop() { ++active; if (stopListener) stopListener(); stopListener=null; client=null; state=null; draftImport=null; editing=false; box.innerHTML=''; }
   function say(message, error=false) { const el=box.querySelector('[data-status]'); if(el){el.textContent=message;el.className=error?'msg err':'msg ok';} }
   function defaults() { const al=D.day(new Date().toISOString()); return {dal:new Date(Date.parse(al+'T12:00:00Z')-29*86400000).toISOString().slice(0,10),al,settore:'',tema:'',target:''}; }
-  const canEdit = () => !!options.auth.currentUser && (options.isAdmin() || options.isApprovatore());
+  // Le regole pubblicate consentono la scrittura del documento cliente ai soli amministratori.
+  const canEdit = () => !!options.auth.currentUser && options.isAdmin();
   function open(c) {
     stop(); client=c; filters=defaults(); const token=active;
     box.innerHTML='<div class="panel"><h3>Monitoraggio operativo</h3><p>Caricamento dati verificati…</p></div>';
@@ -30,13 +31,18 @@ window.createOutreachMonitoraggio = function (options) {
     const actor=options.auth.currentUser?.email;
     if(!slug || !canEdit()) throw Error('Modifica riservata agli operatori abilitati.');
     await options.db.runTransaction(async transaction=>{
-      const ref=options.db.collection('clienti').doc(slug), snapshot=await transaction.get(ref);
+      const ref=options.db.collection('clienti').doc(slug);
+      const [snapshot,admins,approvatori]=await Promise.all([transaction.get(ref),transaction.get(options.db.collection('config').doc('admins')),transaction.get(options.db.collection('config').doc('approvatori_messaggi'))]);
       if(token!==active || !canEdit() || options.auth.currentUser?.email!==actor) throw Error('Accesso o cliente cambiato: operazione annullata.');
+      if(!snapshot.exists) throw Error('Cliente non più disponibile.');
+      const operators=Array.isArray(admins.data()?.emails)?admins.data().emails:[];
+      if(!operators.some(email=>email.toLowerCase()===actor.toLowerCase())) throw Error('Operatore non più amministratore.');
+      const approvers=[...operators,...(Array.isArray(approvatori.data()?.emails)?approvatori.data().emails:[])];
       const raw=snapshot.data()?.monitoraggio_v1;
       if(expectedControl!==undefined && JSON.stringify(snapshot.data()?.controllo_v1 || null)!==expectedControl) throw Error('Controllo cliente aggiornato: prepara di nuovo il report.');
       if(expected!==undefined && JSON.stringify(raw ? D.validate(raw,slug) : null)!==expected) throw Error('Dati aggiornati da un altro operatore. Riapri il pannello prima di salvare.');
       const latest=raw ? D.validate(raw,slug) : D.empty(slug);
-      const next=change(latest) || latest;
+      const next=change(latest,{actor,operators,approvers}) || latest;
       next.updated_at=new Date().toISOString();
       transaction.update(ref,{monitoraggio_v1:D.validate(next,slug)});
     });
@@ -59,12 +65,18 @@ window.createOutreachMonitoraggio = function (options) {
     const waiting='<div class="panel"><h3>Interessati senza prossimo passo</h3><p>Include anche gli ingressi precedenti al periodo. Attesa dall’ultima risposta della persona, fino al '+esc(filters.al)+'.</p>'+table(['Persona','Attesa','Responsabile','Ultima verifica','Azione'],backlog.map(c=>[esc(c.nome),c.attesa+' giorni',esc(c.responsabile||'Da assegnare'),pretty(c.conversazione_verificata_il),'<button data-edit="'+esc(c.id)+'">Apri scheda</button>']))+'</div>';
     const people='<details class="panel"><summary>Persone della coorte e classificazioni</summary>'+table(['Persona','Settore / topic / target','Risposta','Interesse','Esito','Scheda'],summary.contacts.map(c=>[esc(c.nome),[c.settore,c.tema,c.target].map(esc).join(' / '),esc(words[c.tipo_risposta]||'Da classificare'),esc(words[c.tipo_interesse]||'Da classificare'),esc(c.esito||'Non rilevato'),'<button data-edit="'+esc(c.id)+'">Apri</button>']))+'</details>';
     const calls='<div class="panel"><h3>Call e provenienza</h3><p>Prenotazioni create nel periodo, da tutte le fonti dichiarate: anche contatti entrati prima o fuori outreach. Prenotazione, svolgimento e vendita restano distinti.</p>'+table(['Persona','Prenotazione creata','Fissata per','Fatta','Fonte attribuita','Fonte dato / prova','Esito'],summary.calls.map(c=>[esc(state.contacts.find(p=>p.id===c.contact_id)?.nome||c.contact_id),pretty(c.creata),pretty(c.fissata_per),pretty(c.fatta_il),esc(c.fonte||'Da attribuire'),esc(c.source)+'<br>'+esc(c.source_evidence),esc(c.esito||'Non rilevato')]))+'</div>';
-    const outbox='<details class="panel"><summary>Richieste nuove di invio</summary><p>Questa coda registra la richiesta; non invia. Nessuna vecchia approvazione è trasferita qui. Limite dieci richieste al giorno, nessun nuovo invito. Invio e consegna richiedono prove distinte.</p>'+table(['Persona','Creata / confermata','Testo','Stato','Azione'],state.outbox.map(r=>[esc(state.contacts.find(c=>c.id===r.contact_id)?.nome||r.contact_id),pretty(r.created_at)+'<br>'+pretty(r.confirmed_at),esc(r.testo),esc(words[r.stato]),r.stato==='richiesta'&&!r.sent_at&&canEdit()?'<button data-cancel="'+esc(r.id)+'">Annulla richiesta</button>':'—']))+'</details>';
+    const outbox='<details class="panel"><summary>Richieste nuove di invio</summary><p>Questa coda registra richieste e riscontri; non trasmette messaggi. Nessuna vecchia approvazione è trasferita qui. Massimo dieci richieste e dieci invii al giorno, nessun nuovo invito. Invio e consegna richiedono prove distinte.</p>'+table(['Persona / destinatario esatto','Creata / confermata da','Testo approvato','Stato / motivo','Presa in carico / prove','Azioni'],state.outbox.map(r=>[
+      esc(state.contacts.find(c=>c.id===r.contact_id)?.nome||r.contact_id)+'<br>'+esc(r.destinatario||'Destinatario non registrato'),
+      pretty(r.created_at)+'<br>'+pretty(r.confirmed_at)+'<br>'+esc(r.confirmed_by),esc(r.testo),esc(r.stato==='consegnato'&&!r.delivery_evidence?'Consegna dichiarata · prova distinta mancante':words[r.stato]||r.stato)+(r.reason?'<br>'+esc(r.reason):''),
+      'Controllo filo: '+pretty(r.checked_at)+'<br>Presa in carico: '+pretty(r.claimed_at)+' · '+esc(r.claimed_by||'—')+'<br>Invio: '+pretty(r.sent_at)+'<br>'+esc(r.evidence||'Nessuna prova di invio')+'<br>Consegna: '+pretty(r.delivered_at)+'<br>'+esc(r.delivery_evidence||'Nessuna prova distinta di consegna'),
+      (D.threadUrl(r.tipo,r.thread_url||r.conversation_url)?'<a href="'+esc(r.thread_url||r.conversation_url)+'" target="_blank" rel="noopener noreferrer">Apri filo verificato</a>':'')+(canEdit()?'<button data-dispatch="'+esc(r.id)+'">Controlla richiesta e riscontri</button>':'')+(r.stato==='richiesta'&&!r.sent_at&&canEdit()?'<button data-cancel="'+esc(r.id)+'">Annulla richiesta</button>':'')
+    ]))+'</details>';
     const reports=reportBox();
     box.innerHTML=head+filter+tiles+coverage+rates+splits+waiting+people+calls+outbox+reports+importBox()+'<div data-editor></div>';
     box.querySelector('[data-filters]').onsubmit=e=>{e.preventDefault(); const f=Object.fromEntries(new FormData(e.currentTarget));try{D.summarize(state,f);filters=f;render();}catch(error){say(error.message,true);}};
     box.querySelector('[data-all]').onclick=()=>{filters.dal=state.contacts.map(c=>D.day(c.ingresso)).sort()[0]||filters.dal;render();};
     box.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>editor(b.dataset.edit));
+    box.querySelectorAll('[data-dispatch]').forEach(b=>b.onclick=()=>dispatchEditor(b.dataset.dispatch));
     box.querySelectorAll('[data-cancel]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{if(!canEdit())throw Error('Operazione non disponibile.');await mutate(s=>{D.cancel(s,b.dataset.cancel);});say('Richiesta annullata nella dashboard. Nessun annullamento esterno è stato richiesto.');}catch(e){say(e.message,true);b.disabled=false;}});
     bindReport();
     bindImport();
@@ -87,6 +99,40 @@ window.createOutreachMonitoraggio = function (options) {
         say('Report preparato e salvato. Nessuna email inviata.');
       } catch(e) {say(e.message,true);}
     };
+  }
+  function dispatchEditor(id) {
+    const r=state?.outbox.find(item=>item.id===id);
+    if(!r || !canEdit()) return;
+    editing=true;
+    const expected=JSON.stringify(state), target=box.querySelector('[data-editor]');
+    const allowed=r.stato==='richiesta'?['presa']:['in_corso','da_verificare'].includes(r.stato)?['inviato','da_verificare','errore']:r.stato==='inviato'?['consegnato']:[];
+    const actionNames={presa:'Registra presa in carico — non invia',inviato:'Registra una prova di invio già avvenuto',consegnato:'Registra una prova distinta di consegna',da_verificare:'Segna esito incerto — blocca i ritentativi',errore:'Registra errore — nessun nuovo tentativo'};
+    target.innerHTML='<form class="panel monitor-editor"><h3>Controllo richiesta</h3><p><strong>Destinatario confermato:</strong> '+esc(r.destinatario||'Non registrato')+'</p><p><strong>Testo confermato:</strong> '+esc(r.testo)+'</p><p>Confermata da '+esc(r.confirmed_by)+' il '+pretty(r.confirmed_at)+'. Stato: '+esc(words[r.stato]||r.stato)+'.</p><p>Questa operazione salva soltanto il registro. Il messaggio deve essere eseguito nel canale autorizzato; una presa in carico non dimostra l’invio.</p>'+
+      (allowed.length?'<label>Operazione<select name="action">'+allowed.map(key=>'<option value="'+key+'">'+actionNames[key]+'</option>').join('')+'</select></label><label>URL esatto del filo<input name="thread_url" type="url" value="'+esc(r.thread_url||r.conversation_url||'')+'" maxlength="2000"></label><label>Ora UTC del controllo del filo o del riscontro<input name="at" placeholder="2026-10-26T09:00:00Z" maxlength="40"></label>'+
+        (r.stato==='richiesta'?'<label>Data UTC dell’ultima risposta della persona, se presente<input name="latest_reply_at" placeholder="Lascia vuoto soltanto se non esiste una risposta" maxlength="40"></label>':'')+
+        '<label>Riscontro concreto o motivo del blocco<textarea name="evidence" rows="4" maxlength="2000"></textarea></label><label><input name="reviewed" type="checkbox"> Ho ricontrollato questo destinatario e il testo esatto; il riscontro descrive ciò che vedo nel canale reale</label><button type="submit" class="primary">Salva il registro — non invia</button>':'<p>Richiesta chiusa o sospesa. Non può essere ritentata. Per una richiesta sospesa serve un nuovo testo verificato e una nuova conferma nella scheda della persona.</p>')+
+      '<button type="button" data-close-dispatch>Chiudi controllo richiesta</button></form>';
+    const form=target.querySelector('form'), claimId=r.claim_id || 'presa-'+crypto.randomUUID();
+    form.querySelector('[data-close-dispatch]').onclick=()=>render();
+    form.onsubmit=async e=>{
+      e.preventDefault();
+      if(!allowed.length || !form.querySelector('[name="reviewed"]').checked) return say('Conferma il ricontrollo del destinatario, del testo e del riscontro.',true);
+      const fields=Object.fromEntries(new FormData(form)), action=fields.action;
+      if(!allowed.includes(action)) return say('Operazione non disponibile per questa richiesta.',true);
+      const button=form.querySelector('[type="submit"]');button.disabled=true;
+      let result;
+      try {
+        await mutate((s,roles)=>{
+          const latest=s.outbox.find(item=>item.id===id);
+          if(!latest) throw Error('Richiesta non più disponibile.');
+          if(action==='presa') result=D.claim(s,id,{...roles,claim_id:claimId,verification:{checked_at:fields.at,thread_url:fields.thread_url,latest_reply_at:fields.latest_reply_at||'',evidence:fields.evidence,testo:r.testo,destinatario:r.destinatario}});
+          else result=D.recordOutcome(s,id,{...roles,claim_id:claimId,stato:action,at:fields.at,thread_url:fields.thread_url,testo:r.testo,destinatario:r.destinatario,evidence:fields.evidence,reason:fields.evidence});
+        },expected);
+        editing=false;render();
+        say(result?.ok===false?'Richiesta sospesa: '+result.reasons.join(' '):'Registro salvato. Nessun messaggio è stato trasmesso da questo pannello.',result?.ok===false);
+      } catch(error) {say(error.message,true);button.disabled=false;}
+    };
+    target.scrollIntoView({behavior:'smooth',block:'start'});
   }
   function editor(id) {
     const c=state.contacts.find(c=>c.id===id);if(!c)return;

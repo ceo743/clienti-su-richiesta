@@ -76,16 +76,18 @@ function uiHarness(input,control=null,editable=true) {
   const nodes=new Map();
   const box={html:'',set innerHTML(v){this.html=v;nodes.clear();},get innerHTML(){return this.html;},querySelector(selector){if(!nodes.has(selector)){const key=selector==='[data-report-dal]'?'dal':selector==='[data-report-al]'?'al':null;const value=key?this.html.match(new RegExp('data-report-'+key+' type="date" value="([^"]*)"'))?.[1]:'';nodes.set(selector,{innerHTML:'',textContent:'',className:'',disabled:false,value});}return nodes.get(selector);},querySelectorAll(){return [];}};
   let saved=null, transactions=0;
+  let operators=['operatore@example.test'];
+  const reads=[];
   let remote={monitoraggio_v1:input,...(control?{controllo_v1:control}:{})};
-  const snapshot={data:()=>remote};
+  const snapshot={exists:true,data:()=>remote};
   const ref={onSnapshot(fn){fn(snapshot);return ()=>{};}};
-  const db={collection(){return {doc(){return ref;}};},async runTransaction(fn){transactions++;return fn({async get(){return snapshot;},update(_ref,data){saved=data;}});}};
+  const db={collection(collection){return {doc(id){return collection==='clienti'?ref:{collection,id};}};},async runTransaction(fn){transactions++;return fn({async get(target){reads.push(target===ref?'clienti':target.collection+'/'+target.id);return target===ref?snapshot:{exists:true,data:()=>({emails:target.id==='admins'?operators:['approvatore@example.test']})};},update(_ref,data){saved=data;}});}};
   class FixedDate extends Date { constructor(...args){super(...(args.length ? args : [now]));} }
   const sandbox={window:{OutreachMonitoraggio:D,OutreachReportExport:E},document:{getElementById:()=>box},Date:FixedDate,console};
   vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../monitoraggio-ui.js'),'utf8'),sandbox);
   const panel=sandbox.window.createOutreachMonitoraggio({db,auth:{currentUser:{email:'operatore@example.test'}},isAdmin:()=>editable,isApprovatore:()=>editable});
   panel.open(client);
-  return {box,nodes,setRemote(data){remote=data;},get saved(){return saved;},get transactions(){return transactions;}};
+  return {box,nodes,reads,setOperators(emails){operators=emails;},setRemote(data){remote=data;},get saved(){return saved;},get transactions(){return transactions;}};
 }
 test('renderer originale: click effettivo genera testo completo e salva solo monitoraggio_v1 in memoria',async()=>{
   const input=fixture(), h=uiHarness(input);
@@ -93,6 +95,7 @@ test('renderer originale: click effettivo genera testo completo e salva solo mon
   // Il vero pannello usa gli ultimi trenta giorni; i dati di prova restano inclusi.
   await h.nodes.get('[data-report]').onclick();
   assert.equal(h.transactions,1);
+  assert.deepEqual(h.reads,['clienti','config/admins','config/approvatori_messaggi']);
   assert.deepEqual(Object.keys(h.saved),['monitoraggio_v1']);
   const report=h.saved.monitoraggio_v1.reports.at(-1);
   assert.equal(report.stato,'preparato');
@@ -170,4 +173,17 @@ test('handler report rifiuta date vuote, invertite e inesistenti senza salvare o
     assert.equal(h.nodes.get('[data-report-body]').innerHTML,'');
     assert.match(h.nodes.get('[data-status]').textContent,/Intervallo non valido/);
   }
+});
+test('ruolo amministratore revocato durante il salvataggio blocca la scrittura reale',async()=>{
+  const h=uiHarness(fixture());h.setOperators([]);
+  await h.nodes.get('[data-report]').onclick();
+  assert.equal(h.saved,null);assert.match(h.nodes.get('[data-status]').textContent,/non più amministratore/);
+});
+test('la coda renderizzata espone destinatario, approvatore e prove distinte senza fingere il trasporto',()=>{
+  const input=fixture(),c=input.contacts[0];
+  Object.assign(c,{bozza:'Testo approvato visibile',profilo:'https://www.linkedin.com/in/persona-prova/',conversazione_verificata_il:now});
+  const r=D.request(input,c.id,'messaggio',c.bozza,'approvatore@example.test',now);
+  const h=uiHarness(input);
+  for(const text of [r.destinatario,'approvatore@example.test','Testo approvato visibile','Nessuna prova di invio','Nessuna prova distinta di consegna','registra richieste e riscontri; non trasmette messaggi','Controlla richiesta e riscontri']) assert.ok(h.box.innerHTML.includes(text),text);
+  assert.doesNotMatch(h.box.innerHTML,/>Invia ora</);
 });

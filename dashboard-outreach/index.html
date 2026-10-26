@@ -178,6 +178,12 @@ svg text { font-family: inherit; }
 #monitoraggio label { display:block; font-size:13px; margin:8px 0; }
 #monitoraggio input:not([type="checkbox"]), #monitoraggio select, #monitoraggio textarea { display:block; width:100%; font:inherit; background:var(--page); color:var(--text-primary); border:1px solid var(--baseline); padding:8px; border-radius:6px; }
 #monitoraggio summary { cursor:pointer; font-weight:600; }
+#statoOperativo .panel { padding:18px; border:1px solid var(--border); border-radius:12px; background:var(--surface-1); margin-bottom:16px; }
+#statoOperativo article { border-top:1px solid var(--border); padding:12px 0; }
+#statoOperativo p { font-size:13px; color:var(--text-secondary); margin:8px 0; }
+#statoOperativo label { display:block; font-size:13px; margin:8px 0; }
+#statoOperativo textarea { display:block; width:100%; font:inherit; background:var(--page); color:var(--text-primary); border:1px solid var(--baseline); padding:8px; border-radius:6px; }
+#statoOperativo summary { cursor:pointer; font-weight:600; }
 .monitor-filters { display:flex; gap:12px; flex-wrap:wrap; align-items:end; }
 .monitor-filters label { flex:1; min-width:135px; }
 .monitor-filters p { width:100%; }
@@ -240,6 +246,7 @@ svg text { font-family: inherit; }
       <span class="agg" id="dAgg"></span>
     </div>
     <section id="controlloCliente" aria-label="Controllo del cliente selezionato"></section>
+    <section id="statoOperativo" aria-label="Stato delle funzioni e prove"></section>
     <section id="monitoraggio" aria-label="Monitoraggio operativo"></section>
     <div class="history-notice"><strong>Storico precedente</strong><br>I riepiloghi seguenti sono conservati dalla dashboard originale con la loro data di aggiornamento. I dati di luglio non sono i totali attuali; le categorie mancanti restano non disponibili.</div>
     <div class="tiles" id="dTiles"></div>
@@ -291,9 +298,11 @@ svg text { font-family: inherit; }
 <script src="firebase-config.js"></script>
 <script src="controllo-clienti-domain.js"></script>
 <script src="controllo-clienti-ui.js"></script>
-<script src="monitoraggio-domain.js"></script>
+<script src="operativita-domain.js?v=20261026-prove"></script>
+<script src="operativita-ui.js?v=20261026-prove"></script>
+<script src="monitoraggio-domain.js?v=20261026-invii-prove"></script>
 <script src="report-export.js?v=20261026-report-periodo"></script>
-<script src="monitoraggio-ui.js?v=20261026-report-periodo"></script>
+<script src="monitoraggio-ui.js?v=20261026-invii-prove"></script>
 <script>
 /* ================= tema ================= */
 const themeBtn = document.getElementById('themeBtn');
@@ -385,6 +394,7 @@ $('logoutBtn').onclick = () => auth.signOut();
 /* ================= dati ================= */
 let isAdmin = false, isApprovatore = false, allClients = [], currentClient = null;
 const monitoraggio = createOutreachMonitoraggio({db, auth, isAdmin:()=>isAdmin, isApprovatore:()=>isApprovatore});
+const operativita = createOutreachOperativita({db, auth, isAdmin:()=>isAdmin});
 const controlloClienti = createOutreachControlloClienti({db, auth, isAdmin:()=>isAdmin, isApprovatore:()=>isApprovatore,
   openClient:c=>{ currentClient=c; renderClient(c,true); },
   onClients:clients=>{ allClients=clients; $('adminAgg').textContent=`${clients.length} clienti · controllo operativo e storico separati`; },
@@ -398,7 +408,7 @@ const controlloClienti = createOutreachControlloClienti({db, auth, isAdmin:()=>i
 
 auth.onAuthStateChanged(async user => {
   if (!user) {
-    controlloClienti.stop(); monitoraggio.stop(); stopWatchCoda(); stopWatchEsclusi(); stopAdminDaApprovare();
+    controlloClienti.stop(); monitoraggio.stop(); operativita.stop(); stopWatchCoda(); stopWatchEsclusi(); stopAdminDaApprovare();
     isAdmin = false; isApprovatore = false; allClients = []; currentClient = null; window.__lastRender = null;
     $('userEmail').textContent = '';
     $('logoutBtn').style.display = 'none';
@@ -464,6 +474,7 @@ function renderAdmin() {
   currentClient=null;
   controlloClienti.openOverview();
   monitoraggio.stop();
+  operativita.stop();
   stopWatchCoda();
   stopWatchEsclusi();
   $('adminAgg').textContent = `${allClients.length} clienti · controllo operativo e storico separati`;
@@ -516,6 +527,7 @@ function renderClient(c, fromAdmin) {
   currentClient=c;
   controlloClienti.open(c);
   monitoraggio.open(c);
+  operativita.open(c);
   stopAdminDaApprovare();
   window.__lastRender = () => renderClient(c, fromAdmin);
   show('dashView');

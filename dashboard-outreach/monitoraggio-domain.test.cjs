@@ -91,5 +91,5 @@ test('script dashboard e integrazione sintatticamente validi; salvataggio solo m
   for(const match of html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g))new vm.Script(match[1]);
   const ui=fs.readFileSync(path.join(__dirname,'monitoraggio-ui.js'),'utf8');new vm.Script(ui);
   assert.match(ui,/transaction\.update\(ref,\{monitoraggio_v1:D\.validate\(next,slug\)\}\)/);
-  assert.match(html,/monitoraggio\.stop\(\); stopWatchCoda\(\); stopWatchEsclusi\(\); stopAdminDaApprovare\(\)/);
+  assert.match(html,/monitoraggio\.stop\(\);[^\n]*stopWatchCoda\(\); stopWatchEsclusi\(\); stopAdminDaApprovare\(\)/);
 });
