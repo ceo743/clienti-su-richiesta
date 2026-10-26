@@ -173,6 +173,22 @@ svg text { font-family: inherit; }
 .back { margin-bottom: 14px; }
 .empty { color: var(--muted); font-size: 13.5px; padding: 8px 0; }
 #loading { text-align: center; color: var(--muted); padding: 60px 0; }
+#monitoraggio .panel { margin-bottom:16px; }
+#monitoraggio p { color:var(--text-secondary); font-size:13px; margin:8px 0; }
+#monitoraggio label { display:block; font-size:13px; margin:8px 0; }
+#monitoraggio input:not([type="checkbox"]), #monitoraggio select, #monitoraggio textarea { display:block; width:100%; font:inherit; background:var(--page); color:var(--text-primary); border:1px solid var(--baseline); padding:8px; border-radius:6px; }
+#monitoraggio summary { cursor:pointer; font-weight:600; }
+.monitor-filters { display:flex; gap:12px; flex-wrap:wrap; align-items:end; }
+.monitor-filters label { flex:1; min-width:135px; }
+.monitor-filters p { width:100%; }
+.monitor-actions { display:flex; gap:8px; flex-wrap:wrap; }
+.history-notice { margin:24px 0 14px; padding:14px; border:1px solid var(--baseline); border-radius:8px; color:var(--text-secondary); }
+.control-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:12px; margin:12px 0; overflow-wrap:anywhere; }
+#controlloCliente .panel, #controlloClienti .panel { margin-bottom:16px; }
+#controlloCliente p, #controlloClienti p { font-size:13px; color:var(--text-secondary); margin:10px 0; }
+.control-form label { display:block; font-size:13px; margin:12px 0; }
+.control-form input:not([type="checkbox"]), .control-form select, .control-form textarea { display:block; width:100%; font:inherit; background:var(--page); color:var(--text-primary); border:1px solid var(--baseline); padding:8px; border-radius:6px; }
+#controlloClienti td { min-width:120px; overflow-wrap:anywhere; }
 </style>
 </head>
 <body>
@@ -210,7 +226,10 @@ svg text { font-family: inherit; }
   <!-- ADMIN: elenco clienti -->
   <div id="adminView" style="display:none">
     <div class="topline"><h2>Tutti i clienti</h2><span class="agg" id="adminAgg"></span></div>
+    <section id="controlloClienti" aria-label="Controllo di tutti i clienti"></section>
+    <details><summary>Riepiloghi e coda storica originali</summary>
     <div class="client-cards" id="clientCards"></div>
+    </details>
   </div>
 
   <!-- DASHBOARD cliente -->
@@ -220,6 +239,9 @@ svg text { font-family: inherit; }
       <h2 id="dTitle"></h2>
       <span class="agg" id="dAgg"></span>
     </div>
+    <section id="controlloCliente" aria-label="Controllo del cliente selezionato"></section>
+    <section id="monitoraggio" aria-label="Monitoraggio operativo"></section>
+    <div class="history-notice"><strong>Storico precedente</strong><br>I riepiloghi seguenti sono conservati dalla dashboard originale con la loro data di aggiornamento. I dati di luglio non sono i totali attuali; le categorie mancanti restano non disponibili.</div>
     <div class="tiles" id="dTiles"></div>
     <div class="panel" id="dDetailPanel" style="display:none;margin-bottom:22px">
       <h3 id="dDetailTitle" style="display:flex;align-items:center;justify-content:space-between">
@@ -243,12 +265,13 @@ svg text { font-family: inherit; }
       </div>
     </div>
     <div class="panel" id="dMsgPanel" style="margin-bottom:16px">
-      <h3>Messaggi da approvare <span class="n" id="dMsgN"></span></h3>
+      <h3>Coda storica messaggi · sola lettura <span class="n" id="dMsgN"></span></h3>
+      <p class="empty">Coda originale in sola lettura. Le approvazioni storiche non autorizzano nuovi invii. Le richieste attuali sono nel monitoraggio operativo.</p>
       <div id="dMsgToast" class="msg ok" style="display:none;margin-bottom:10px"></div>
       <div id="dMsgQueue"></div>
     </div>
     <div class="panel" style="margin-bottom:16px">
-      <h3>Lead esclusi <span class="n" id="dExclN"></span></h3>
+      <h3>Lead esclusi storici · sola lettura <span class="n" id="dExclN"></span></h3>
       <div id="dExclQueue"></div>
     </div>
     <div class="panel" id="dRispPanel" style="margin-bottom:16px">
@@ -266,6 +289,10 @@ svg text { font-family: inherit; }
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
+<script src="controllo-clienti-domain.js"></script>
+<script src="controllo-clienti-ui.js"></script>
+<script src="monitoraggio-domain.js"></script>
+<script src="monitoraggio-ui.js"></script>
 <script>
 /* ================= tema ================= */
 const themeBtn = document.getElementById('themeBtn');
@@ -356,9 +383,22 @@ $('logoutBtn').onclick = () => auth.signOut();
 
 /* ================= dati ================= */
 let isAdmin = false, isApprovatore = false, allClients = [], currentClient = null;
+const monitoraggio = createOutreachMonitoraggio({db, auth, isAdmin:()=>isAdmin, isApprovatore:()=>isApprovatore});
+const controlloClienti = createOutreachControlloClienti({db, auth, isAdmin:()=>isAdmin, isApprovatore:()=>isApprovatore,
+  openClient:c=>{ currentClient=c; renderClient(c,true); },
+  onClients:clients=>{ allClients=clients; $('adminAgg').textContent=`${clients.length} clienti · controllo operativo e storico separati`; },
+  onClient:c=>{
+    if(currentClient?.slug!==c.slug)return;
+    currentClient=c;
+    allClients=allClients.map(item=>item.slug===c.slug?c:item);
+    $('dTitle').textContent=c.nome+(c.brand?' — '+c.brand:'');
+  }
+});
 
 auth.onAuthStateChanged(async user => {
   if (!user) {
+    controlloClienti.stop(); monitoraggio.stop(); stopWatchCoda(); stopWatchEsclusi(); stopAdminDaApprovare();
+    isAdmin = false; isApprovatore = false; allClients = []; currentClient = null; window.__lastRender = null;
     $('userEmail').textContent = '';
     $('logoutBtn').style.display = 'none';
     setMode(false);
@@ -388,7 +428,7 @@ auth.onAuthStateChanged(async user => {
 
     if (isAdmin) {
       const snap = await db.collection('clienti').get();
-      allClients = snap.docs.map(d => d.data()).sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
+      allClients = snap.docs.map(d => ({...d.data(),slug:d.id})).sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
       // admin che è ANCHE cliente (es. Davide/davide-caiazzo): atterra sulla SUA scheda, non sulla lista.
       // "← Tutti i clienti" (già presente) resta il modo per passare alla vista admin.
       let mySlug = null;
@@ -409,7 +449,7 @@ auth.onAuthStateChanged(async user => {
       }
       const doc = await db.collection('clienti').doc(acc.data().slug).get();
       if (!doc.exists) { show('loginView'); msg('Dati non ancora disponibili: riprova più tardi.'); return; }
-      currentClient = doc.data();
+      currentClient = {...doc.data(),slug:doc.id};
       renderClient(currentClient, false);
     }
   } catch (e) {
@@ -420,30 +460,28 @@ auth.onAuthStateChanged(async user => {
 
 /* ================= render admin ================= */
 function renderAdmin() {
+  currentClient=null;
+  controlloClienti.openOverview();
+  monitoraggio.stop();
   stopWatchCoda();
   stopWatchEsclusi();
-  const tot = allClients.reduce((a, c) => ({
-    inviti: a.inviti + (c.kpi?.inviti_totali || 0),
-    risposte: a.risposte + (c.kpi?.risposte || 0),
-    call: a.call + (c.kpi?.call_fissate || 0),
-  }), { inviti: 0, risposte: 0, call: 0 });
-  $('adminAgg').textContent = `${allClients.length} clienti · ${tot.inviti} inviti · ${tot.risposte} risposte · ${tot.call} call`;
+  $('adminAgg').textContent = `${allClients.length} clienti · controllo operativo e storico separati`;
   $('clientCards').innerHTML = '';
   allClients.forEach((c, i) => {
     const el = document.createElement('div');
     el.className = 'card client-card';
     el.innerHTML = `
       <h3>${esc(c.nome)}</h3>
-      <div class="b">${esc(c.brand || '')} · agg. ${dataIt(c.aggiornato)}</div>
+      <div class="b">${esc(c.brand || '')} · storico aggiornato il ${dataIt(c.aggiornato)}</div>
       <div class="mini">
-        <div><div class="mv">${c.kpi?.inviti_totali ?? 0}</div><div class="mk">Inviti</div></div>
-        <div><div class="mv">${c.kpi?.accettati ?? 0}</div><div class="mk">Accettati</div></div>
-        <div><div class="mv">${(c.kpi?.messaggi_totali ?? c.kpi?.messaggiati) ?? 0}</div><div class="mk">Messaggi</div></div>
-        <div><div class="mv">${c.kpi?.risposte ?? 0}</div><div class="mk">Risposte</div></div>
-        <div><div class="mv">${c.kpi?.risposte_positive ?? 0}</div><div class="mk">Lead</div></div>
-        <div><div class="mv" data-daapprovare="${esc(c.slug)}">${c.kpi?.da_approvare ?? 0}</div><div class="mk">Da approvare</div></div>
+        <div><div class="mv">${c.kpi?.inviti_totali ?? '—'}</div><div class="mk">Inviti storici</div></div>
+        <div><div class="mv">${c.kpi?.accettati ?? '—'}</div><div class="mk">Accettati storici</div></div>
+        <div><div class="mv">${(c.kpi?.messaggi_totali ?? c.kpi?.messaggiati) ?? '—'}</div><div class="mk">Messaggi storici</div></div>
+        <div><div class="mv">${c.kpi?.risposte ?? '—'}</div><div class="mk">Risposte storiche</div></div>
+        <div><div class="mv">${c.kpi?.risposte_positive ?? '—'}</div><div class="mk">Lead storici</div></div>
+        <div><div class="mv" data-daapprovare="${esc(c.slug)}">${c.kpi?.da_approvare ?? 0}</div><div class="mk">Nella coda storica</div></div>
       </div>`;
-    el.onclick = () => { currentClient = allClients[i]; renderClient(currentClient, true); };
+    el.onclick = () => { currentClient = allClients.find(item=>item.slug===c.slug)||c; renderClient(currentClient, true); };
     $('clientCards').appendChild(el);
   });
   show('adminView');
@@ -474,12 +512,15 @@ $('backBtn').onclick = () => renderAdmin();
 
 /* ================= render cliente ================= */
 function renderClient(c, fromAdmin) {
+  currentClient=c;
+  controlloClienti.open(c);
+  monitoraggio.open(c);
   stopAdminDaApprovare();
   window.__lastRender = () => renderClient(c, fromAdmin);
   show('dashView');
   $('backWrap').style.display = fromAdmin ? 'block' : 'none';
   $('dTitle').textContent = c.nome + (c.brand ? ' — ' + c.brand : '');
-  $('dAgg').textContent = 'aggiornato ' + dataIt(c.aggiornato);
+  $('dAgg').textContent = 'dati storici aggiornati ' + dataIt(c.aggiornato);
   const k = c.kpi || {};
   const tiles = [
     ['Inviti mandati', k.inviti_totali, null, 'detail', 'dettaglio_inviti', '📨', 'var(--accent)'],
@@ -490,7 +531,7 @@ function renderClient(c, fromAdmin) {
     ['Call fissate', k.call_fissate, null, 'detail', 'dettaglio_call', '📅', 'var(--good-text)'],
   ];
   $('dTiles').innerHTML = tiles.map(([lbl, v, d, , , icon, color]) => `
-    <div class="tile" style="cursor:pointer;--c:${color}"><div class="tile-icon">${icon}</div><div class="k">${lbl}</div><div class="v">${v ?? 0}</div>${d ? `<div class="d">${d}</div>` : ''}</div>
+    <div class="tile" style="cursor:pointer;--c:${color}"><div class="tile-icon">${icon}</div><div class="k">${lbl} · storico</div><div class="v">${v ?? '—'}</div>${d ? `<div class="d">${d}</div>` : ''}</div>
   `).join('');
   $('dTiles').querySelectorAll('.tile').forEach((el, i) => {
     const [lbl, , , mode, target] = tiles[i];
@@ -570,59 +611,31 @@ function stopWatchEsclusi() {
 }
 
 function renderEsclusi(slug, items) {
+  if(currentClient?.slug!==slug)return;
   $('dExclN').textContent = items.length ? `— ${items.length}` : '';
   const box = $('dExclQueue');
   if (!items.length) { box.innerHTML = '<div class="empty">Nessun lead escluso al momento.</div>'; return; }
-  const puoiRipristinare = isApprovatore || !isAdmin;
   box.innerHTML = items.map(it => {
     const testo = it.messaggio_cliente ?? it.messaggio_originale ?? '';
     return `<div class="msgq-row" data-id="${esc(it.id)}">
       <div><strong>${esc(it.nome || '')}</strong>${it.ruolo ? `<br><span style="color:var(--muted);font-size:12px">${esc(it.ruolo)}</span>` : ''}</div>
       <textarea readonly>${esc(testo)}</textarea>
-      <div class="msgq-azioni">${puoiRipristinare ? '<button data-act="ripristina">Ripristina</button>' : '<span class="pill neu">Escluso</span>'}</div>
+      <div class="msgq-azioni"><span class="pill neu">Escluso nello storico</span></div>
     </div>`;
   }).join('');
-  box.querySelectorAll('.msgq-row').forEach(row => {
-    const id = row.dataset.id;
-    row.querySelectorAll('button[data-act="ripristina"]').forEach(btn => {
-      btn.onclick = async () => {
-        try {
-          await db.collection('clienti').doc(slug).collection('coda_messaggi').doc(id)
-            .update({ stato: 'in_coda', cancellato_il: null });
-        } catch (e) { alert('Errore: ' + (e.message || e.code)); }
-      };
-    });
-  });
 }
 
 function renderMsgQueue(slug, items) {
-  $('dMsgN').textContent = items.length ? `— ${items.length} in coda` : '';
-  $('dMsgPanel').classList.toggle('urgent', items.length > 0);
+  if(currentClient?.slug!==slug)return;
+  $('dMsgN').textContent = items.length ? `— ${items.length} nello storico` : '';
+  $('dMsgPanel').classList.remove('urgent');
   const box = $('dMsgQueue');
   if (!items.length) { box.innerHTML = '<div class="empty">Nessun messaggio in coda al momento.</div>'; return; }
 
   box.innerHTML = items.map(it => {
     const testo = it.messaggio_cliente ?? it.messaggio_originale ?? '';
-    const editabile = it.stato !== 'approvato_max' && (it.stato === 'in_coda' || isApprovatore);
-    let azioni = '';
-    if (it.stato === 'approvato_max') {
-      azioni = isApprovatore
-        ? (it.invio_urgente ? '<span class="pill pos">Invio urgente richiesto</span>' : '<button data-act="urgente">Invia ora</button>')
-        : '<span class="pill pos">Approvato — in attesa di invio</span>';
-    } else if (isApprovatore) {
-      azioni = `<button class="primary" data-act="approva">Approva</button>
-        <button data-act="modinvia">Modifica e invia</button>
-        <button class="ghost" data-act="cancella">Escludi lead</button>`;
-    } else if (!isAdmin) {
-      azioni = it.stato === 'in_coda'
-        ? `<button class="primary" data-act="conferma">Conferma</button>
-           <button data-act="modifica">Modifica</button>
-           <button class="ghost" data-act="cancella">Escludi lead</button>`
-        : `<span class="pill pos">Grazie, ricevuto — in attesa di approvazione</span>
-           <button class="ghost" data-act="cancella">Escludi lead</button>`;
-    } else {
-      azioni = `<span class="pill neu">${esc(it.stato)}</span>`;
-    }
+    const editabile = false;
+    const azioni = `<span class="pill neu">${esc(it.stato)}</span><span class="empty">Stato storico · nessun nuovo invio</span>`;
     return `<div class="msgq-row" data-id="${esc(it.id)}" data-nome="${esc(it.nome || '')}">
       <div><strong>${esc(it.nome || '')}</strong>${it.ruolo ? `<br><span style="color:var(--muted);font-size:12px">${esc(it.ruolo)}</span>` : ''}</div>
       <textarea ${editabile ? '' : 'readonly'}>${esc(testo)}</textarea>
@@ -630,28 +643,6 @@ function renderMsgQueue(slug, items) {
     </div>`;
   }).join('');
 
-  box.querySelectorAll('.msgq-row').forEach(row => {
-    const id = row.dataset.id;
-    const nome = row.dataset.nome;
-    const ta = row.querySelector('textarea');
-    row.querySelectorAll('button[data-act]').forEach(btn => {
-      btn.onclick = async () => {
-        const ref = db.collection('clienti').doc(slug).collection('coda_messaggi').doc(id);
-        const now = new Date().toISOString();
-        try {
-          const act = btn.dataset.act;
-          if (act === 'conferma') await ref.update({ stato: 'confermato_cliente' });
-          if (act === 'modifica') await ref.update({ stato: 'modificato_cliente', messaggio_cliente: ta.value, modificato_cliente_il: now });
-          if (act === 'cancella') await ref.update({ stato: 'cancellato', cancellato_il: now });
-          if (act === 'approva') await ref.update({ stato: 'approvato_max', approvato_max_il: now });
-          if (act === 'modinvia') await ref.update({ stato: 'approvato_max', messaggio_cliente: ta.value, approvato_max_il: now });
-          if (act === 'urgente') await ref.update({ invio_urgente: true });
-          if (act === 'cancella') showMsgToast(`${nome} escluso: non verrà più ricontattato.`);
-          // nessun reload manuale: watchCoda() è live, si aggiorna da sola
-        } catch (e) { alert('Errore: ' + (e.message || e.code)); }
-      };
-    });
-  });
 }
 
 let __toastTimer = null;
