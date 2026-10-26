@@ -71,13 +71,15 @@ window.createOutreachMonitoraggio = function (options) {
   }
   function reportBox() {
     const schedule=client.slug==='davide-caiazzo'?'Report a Chiara programmato venerdì alle 11:00. Controllo delle nuove richieste approvate alle 09:00 e 16:00 dal lunedì al sabato. Ogni invio richiede una prova separata.':'Nessuna programmazione di invio configurata per questo cliente in questo pannello.';
-    return '<div class="panel"><h3>Report commerciale</h3><p>Include controllo cliente, fasi, classificazioni, provenienza call, esiti, attese, responsabili, prossime azioni e copertura. La preparazione non invia email.</p><p>'+schedule+'</p><button data-report>Prepara report con dati disponibili</button><div data-report-body></div><p>Ultimo report salvato: '+pretty(state?.reports.at(-1)?.created_at)+'</p></div>';
+    return '<div class="panel"><h3>Report commerciale</h3><p>Include controllo cliente, fasi, classificazioni, provenienza call, esiti, attese, responsabili, prossime azioni e copertura. La preparazione non invia email.</p><p>'+schedule+'</p><label>Report dal<input data-report-dal type="date" value="'+esc(filters.dal)+'" required></label><label>Report fino al<input data-report-al type="date" value="'+esc(filters.al)+'" required></label><p>Queste date valgono solo per il report.</p><button data-report>Prepara report con dati disponibili</button><div data-report-body></div><p>Ultimo report salvato: '+pretty(state?.reports.at(-1)?.created_at)+'</p></div>';
   }
   function bindReport() {
     box.querySelector('[data-report]').onclick=async()=>{
       try {
         const expected=JSON.stringify(state), expectedControl=JSON.stringify(client.controllo_v1 || null);
-        const output=Report.prepare(state,client,filters), report=output.report;
+        const reportFilters={...filters,dal:box.querySelector('[data-report-dal]').value,al:box.querySelector('[data-report-al]').value};
+        box.querySelector('[data-report-body]').innerHTML='';
+        const output=Report.prepare(state,client,reportFilters), report=output.report;
         box.querySelector('[data-report-body]').innerHTML='<label>Report completo — testo esportabile<textarea data-report-text readonly rows="18">'+esc(output.text)+'</textarea></label><details><summary>Versione HTML esportabile</summary><label>HTML completo<textarea data-report-html readonly rows="10">'+esc(output.html)+'</textarea></label></details>';
         if(!state) {say('Report preparato con limiti espliciti. Nessuna rilevazione creata e nessuna email inviata.');return;}
         if(!canEdit()) {say('Anteprima pronta. Salvataggio riservato agli operatori abilitati.');return;}

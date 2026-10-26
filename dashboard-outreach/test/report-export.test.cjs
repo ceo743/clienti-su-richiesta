@@ -74,7 +74,7 @@ test('HTML inerte: nomi, fonti e prossime azioni codificati; niente rete o crede
 // Non simula un browser o Firebase: intercetta soltanto il salvataggio in memoria.
 function uiHarness(input,control=null,editable=true) {
   const nodes=new Map();
-  const box={html:'',set innerHTML(v){this.html=v;nodes.clear();},get innerHTML(){return this.html;},querySelector(selector){if(!nodes.has(selector))nodes.set(selector,{innerHTML:'',textContent:'',className:'',disabled:false});return nodes.get(selector);},querySelectorAll(){return [];}};
+  const box={html:'',set innerHTML(v){this.html=v;nodes.clear();},get innerHTML(){return this.html;},querySelector(selector){if(!nodes.has(selector)){const key=selector==='[data-report-dal]'?'dal':selector==='[data-report-al]'?'al':null;const value=key?this.html.match(new RegExp('data-report-'+key+' type="date" value="([^"]*)"'))?.[1]:'';nodes.set(selector,{innerHTML:'',textContent:'',className:'',disabled:false,value});}return nodes.get(selector);},querySelectorAll(){return [];}};
   let saved=null, transactions=0;
   let remote={monitoraggio_v1:input,...(control?{controllo_v1:control}:{})};
   const snapshot={data:()=>remote};
@@ -139,4 +139,35 @@ test('sola lettura genera anteprima senza scrittura e pagina carica esportatore 
   const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
   assert.ok(html.indexOf('report-export.js')>html.indexOf('controllo-clienti-domain.js'));
   assert.ok(html.indexOf('report-export.js')<html.indexOf('monitoraggio-ui.js'));
+});
+test('periodo report separato dalla coorte schermata, anche senza rilevazione: venerdì–giovedì selezionabile',async()=>{
+  for(const input of [fixture(),undefined]) {
+    const h=uiHarness(input),dal=h.box.querySelector('[data-report-dal]'),al=h.box.querySelector('[data-report-al]');
+    const initial={dal:dal.value,al:al.value};
+    assert.deepEqual(initial,{dal:'2026-09-27',al:'2026-10-26'});
+    assert.match(h.box.innerHTML,/Report dal/);assert.match(h.box.innerHTML,/Report fino al/);
+    dal.value='2026-10-16';al.value='2026-10-22';
+    await h.nodes.get('[data-report]').onclick();
+    assert.match(h.nodes.get('[data-report-body]').innerHTML,/Periodo ingresso: 2026-10-16 \/ 2026-10-22/);
+    if(input) assert.equal(h.saved.monitoraggio_v1.reports.at(-1).periodo.al,'2026-10-22');
+    else {assert.equal(h.transactions,0);assert.equal(h.saved,null);}
+    // Riportando soltanto gli input report ai valori iniziali, il secondo output
+    // deve riusare la coorte originale: il primo click non modifica filters.
+    dal.value=initial.dal;al.value=initial.al;
+    await h.nodes.get('[data-report]').onclick();
+    assert.match(h.nodes.get('[data-report-body]').innerHTML,/Periodo ingresso: 2026-09-27 \/ 2026-10-26/);
+    if(input) assert.equal(h.saved.monitoraggio_v1.reports.at(-1).periodo.dal,'2026-09-27');
+    else assert.equal(h.transactions,0);
+  }
+});
+test('handler report rifiuta date vuote, invertite e inesistenti senza salvare o lasciare anteprima vecchia',async()=>{
+  for(const [dal,al] of [['','2026-10-22'],['2026-10-23','2026-10-22'],['2026-02-31','2026-10-22']]) {
+    const h=uiHarness(undefined);
+    h.box.querySelector('[data-report-body]').innerHTML='anteprima precedente';
+    h.box.querySelector('[data-report-dal]').value=dal;h.box.querySelector('[data-report-al]').value=al;
+    await h.nodes.get('[data-report]').onclick();
+    assert.equal(h.transactions,0);assert.equal(h.saved,null);
+    assert.equal(h.nodes.get('[data-report-body]').innerHTML,'');
+    assert.match(h.nodes.get('[data-status]').textContent,/Intervallo non valido/);
+  }
 });
