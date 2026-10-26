@@ -97,3 +97,21 @@ test('lo snapshot proprio dopo la risoluzione della transazione aggiorna il regi
   assert.equal(h.node('[data-operativita-status]').textContent,undefined);
   assert.match(h.box.innerHTML,/email-reale/);
 });
+
+test('lo snapshot proprio riconosce le chiavi map riordinate ricorsivamente da Firestore',async()=>{
+  const h=pendingUiSave(),before=h.draws(),save=h.start();
+  await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(h.writes.length,1);
+  h.resolve();await save;
+  const reorder=value=>Array.isArray(value)?value.map(reorder):value&&typeof value==='object'?Object.fromEntries(Object.keys(value).reverse().map(key=>[key,reorder(value[key])])):value;
+  const snapshot=reorder(h.writes[0]);
+  assert.deepEqual(snapshot,h.writes[0],'il riordino non cambia valori o ordine degli array');
+  assert.notEqual(JSON.stringify(snapshot),JSON.stringify(h.writes[0]),'il caso deve cambiare effettivamente l’ordine delle chiavi');
+  assert.notDeepEqual(Object.keys(snapshot.entries[0].periodo),Object.keys(h.writes[0].entries[0].periodo),'anche le map annidate devono avere ordine diverso');
+  h.snapshot(snapshot);
+  assert.equal(h.draws(),before+1);
+  assert.equal(h.node('[data-operativita-input]').value,'');
+  assert.equal(h.node('[data-operativita-reviewed]').checked,false);
+  assert.equal(h.node('[data-operativita-status]').textContent,undefined);
+  assert.match(h.box.innerHTML,/email-reale/);
+});

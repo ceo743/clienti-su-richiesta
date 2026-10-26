@@ -3,6 +3,8 @@ window.createOutreachOperativita=function(options){
   'use strict';const D=window.OutreachOperativita,box=document.getElementById('statoOperativo');
   const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const when=x=>new Date(x).toLocaleString('it-IT',{timeZone:'Europe/Rome'});
+  // Firestore può restituire le chiavi in ordine diverso da quello inviato.
+  const signatureOf=value=>JSON.stringify(value,(_key,item)=>item&&typeof item==='object'&&!Array.isArray(item)?Object.fromEntries(Object.keys(item).sort().map(key=>[key,item[key]])):item);
   let client=null,state=null,unsubscribe=null,generation=0,fingerprint=null,expectedSignature=null;
   const stop=()=>{generation++;if(unsubscribe)unsubscribe();unsubscribe=null;client=null;state=null;fingerprint=null;expectedSignature=null;box.innerHTML='';};
   const canEdit=()=>!!options.auth.currentUser&&options.isAdmin();
@@ -24,13 +26,13 @@ window.createOutreachOperativita=function(options){
       await options.db.runTransaction(async t=>{
         const ref=options.db.collection('clienti').doc(slug),snapshot=await t.get(ref);
         if(!snapshot.exists||token!==generation||!canEdit()||actor!==options.auth.currentUser?.email)throw Error('Cliente o accesso cambiato: salvataggio annullato.');
-        const next=D.append(snapshot.data().operativita_v1,slug,revision,payload,actor);expectedSignature=JSON.stringify(next);t.update(ref,{operativita_v1:next});
+        const next=D.append(snapshot.data().operativita_v1,slug,revision,payload,actor);expectedSignature=signatureOf(next);t.update(ref,{operativita_v1:next});
       });
     }catch(e){expectedSignature=null;fail(e);}
   }
   function open(c){stop();client=c;const token=generation;box.innerHTML='<p>Caricamento prove operative…</p>';
     unsubscribe=options.db.collection('clienti').doc(c.slug).onSnapshot(s=>{if(token!==generation)return;try{
-      const next=s.data()?.operativita_v1?D.validate(s.data().operativita_v1,c.slug):null,signature=JSON.stringify(next);
+      const next=s.data()?.operativita_v1?D.validate(s.data().operativita_v1,c.slug):null,signature=signatureOf(next);
       if(signature===fingerprint)return;
       const input=box.querySelector('[data-operativita-input]'),dirty=!!input&&(!!input.value.trim()||box.querySelector('[data-operativita-reviewed]').checked);
       if(dirty&&signature!==expectedSignature){const status=box.querySelector('[data-operativita-status]');status.textContent='Registro aggiornato da un altro operatore. La tua bozza è conservata; riapri il cliente prima di salvarla.';status.className='msg err';return;}
