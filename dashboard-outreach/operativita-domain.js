@@ -1,8 +1,8 @@
 /* Registro delle prove operative: nessun trasporto esterno e nessuna credenziale. */
 (function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;else root.OutreachOperativita=api;})(typeof globalThis!=='undefined'?globalThis:this,function(){
   'use strict';
-  const TYPES={controllo_clienti:'Controllo clienti',invio_linkedin:'Invii LinkedIn',report_email:'Report via email',report_automatico:'Report automatico'};
-  const RESULTS={verificato:'Prova reale registrata',bloccato:'Bloccato',incerto:'Esito da verificare',simulato:'Solo simulazione'};
+  const TYPES={controllo_clienti:'Controllo clienti',invio_linkedin:'Invii LinkedIn',report_email:'Report via email',report_coordinato:'Procedura report · collaudo reale anticipato',report_automatico:'Partenza settimanale del report'};
+  const RESULTS={verificato:'Prova reale registrata',canale_verificato:'Canale di invio verificato · coda da collaudare',bloccato:'Bloccato',incerto:'Esito da verificare',simulato:'Solo simulazione'};
   const assert=(ok,msg)=>{if(!ok)throw Error(msg);};
   const timestamp=x=>typeof x==='string'&&Number.isFinite(Date.parse(x));
   const text=(x,n=2000)=>typeof x==='string'&&x.trim().length>0&&x.length<=n;
@@ -12,17 +12,29 @@
   function validate(raw,slug){
     assert(raw&&raw.version===1&&raw.client_slug===slug&&/^[a-z0-9][a-z0-9-]{0,100}$/.test(slug),'Registro di un altro cliente.');
     assert(Number.isSafeInteger(raw.revision)&&raw.revision>=0&&Array.isArray(raw.entries)&&raw.entries.length<=100,'Registro operativo non valido.');
-    const ids=new Set();
+    const ids=new Set(),coordinatorRuns=new Set(),coordinatorMessages=new Set();
     for(const e of raw.entries){
       assert(text(e.id,200)&&!ids.has(e.id),'Identificativo prova duplicato.');ids.add(e.id);
       assert(Object.hasOwn(TYPES,e.funzione)&&Object.hasOwn(RESULTS,e.esito),'Funzione o esito non valido.');
+      if(e.esito==='canale_verificato'){
+        assert(e.funzione==='invio_linkedin','La verifica del solo canale è ammessa esclusivamente per gli invii LinkedIn.');
+        assert(/^https:\/\/www\.linkedin\.com\/in\/[^/?#\s]+\/?$/.test(e.destinatario||'')&&text(e.esecuzione_id,200),'La prova del canale richiede il profilo LinkedIn esatto e l’identificativo dell’intento.');
+        assert(/^https:\/\/www\.linkedin\.com\/(?:sales\/lead|messaging\/thread)\/[^/?#\s]+\/?(?:\?[^#\s]*)?$/.test(e.filo||''),'La prova del canale richiede il filo ufficiale Sales Navigator o messaggistica LinkedIn.');
+      }
       assert(timestamp(e.eseguito_il)&&timestamp(e.registrato_il)&&text(e.registrato_da,320),'Data o operatore della prova mancante.');
       assert(text(e.fonte)&&text(e.riscontro),'Ogni esito richiede fonte e riscontro rintracciabile.');
       if(e.periodo)assert(date(e.periodo.dal)&&date(e.periodo.al)&&e.periodo.dal<=e.periodo.al,'Periodo della prova non valido.');
-      if(e.esito==='verificato'&&['report_email','report_automatico'].includes(e.funzione)){
+      if(e.esito==='verificato'&&['report_email','report_coordinato','report_automatico'].includes(e.funzione)){
         assert(text(e.messaggio_id,320)&&text(e.destinatario,320)&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.destinatario)&&/^[a-f0-9]{64}$/.test(e.sha256_html||'')&&e.periodo,'Report senza prova email e allegato.');
       }
       if(e.esito==='verificato'&&e.funzione==='invio_linkedin')assert(/^https:\/\/www\.linkedin\.com\/messaging\/thread\/[^\s]+$/.test(e.filo||'')&&text(e.destinatario,1000),'Invio LinkedIn senza filo e destinatario.');
+      if(e.esito==='verificato'&&e.funzione==='report_coordinato'){
+        assert(e.origine==='coordinatore_reale_avvio_anticipato'&&text(e.esecuzione_id,200),'Il collaudo anticipato richiede il coordinatore reale e l’identificativo del tentativo effettivo.');
+        assert(['sha256_manifest','sha256_ricevuta','sha256_raw'].every(k=>/^[a-f0-9]{64}$/.test(e[k]||'')),'Il collaudo coordinato richiede le impronte di manifest, ricevuta e messaggio originale.');
+        assert(!coordinatorRuns.has(e.esecuzione_id)&&!coordinatorMessages.has(e.messaggio_id),'Tentativo coordinato o messaggio già registrato con un’altra prova.');
+        coordinatorRuns.add(e.esecuzione_id);coordinatorMessages.add(e.messaggio_id);
+        assert(raw.entries.some(p=>p.funzione==='report_email'&&p.esito==='verificato'&&p.messaggio_id===e.messaggio_id&&p.sha256_html===e.sha256_html&&p.destinatario===e.destinatario&&p.periodo?.dal===e.periodo.dal&&p.periodo?.al===e.periodo.al&&Date.parse(p.eseguito_il)<=Date.parse(e.eseguito_il)),'Il collaudo coordinato richiede il riscontro email verificato dello stesso messaggio, destinatario, periodo e allegato.');
+      }
       if(e.esito==='verificato'&&e.funzione==='report_automatico'){
         assert(text(e.esecuzione_id,200),'Manca il riferimento alla vera esecuzione automatica.');
         assert(raw.entries.some(p=>p.funzione==='report_email'&&p.esito==='verificato'&&p.messaggio_id===e.messaggio_id&&p.sha256_html===e.sha256_html&&p.destinatario===e.destinatario&&p.periodo?.dal===e.periodo.dal&&p.periodo?.al===e.periodo.al),'Prima registrare il riscontro email della stessa esecuzione.');
@@ -36,7 +48,7 @@
     assert(state.revision===expected,'Registro aggiornato da un altro operatore: riapri prima di salvare.');
     assert(text(actor,320)&&timestamp(now),'Accesso o data non validi.');
     assert(payload&&payload.version===1&&payload.client_slug===slug&&Array.isArray(payload.entries)&&payload.entries.length>0&&payload.entries.length<=10,'Indicare le prove del solo cliente aperto.');
-    const fields=['id','funzione','esito','eseguito_il','fonte','riscontro','periodo','messaggio_id','destinatario','sha256_html','filo','esecuzione_id'];
+    const fields=['id','funzione','esito','eseguito_il','fonte','riscontro','periodo','messaggio_id','destinatario','sha256_html','filo','esecuzione_id','origine','sha256_manifest','sha256_ricevuta','sha256_raw'];
     for(const entry of payload.entries){
       assert(entry&&Object.keys(entry).every(k=>fields.includes(k)),'Campi non ammessi nella prova.');
       assert(!(entry.funzione==='report_automatico'&&entry.esito==='verificato'),'Il modulo manuale non certifica la partenza automatica: serve un riscontro del processo automatico distinto.');
