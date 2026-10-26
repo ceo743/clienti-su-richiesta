@@ -6,6 +6,7 @@
   const assert=(ok,msg)=>{if(!ok)throw Error(msg);};
   const timestamp=x=>typeof x==='string'&&Number.isFinite(Date.parse(x));
   const text=(x,n=2000)=>typeof x==='string'&&x.trim().length>0&&x.length<=n;
+  const stable=value=>JSON.stringify(value,(_key,item)=>item&&typeof item==='object'&&!Array.isArray(item)?Object.fromEntries(Object.keys(item).sort().map(key=>[key,item[key]])):item);
   const date=x=>/^\d{4}-\d{2}-\d{2}$/.test(x||'')&&timestamp(x)&&new Date(x).toISOString().slice(0,10)===x;
   const empty=slug=>({version:1,client_slug:slug,revision:0,entries:[],updated_at:'',updated_by:''});
   function validate(raw,slug){
@@ -41,7 +42,7 @@
       assert(!(entry.funzione==='report_automatico'&&entry.esito==='verificato'),'Il modulo manuale non certifica la partenza automatica: serve un riscontro del processo automatico distinto.');
       assert(timestamp(entry.eseguito_il)&&Date.parse(entry.eseguito_il)<=Date.parse(now),'La prova non può essere futura.');
       const prior=state.entries.find(e=>e.id===entry.id);
-      if(prior){assert(fields.every(k=>JSON.stringify(prior[k])===JSON.stringify(entry[k])),'Prova già registrata con contenuto diverso.');continue;}
+      if(prior){assert(fields.every(k=>stable(prior[k])===stable(entry[k])),'Prova già registrata con contenuto diverso.');continue;}
       state.entries.push({...entry,registrato_il:now,registrato_da:actor});
     }
     state.revision++;state.updated_at=now;state.updated_by=actor;return validate(state,slug);
