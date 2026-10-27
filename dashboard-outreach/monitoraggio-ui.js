@@ -122,10 +122,25 @@ window.createOutreachMonitoraggio = function (options) {
       (allowed.length?'<label>Operazione<select name="action">'+allowed.map(key=>'<option value="'+key+'">'+actionNames[key]+'</option>').join('')+'</select></label><label>URL esatto del filo<input name="thread_url" type="url" value="'+esc(r.sent_thread_url||r.thread_url||r.conversation_url||'')+'" maxlength="2000"></label><label>Ora UTC del controllo del filo o del riscontro<input name="at" placeholder="2026-10-26T09:00:00Z" maxlength="40"></label>'+
         (r.stato==='richiesta'?'<label>Data UTC dell’ultima risposta della persona, se presente<input name="latest_reply_at" placeholder="Lascia vuoto soltanto se non esiste una risposta" maxlength="40"></label>':'')+
         '<label>Riscontro concreto o motivo del blocco<textarea name="evidence" rows="4" maxlength="2000"></textarea></label><label><input name="reviewed" type="checkbox"> Ho ricontrollato questo destinatario e il testo esatto; il riscontro descrive ciò che vedo nel canale reale</label><button type="submit" class="primary">Salva il registro — non invia</button>':'<p>Richiesta chiusa o sospesa. Non può essere ritentata. Per una richiesta sospesa serve un nuovo testo verificato e una nuova conferma nella scheda della persona.</p>')+
-      '<button type="button" data-close-dispatch>Chiudi controllo richiesta</button></form>';
+      '<button type="button" data-close-dispatch>Chiudi controllo richiesta</button></form>'+
+      (options.testMode?'':'<details class="panel"><summary>Dati correnti di questa richiesta</summary><p>Rilegge soltanto questa richiesta dal server e ricontrolla l’accesso. Non prende in carico e non invia messaggi.</p><button type="button" data-read-request>Rileggi questa richiesta dal server</button><label>Copia corrente della richiesta<textarea data-request-export rows="12" readonly></textarea></label><p data-request-export-status role="status" aria-live="polite"></p></details>');
     if(options.testMode) target.querySelector('[name="reviewed"]')?.parentElement.replaceChildren(Object.assign(document.createElement('input'),{name:'reviewed',type:'checkbox'}),document.createTextNode(' Confermo i dati di collaudo: nessuna conversazione verificata e nessun invio reale.'));
     const form=target.querySelector('form'), claimId=r.claim_id || 'presa-'+crypto.randomUUID();
     form.querySelector('[data-close-dispatch]').onclick=()=>render();
+    const readButton=target.querySelector('[data-read-request]');
+    if(readButton)readButton.onclick=async()=>{
+      const token=active,slug=client?.slug,status=target.querySelector('[data-request-export-status]');
+      const current=()=>token===active&&client?.slug===slug&&box.contains(target)&&target.contains(readButton)&&(!options.isCurrent||options.isCurrent());
+      readButton.disabled=true;status.textContent='Lettura della richiesta corrente…';
+      try{
+        if(!window.OutreachRequestExport)throw Error('Lettura corrente non disponibile: ricarica la dashboard.');
+        const output=await window.OutreachRequestExport.read({...options,isCurrent:current},slug,id);
+        if(!current())return;
+        target.querySelector('[data-request-export]').value=JSON.stringify(output,null,2);
+        status.textContent='Richiesta riletta dal server. Nessun invio eseguito da questa lettura.';
+      }catch(error){if(current())status.textContent=error.message;}
+      finally{if(current())readButton.disabled=false;}
+    };
     form.onsubmit=async e=>{
       e.preventDefault();
       if(!allowed.length || !form.querySelector('[name="reviewed"]').checked) return say('Conferma il ricontrollo del destinatario, del testo e del riscontro.',true);
