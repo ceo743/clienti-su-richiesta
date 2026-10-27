@@ -11,6 +11,26 @@
   const INTEREST = ['da_classificare','bisogno_call','materiale'];
   const OUTBOX = ['richiesta','sospesa','in_corso','da_verificare','annullata','inviato','consegnato','errore'];
   const DAY_MS = 86400000;
+  // Firestore restituisce mappe con un ordine proprio; gli array restano ordinati.
+  const signature = value => JSON.stringify(value,(_key,item)=>item&&typeof item==='object'&&!Array.isArray(item)?Object.fromEntries(Object.keys(item).sort().map(key=>[key,item[key]])):item);
+  function mergeImport(latest, incoming, slug) {
+    const next=validate(incoming,slug);
+    if(!latest) return next;
+    const current=validate(latest,slug);
+    const ids=new Set(next.contacts.map(c=>c.id));
+    assert(current.outbox.every(r=>ids.has(r.contact_id)),'Importazione bloccata: conserva le persone associate alle richieste già registrate.');
+    assert(!next.outbox.length || signature(next.outbox)===signature(current.outbox),'L’importazione non può sostituire le richieste operative.');
+    assert(!next.reports.length || signature(next.reports)===signature(current.reports),'L’importazione non può sostituire i report registrati.');
+    next.outbox=current.outbox; next.reports=current.reports;
+    return validate(next,slug);
+  }
+  function validateCheckInput(tipo, fields, now=new Date().toISOString(), knownReply='') {
+    assert(parsed(now) && parsed(fields.at) && Date.parse(fields.at)<=Date.parse(now) && Date.parse(now)-Date.parse(fields.at)<=900000,'Indica la data reale del controllo, entro quindici minuti.');
+    assert(threadUrl(tipo,fields.thread_url),'Indica il collegamento esatto del filo nel canale corretto.');
+    assert(text(fields.evidence) && fields.evidence.trim(),'Inserisci il riscontro concreto prima di salvare.');
+    assert(!fields.latest_reply_at || (parsed(fields.latest_reply_at) && Date.parse(fields.latest_reply_at)<=Date.parse(now)),'Data dell’ultima risposta non valida o futura.');
+    assert(!parsed(knownReply) || parsed(fields.latest_reply_at),'Indica la data dell’ultima risposta già presente nella scheda.');
+  }
   const emailKey = value => typeof value === 'string' ? value.trim().toLowerCase() : '';
   function destination(tipo, value) {
     if (typeof value !== 'string') return '';
@@ -212,5 +232,5 @@
     const s=summarize(state,f), backlog=summarize(state,{...f,dal:'1900-01-01'}).waiting;
     return {id:'report-'+now,created_at:now,stato:'preparato',periodo:{...f},scadenza:'venerdì prima delle 12:00 Europe/Rome',summary:s,backlog,source:state.source,verified_at:state.verified_at,coverage:state.coverage};
   }
-  return {STAGES,LABELS,RESPONSE,INTEREST,OUTBOX,day,parsed,empty,validate,validateImport,summarize,request,cancel,preflight,claim,recordOutcome,threadUrl,report};
+  return {STAGES,LABELS,RESPONSE,INTEREST,OUTBOX,day,parsed,empty,validate,validateImport,mergeImport,signature,validateCheckInput,summarize,request,cancel,preflight,claim,recordOutcome,threadUrl,report};
 });

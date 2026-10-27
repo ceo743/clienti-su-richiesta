@@ -8,7 +8,7 @@ window.createOutreachMonitoraggio = function (options) {
   const labels = Object.fromEntries(D.STAGES.map((s,i)=>[s,D.LABELS[i]]));
   const words = {da_classificare:'Da classificare',cortesia:'Cortesia / grazie',proposta:'Risposta alla proposta / CTA',negativa:'Negativa',bisogno_call:'Bisogno concreto / call',materiale:'Solo materiale',richiesta:'Da eseguire · non ancora inviata',sospesa:'Sospesa · nuova conferma necessaria',in_corso:'Presa in carico · invio non provato',da_verificare:'Esito incerto · nessun ritentativo',annullata:'Richiesta annullata',inviato:'Invio provato',consegnato:'Consegna provata',errore:'Errore · nessun ritentativo'};
   let client = null, state = null, stopListener = null, active = 0, filters = null, draftImport = null, editing = false;
-  const box = document.getElementById('monitoraggio');
+  const box = options.box || document.getElementById('monitoraggio');
   function stop() { ++active; if (stopListener) stopListener(); stopListener=null; client=null; state=null; draftImport=null; editing=false; box.innerHTML=''; }
   function say(message, error=false) { const el=box.querySelector('[data-status]'); if(el){el.textContent=message;el.className=error?'msg err':'msg ok';} }
   function defaults() { const al=D.day(new Date().toISOString()); return {dal:new Date(Date.parse(al+'T12:00:00Z')-29*86400000).toISOString().slice(0,10),al,settore:'',tema:'',target:''}; }
@@ -39,8 +39,8 @@ window.createOutreachMonitoraggio = function (options) {
       if(!operators.some(email=>email.toLowerCase()===actor.toLowerCase())) throw Error('Operatore non più amministratore.');
       const approvers=[...operators,...(Array.isArray(approvatori.data()?.emails)?approvatori.data().emails:[])];
       const raw=snapshot.data()?.monitoraggio_v1;
-      if(expectedControl!==undefined && JSON.stringify(snapshot.data()?.controllo_v1 || null)!==expectedControl) throw Error('Controllo cliente aggiornato: prepara di nuovo il report.');
-      if(expected!==undefined && JSON.stringify(raw ? D.validate(raw,slug) : null)!==expected) throw Error('Dati aggiornati da un altro operatore. Riapri il pannello prima di salvare.');
+      if(expectedControl!==undefined && D.signature(snapshot.data()?.controllo_v1 || null)!==expectedControl) throw Error('Controllo cliente aggiornato: prepara di nuovo il report.');
+      if(expected!==undefined && D.signature(raw ? D.validate(raw,slug) : null)!==expected) throw Error('Dati aggiornati da un altro operatore. Riapri il pannello prima di salvare.');
       const latest=raw ? D.validate(raw,slug) : D.empty(slug);
       const next=change(latest,{actor,operators,approvers}) || latest;
       next.updated_at=new Date().toISOString();
@@ -82,13 +82,15 @@ window.createOutreachMonitoraggio = function (options) {
     bindImport();
   }
   function reportBox() {
+    if(options.testMode) return '';
     const schedule=client.slug==='davide-caiazzo'?'Report a Chiara programmato venerdì alle 11:00. Controllo delle nuove richieste approvate alle 09:00 e 16:00 dal lunedì al sabato. Ogni invio richiede una prova separata.':'Nessuna programmazione di invio configurata per questo cliente in questo pannello.';
     return '<div class="panel"><h3>Report commerciale</h3><p>Include controllo cliente, fasi, classificazioni, provenienza call, esiti, attese, responsabili, prossime azioni e copertura. La preparazione non invia email.</p><p>'+schedule+'</p><label>Report dal<input data-report-dal type="date" value="'+esc(filters.dal)+'" required></label><label>Report fino al<input data-report-al type="date" value="'+esc(filters.al)+'" required></label><p>Queste date valgono solo per il report.</p><button data-report>Prepara report con dati disponibili</button><div data-report-body></div><p>Ultimo report salvato: '+pretty(state?.reports.at(-1)?.created_at)+'</p></div>';
   }
   function bindReport() {
+    if(options.testMode) return;
     box.querySelector('[data-report]').onclick=async()=>{
       try {
-        const expected=JSON.stringify(state), expectedControl=JSON.stringify(client.controllo_v1 || null);
+        const expected=D.signature(state), expectedControl=D.signature(client.controllo_v1 || null);
         const reportFilters={...filters,dal:box.querySelector('[data-report-dal]').value,al:box.querySelector('[data-report-al]').value};
         box.querySelector('[data-report-body]').innerHTML='';
         const output=Report.prepare(state,client,reportFilters), report=output.report;
@@ -104,20 +106,25 @@ window.createOutreachMonitoraggio = function (options) {
     const r=state?.outbox.find(item=>item.id===id);
     if(!r || !canEdit()) return;
     editing=true;
-    const expected=JSON.stringify(state), target=box.querySelector('[data-editor]');
-    const allowed=r.stato==='richiesta'?['presa']:['in_corso','da_verificare'].includes(r.stato)?['inviato','da_verificare','errore']:r.stato==='inviato'?['consegnato']:[];
+    const expected=D.signature(state), target=box.querySelector('[data-editor]');
+    const allowed=(r.stato==='richiesta'?['presa']:['in_corso','da_verificare'].includes(r.stato)?['inviato','da_verificare','errore']:r.stato==='inviato'?['consegnato']:[]).filter(action=>!options.testMode||!['inviato','consegnato','errore'].includes(action));
     const actionNames={presa:'Registra presa in carico — non invia',inviato:'Registra una prova di invio già avvenuto',consegnato:'Registra una prova distinta di consegna',da_verificare:'Segna esito incerto — blocca i ritentativi',errore:'Registra errore — nessun nuovo tentativo'};
     target.innerHTML='<form class="panel monitor-editor"><h3>Controllo richiesta</h3><p><strong>Destinatario confermato:</strong> '+esc(r.destinatario||'Non registrato')+'</p><p><strong>Testo confermato:</strong> '+esc(r.testo)+'</p><p>Confermata da '+esc(r.confirmed_by)+' il '+pretty(r.confirmed_at)+'. Stato: '+esc(words[r.stato]||r.stato)+'.</p><p>Questa operazione salva soltanto il registro. Il messaggio deve essere eseguito nel canale autorizzato; una presa in carico non dimostra l’invio.</p>'+
       (allowed.length?'<label>Operazione<select name="action">'+allowed.map(key=>'<option value="'+key+'">'+actionNames[key]+'</option>').join('')+'</select></label><label>URL esatto del filo<input name="thread_url" type="url" value="'+esc(r.thread_url||r.conversation_url||'')+'" maxlength="2000"></label><label>Ora UTC del controllo del filo o del riscontro<input name="at" placeholder="2026-10-26T09:00:00Z" maxlength="40"></label>'+
         (r.stato==='richiesta'?'<label>Data UTC dell’ultima risposta della persona, se presente<input name="latest_reply_at" placeholder="Lascia vuoto soltanto se non esiste una risposta" maxlength="40"></label>':'')+
         '<label>Riscontro concreto o motivo del blocco<textarea name="evidence" rows="4" maxlength="2000"></textarea></label><label><input name="reviewed" type="checkbox"> Ho ricontrollato questo destinatario e il testo esatto; il riscontro descrive ciò che vedo nel canale reale</label><button type="submit" class="primary">Salva il registro — non invia</button>':'<p>Richiesta chiusa o sospesa. Non può essere ritentata. Per una richiesta sospesa serve un nuovo testo verificato e una nuova conferma nella scheda della persona.</p>')+
       '<button type="button" data-close-dispatch>Chiudi controllo richiesta</button></form>';
+    if(options.testMode) target.querySelector('[name="reviewed"]')?.parentElement.replaceChildren(Object.assign(document.createElement('input'),{name:'reviewed',type:'checkbox'}),document.createTextNode(' Confermo i dati di collaudo: nessuna conversazione verificata e nessun invio reale.'));
     const form=target.querySelector('form'), claimId=r.claim_id || 'presa-'+crypto.randomUUID();
     form.querySelector('[data-close-dispatch]').onclick=()=>render();
     form.onsubmit=async e=>{
       e.preventDefault();
       if(!allowed.length || !form.querySelector('[name="reviewed"]').checked) return say('Conferma il ricontrollo del destinatario, del testo e del riscontro.',true);
       const fields=Object.fromEntries(new FormData(form)), action=fields.action;
+      try {
+        if(action==='presa') D.validateCheckInput(r.tipo,fields,new Date().toISOString(),state.contacts.find(c=>c.id===r.contact_id)?.events?.risposta);
+        else if(!D.parsed(fields.at)||Date.parse(fields.at)>Date.now()||!fields.evidence?.trim()) throw Error('Indica data reale e riscontro prima di salvare.');
+      } catch(error) {return say(error.message,true);}
       if(!allowed.includes(action)) return say('Operazione non disponibile per questa richiesta.',true);
       const button=form.querySelector('[type="submit"]');button.disabled=true;
       let result;
@@ -136,29 +143,33 @@ window.createOutreachMonitoraggio = function (options) {
   }
   function editor(id) {
     const c=state.contacts.find(c=>c.id===id);if(!c)return;
-    editing=true;const expected=JSON.stringify(state), target=box.querySelector('[data-editor]');
-    target.innerHTML='<form class="panel monitor-editor"><h3>'+esc(c.nome)+'</h3><p>Classificazioni esplicite e testo per il target '+esc(c.target||'da definire')+'. Nessuna deduzione automatica.</p>'+[['tipo_risposta','Risposta',D.RESPONSE],['tipo_interesse','Interesse',D.INTEREST]].map(([k,t,v])=>'<label>'+t+select(k,c[k]||'da_classificare',v)+'</label>').join('')+['settore','tema','target','responsabile','prossimo_passo','esito'].map(k=>'<label>'+esc(({tema:'Topic',prossimo_passo:'Prossimo passo'}[k])||k)+'<input data-field="'+k+'" value="'+esc(c[k])+'" maxlength="2000"></label>').join('')+'<label>Bozza modificabile<textarea data-field="bozza" maxlength="6000" rows="5">'+esc(c.bozza)+'</textarea></label><label><input type="checkbox" data-reviewed> Ho verificato la conversazione e queste classificazioni</label><label>Tipo richiesta'+select('tipo_invio','messaggio',['messaggio','email'])+'</label><label><input type="checkbox" data-confirm> Confermo ora questo testo per una nuova richiesta di invio</label><div class="monitor-actions"><button type="submit" class="primary" '+(!canEdit()?'disabled':'')+'>Salva scheda</button><button type="button" data-request '+(!canEdit()?'disabled':'')+'>Registra richiesta di invio</button><button type="button" data-close>Chiudi scheda</button></div><p>La richiesta resta ferma finché l’operatività di invio non è autorizzata e verificata.</p></form>';
+    editing=true;const expected=D.signature(state), target=box.querySelector('[data-editor]');
+    target.innerHTML='<form class="panel monitor-editor"><h3>'+esc(c.nome)+'</h3><p>Classificazioni esplicite e testo per il target '+esc(c.target||'da definire')+'. Nessuna deduzione automatica.</p>'+[['tipo_risposta','Risposta',D.RESPONSE],['tipo_interesse','Interesse',D.INTEREST]].map(([k,t,v])=>'<label>'+t+select(k,c[k]||'da_classificare',v)+'</label>').join('')+['settore','tema','target','responsabile','prossimo_passo','esito'].map(k=>'<label>'+esc(({tema:'Topic',prossimo_passo:'Prossimo passo'}[k])||k)+'<input data-field="'+k+'" value="'+esc(c[k])+'" maxlength="2000"></label>').join('')+'<label>Bozza modificabile<textarea data-field="bozza" maxlength="6000" rows="5">'+esc(c.bozza)+'</textarea></label><label><input type="checkbox" data-reviewed> Ho verificato la conversazione e queste classificazioni</label><label>Tipo richiesta'+select('tipo_invio',options.testMode?'email':'messaggio',options.testMode?['email']:['messaggio','email'])+'</label><label><input type="checkbox" data-confirm> Confermo ora questo testo per una nuova richiesta di invio</label><div class="monitor-actions"><button type="submit" class="primary" '+(!canEdit()?'disabled':'')+'>Salva scheda</button><button type="button" data-request '+(!canEdit()?'disabled':'')+'>Registra richiesta di invio</button><button type="button" data-close>Chiudi scheda</button></div><p>La richiesta resta ferma finché l’operatività di invio non è autorizzata e verificata.</p></form>';
     const form=target.querySelector('form');
+    if(options.testMode) {const label=form.querySelector('[data-reviewed]').parentElement;label.lastChild.textContent=' Confermo i dati della prova isolata; nessuna conversazione reale verificata.';}
+    let saving=false;
     const save=async send=>{
+      if(saving) return;
       const fields=Object.fromEntries([...form.querySelectorAll('[data-field]')].map(el=>[el.dataset.field,el.value]));
       if(!canEdit())return say('Modifica non disponibile.',true);
       if(!form.querySelector('[data-reviewed]').checked)return say('Conferma la verifica della conversazione.',true);
       if(send&&!form.querySelector('[data-confirm]').checked)return say('Serve una nuova conferma del testo.',true);
       const {tipo_invio:tipo,...patch}=fields;
-      try {await mutate(s=>{const p=s.contacts.find(x=>x.id===id);if(!p)throw Error('Contatto non più presente.');Object.assign(p,patch,{conversazione_verificata_il:new Date().toISOString()});if(send)D.request(s,id,tipo,p.bozza,options.auth.currentUser.email);},expected);editing=false;render();say(send?'Richiesta nuova salvata. Nessun messaggio inviato.':'Scheda salvata per questo cliente.');}catch(e){say(e.message,true);}
+      saving=true; form.querySelectorAll('button').forEach(b=>b.disabled=true);
+      try {await mutate(s=>{const p=s.contacts.find(x=>x.id===id);if(!p)throw Error('Contatto non più presente.');Object.assign(p,patch,{conversazione_verificata_il:new Date().toISOString()});if(send)D.request(s,id,tipo,p.bozza,options.auth.currentUser.email);},expected);editing=false;render();say(send?'Richiesta nuova salvata. Nessun messaggio inviato.':'Scheda salvata per questo cliente.');}catch(e){say(e.message,true);saving=false;form.querySelectorAll('button').forEach(b=>b.disabled=false);}
     };
     form.onsubmit=e=>{e.preventDefault();save(false);};form.querySelector('[data-request]').onclick=()=>save(true);form.querySelector('[data-close]').onclick=()=>render();target.scrollIntoView({behavior:'smooth',block:'start'});
   }
-  function importBox() { return options.isAdmin()?'<details class="panel"><summary>Importa rilevazione verificata (amministratori)</summary><p>Lo slug deve coincidere con '+esc(client.slug)+'. L’importazione aggiorna solo monitoraggio_v1. I dati storici e le code originali restano invariati.</p><label>JSON<textarea data-import rows="6" spellcheck="false"></textarea></label><button data-preview>Verifica e mostra anteprima</button><div data-import-preview></div></details>':''; }
+  function importBox() { if(options.testMode) return ''; return options.isAdmin()?'<details class="panel"><summary>Importa rilevazione verificata (amministratori)</summary><p>Lo slug deve coincidere con '+esc(client.slug)+'. L’importazione aggiorna solo monitoraggio_v1. I dati storici e le code originali restano invariati.</p><label>JSON<textarea data-import rows="6" spellcheck="false"></textarea></label><button data-preview>Verifica e mostra anteprima</button><div data-import-preview></div></details>':''; }
   function bindImport() {
     const button=box.querySelector('[data-preview]');if(!button)return;
     button.onclick=()=>{
       try {
         if(!options.isAdmin())throw Error('Importazione riservata agli amministratori.');
         const text=box.querySelector('[data-import]').value;if(text.length>700000)throw Error('File troppo grande.');
-        draftImport=D.validateImport(JSON.parse(text),client.slug);const expected=JSON.stringify(state||null);
-        const preview=box.querySelector('[data-import-preview]');preview.innerHTML='<p>Cliente '+esc(client.slug)+' · contatti '+draftImport.contacts.length+' · call '+draftImport.calls.length+' · fonte '+esc(draftImport.source)+' · verifica '+pretty(draftImport.verified_at)+'. La rilevazione operativa precedente sarà sostituita.</p><label><input type="checkbox" data-import-confirm> Confermo cliente, fonte e sostituzione della rilevazione</label><button data-import-save>Salva importazione verificata</button>';
-        preview.querySelector('[data-import-save]').onclick=async()=>{try{if(!options.isAdmin()||!preview.querySelector('[data-import-confirm]').checked)throw Error('Confermare l’anteprima prima di salvare.');const next=D.validate(draftImport,client.slug);await mutate(()=>next,expected);render();say('Rilevazione importata. Storico e code originali conservati.');}catch(e){say(e.message,true);}};
+        draftImport=D.validateImport(JSON.parse(text),client.slug);const expected=D.signature(state||null);
+        const preview=box.querySelector('[data-import-preview]');preview.innerHTML='<p>Cliente '+esc(client.slug)+' · contatti '+draftImport.contacts.length+' · call '+draftImport.calls.length+' · fonte '+esc(draftImport.source)+' · verifica '+pretty(draftImport.verified_at)+'. Le rilevazioni saranno aggiornate; richieste e report già registrati saranno conservati.</p><label><input type="checkbox" data-import-confirm> Confermo cliente, fonte e sostituzione della rilevazione</label><button data-import-save>Salva importazione verificata</button>';
+        preview.querySelector('[data-import-save]').onclick=async()=>{try{if(!options.isAdmin()||!preview.querySelector('[data-import-confirm]').checked)throw Error('Confermare l’anteprima prima di salvare.');const next=D.validate(draftImport,client.slug);await mutate(latest=>D.mergeImport(state?latest:null,next,client.slug),expected);render();say('Rilevazione importata. Storico e code originali conservati.');}catch(e){say(e.message,true);}};
       } catch(e) {draftImport=null;say(e.message,true);}
     };
   }
