@@ -531,7 +531,8 @@ function renderClient(c, fromAdmin) {
   currentClient=c;
   controlloClienti.open(c);
   monitoraggio.open(c);
-  collaudoCoda.open(c);
+  if(new URLSearchParams(location.search).has('collaudo')) collaudoCoda.open(c);
+  else collaudoCoda.stop();
   operativita.open(c);
   stopAdminDaApprovare();
   window.__lastRender = () => renderClient(c, fromAdmin);
