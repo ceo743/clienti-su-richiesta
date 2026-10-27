@@ -345,3 +345,27 @@ test('un vero report automatico verificato non resta tra le verifiche in sospeso
   assert.match(view.green,/Verificato l’invio di un nuovo report dal calendario settimanale/);
   assert.doesNotMatch(view.pending,/Invio di un nuovo report settimanale|Da verificare al prossimo invio/);
 });
+
+const ceoAutomatico={id:'report-auto-ceo-sintetico',funzione:'report_automatico_ceo',esito:'verificato',eseguito_il:'2026-10-26T19:35:00Z',rilevato_il:'2026-10-26T18:25:00Z',fonte:'Evento reale e riscontro SENT RAW INBOX',riscontro:'Prova a CEO con periodo parziale',periodo:{dal:'2026-10-23',al:'2026-10-26'},destinatario:'ceo@davidecaiazzo.it',origine:'heartbeat_reale_prova_report_ceo',automazione_id:'dashboard-linkedin-report-settimanale-chiara',esecuzione_id:'evento-ceo-unico',messaggio_id:'messaggio-sintetico-ceo',sha256_evento:'1'.repeat(64),sha256_manifest:'2'.repeat(64),sha256_ricevuta:'3'.repeat(64),sha256_raw:'4'.repeat(64),sha256_html:'5'.repeat(64),sha256_ripristino:'6'.repeat(64),ripristino_rrule:'FREQ=WEEKLY;BYDAY=FR;BYHOUR=11;BYMINUTE=0;BYSECOND=0'};
+test('report automatico CEO conserva evento distinto dal settimanale Chiara',()=>{
+  const s=D.append(null,slug,0,payload([ceoAutomatico]),actor,now);
+  assert.equal(D.summarize(s,slug).find(x=>x.funzione==='report_automatico_ceo').latest.messaggio_id,ceoAutomatico.messaggio_id);
+  assert.equal(D.summarize(s,slug).find(x=>x.funzione==='report_automatico').latest,null);
+  for(const field of ['sha256_evento','sha256_manifest','sha256_ricevuta','sha256_raw','sha256_html','sha256_ripristino','esecuzione_id','messaggio_id','rilevato_il']){
+    const copy={...ceoAutomatico};delete copy[field];assert.throws(()=>D.append(null,slug,0,payload([copy]),actor,now));
+  }
+  for(const patch of [{destinatario:'chiara@example.test'},{origine:'avvio_manuale'},{automazione_id:'altro'},{esito:'simulato'},{rilevato_il:'2026-10-26T19:36:00Z'},{ripristino_rrule:'FREQ=DAILY'}])assert.throws(()=>D.append(null,slug,0,payload([{...ceoAutomatico,...patch}]),actor,now));
+  for(const patch of [{},{esecuzione_id:'nuovo-evento'},{messaggio_id:'altro-messaggio',esecuzione_id:'altro-evento'}])assert.throws(()=>D.append(s,slug,1,payload([{...ceoAutomatico,id:'clone',...patch}]),actor,now),/già registrata/);
+  assert.throws(()=>D.append(s,slug,1,payload([{...report,id:'falso-settimanale',funzione:'report_automatico',esecuzione_id:'clonato-ceo'}]),actor,now),/modulo manuale/);
+});
+test('UI indica nuovo invio automatico solo a Davide e limita la prova',()=>{
+  const vm=require('node:vm'),fs=require('node:fs'),path=require('node:path');
+  const s=D.append(null,slug,0,payload([ceoAutomatico]),actor,now),box={innerHTML:'',querySelector:()=>null};
+  const db={collection:()=>({doc:()=>({onSnapshot:fn=>{fn({data:()=>({operativita_v1:s})});return ()=>{};}})})};
+  const ctx={window:{OutreachOperativita:D},document:{getElementById:()=>box},Date,JSON,Error};
+  vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../operativita-ui.js'),'utf8'),ctx);
+  ctx.window.createOutreachOperativita({db,auth:{currentUser:{email:actor}},isAdmin:()=>false}).open({slug});
+  assert.match(box.innerHTML,/Nuovo report automatico · prova a Davide/);
+  assert.match(box.innerHTML,/è arrivato nella casella di Davide/);
+  assert.match(box.innerHTML,/Resta da osservare il primo report ordinario a Chiara/);
+});
