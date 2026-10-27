@@ -73,8 +73,8 @@ test('la pagina distingue procedura anticipata, email e partenza settimanale con
   const context={window:{OutreachOperativita:D},document:{getElementById:()=>box},Date,JSON,Error};
   vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../operativita-ui.js'),'utf8'),context);
   context.window.createOutreachOperativita({db,auth:{currentUser:{email:actor}},isAdmin:()=>false}).open({slug});
-  for(const text of ['Report via email','Procedura report · collaudo reale anticipato','Partenza settimanale del report','non certifica la partenza del calendario settimanale','coordinatore reale avviato in anticipo','attempt-prova-1',coordinato.sha256_manifest,coordinato.sha256_ricevuta,coordinato.sha256_raw,'26/10/2026'])assert.ok(box.innerHTML.includes(text),text);
-  assert.match(box.innerHTML,/<h4>Partenza settimanale del report<\/h4><p><strong>Da collaudare/);
+  for(const text of ['Preparazione e invio del report','Report via email','Procedura report · collaudo reale anticipato','Invio di un nuovo report settimanale','Nessun nuovo invio automatico del report è stato provato','attempt-prova-1',coordinato.sha256_manifest,coordinato.sha256_ricevuta,coordinato.sha256_raw,'26/10/2026'])assert.ok(box.innerHTML.includes(text),text);
+  assert.match(box.innerHTML,/<h5>Invio di un nuovo report settimanale<\/h5><p>Nessun nuovo invio automatico/);
   assert.doesNotMatch(box.innerHTML,/data-operativita-save/);
 });
 test('nessun report verificato senza allegato e periodo',()=>assert.throws(()=>D.append(null,slug,0,payload([{...report,sha256_html:''}]),actor,now),/prova email/));
@@ -241,8 +241,107 @@ test('la pagina mostra prove calendario e limiti senza presentarle come nuova em
   const context={window:{OutreachOperativita:D},document:{getElementById:()=>box},Date,JSON,Error};
   vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../operativita-ui.js'),'utf8'),context);
   context.window.createOutreachOperativita({db,auth:{currentUser:{email:actor}},isAdmin:()=>false}).open({slug});
-  for(const text of ['Avvio automatico · controllo anti-duplicato','Il giro ha saltato il report già spedito','non prova un nuovo invio della settimana successiva',calendario.origine,calendario.automazione_id,calendario.esecuzione_id,calendario.sha256_evento,calendario.sha256_ricevuta,calendario.sha256_ripristino,calendario.ripristino_rrule])assert.ok(box.innerHTML.includes(text),text);
-  assert.match(box.innerHTML,/<h4>Report via email<\/h4><p><strong>Da collaudare/);
-  assert.match(box.innerHTML,/<h4>Partenza settimanale del report<\/h4><p><strong>Da collaudare/);
+  for(const text of ['Avvio automatico · controllo anti-duplicato','Il calendario si è avviato e ha bloccato il report già inviato','non prova l’invio di uno nuovo',calendario.origine,calendario.automazione_id,calendario.esecuzione_id,calendario.sha256_evento,calendario.sha256_ricevuta,calendario.sha256_ripristino,calendario.ripristino_rrule])assert.ok(box.innerHTML.includes(text),text);
+  assert.match(box.innerHTML,/<h5>Invio del report via email<\/h5><p>Manca una verifica/);
+  assert.match(box.innerHTML,/<h5>Invio di un nuovo report settimanale<\/h5><p>Da verificare al prossimo invio/);
   assert.doesNotMatch(box.innerHTML,/data-operativita-save/);
+});
+
+function renderOperationalState(state,isAdmin=false){
+  const vm=require('node:vm'),fs=require('node:fs'),path=require('node:path'),box={innerHTML:'',querySelector:()=>null};
+  const db={collection:()=>({doc:()=>({onSnapshot:fn=>{fn({data:()=>({operativita_v1:state})});return ()=>{};}})})};
+  const context={window:{OutreachOperativita:D},document:{getElementById:()=>box},Date,JSON,Error};
+  vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../operativita-ui.js'),'utf8'),context);
+  context.window.createOutreachOperativita({db,auth:{currentUser:{email:actor}},isAdmin:()=>isAdmin}).open({slug});
+  const html=box.innerHTML,main=html.split('<details class="panel" data-operativita-history>')[0];
+  const section=kind=>main.match(new RegExp('<section data-operativita-'+kind+'>([\\s\\S]*?)</section>'))?.[1]||'';
+  return {html,main,green:section('verified'),pending:section('pending'),history:html.slice(main.length)};
+}
+// Scenario sintetico portabile: stessa successione di esiti, nessuna prova o identità privata.
+function equivalentCalendarState(){
+  const initial=[
+    {id:'cliente-fittizio-controllato',funzione:'controllo_clienti',esito:'verificato',eseguito_il:'2026-10-26T19:00:00Z',fonte:'Fonte fittizia del controllo',riscontro:'Controllo cliente salvato e riletto'},
+    report,
+    {id:'blocco-linkedin-fittizio',funzione:'invio_linkedin',esito:'bloccato',eseguito_il:'2026-10-26T19:05:00Z',fonte:'Compositore fittizio',riscontro:'Il compositore non ha aperto il messaggio'},
+    {id:'report-auto-simulato-fittizio',funzione:'report_automatico',esito:'simulato',eseguito_il:'2026-10-26T19:06:00Z',fonte:'Trasporto fittizio senza rete',riscontro:'Il primo evento del calendario settimanale resta da osservare'}
+  ];
+  let state=D.append(null,slug,0,payload(initial),actor,now);
+  const coordinatedEmail={...report,id:'email-coordinata-fittizia',eseguito_il:'2026-10-26T19:30:30Z',messaggio_id:'<report-coordinato@example.test>'};
+  const coordinatedRun={...coordinato,id:'coordinatore-fittizio',messaggio_id:coordinatedEmail.messaggio_id,esecuzione_id:'run-coordinato-fittizio'};
+  state=D.append(state,slug,state.revision,payload([coordinatedEmail,coordinatedRun,canale]),actor,now);
+  const ceo={id:'email-ceo-fittizia',funzione:'coda_email_ceo',esito:'verificato',eseguito_il:'2026-10-26T19:45:00Z',fonte:'Coda fittizia e casella di prova',riscontro:'Percorso fittizio dalla coda alla casella',origine:'coda_reale_email_ceo',destinatario:'ceo@davidecaiazzo.it',richiesta_id:'richiesta-fittizia',presa_id:'presa-fittizia',esecuzione_id:'run-email-fittizio',messaggio_id:'messaggio-fittizio',filo:'https://mail.google.com/mail/u/0/#all/messaggio-fittizio',sha256_manifest:'5'.repeat(64),sha256_ricevuta:'6'.repeat(64),sha256_raw:'7'.repeat(64),sha256_testo:'8'.repeat(64)};
+  state=D.append(state,slug,state.revision,payload([ceo]),actor,now);
+  const linkedin={...canale,id:'coda-linkedin-fittizia',esito:'verificato',eseguito_il:'2026-10-26T19:50:00Z',filo:'https://www.linkedin.com/messaging/thread/filo-fittizio/',esecuzione_id:'run-linkedin-fittizio',fonte:'Coda fittizia e filo di prova',riscontro:'Invio fittizio dalla coda con esito riletto'};
+  state=D.append(state,slug,state.revision,payload([linkedin]),actor,now);
+  const calendar={...calendario,id:'calendario-fittizio',eseguito_il:'2026-10-26T19:55:00Z',esecuzione_id:'run-calendario-fittizio'};
+  state=D.append(state,slug,state.revision,payload([calendar]),actor,now);
+  state=D.append(state,slug,state.revision,payload([calendar]),actor,now);
+  return D.validate(state,slug);
+}
+
+test('scenario sintetico equivalente allo stato reale: cinque funzioni verificate e nuovo report settimanale da verificare',()=>{
+  const state=equivalentCalendarState(),before=JSON.stringify(state),view=renderOperationalState(state,true);
+  assert.equal(state.entries.length,10);assert.equal(state.revision,6);
+  assert.equal((view.green.match(/<article>/g)||[]).length,5);
+  assert.equal((view.pending.match(/<article>/g)||[]).length,1);
+  for(const title of ['Controllo del cliente','Invii LinkedIn dalla coda','Preparazione e invio del report','Avvio del calendario e controllo dei doppioni','Email dalla coda a Davide'])assert.ok(view.green.includes(title),title);
+  assert.match(view.pending,/Invio di un nuovo report settimanale/);
+  assert.match(view.pending,/Da verificare al prossimo invio: il giro anti-duplicato ha saltato un report già spedito e non prova l’invio di uno nuovo/);
+  assert.match(view.green,/Consegna e lettura non verificate/);
+  assert.match(view.green,/venerdì alle 11/);
+  assert.equal(JSON.stringify(state),before,'presentare lo stato non modifica le prove');
+  assert.match(view.html,/data-operativita-save/);assert.match(view.history,/data-operativita-export/);
+});
+test('simulazioni, blocchi superati e dettagli originali sono nello storico chiuso',()=>{
+  const state=equivalentCalendarState(),view=renderOperationalState(state);
+  for(const text of ['Solo simulazione','Partenza settimanale del report','Il primo evento del calendario settimanale resta da osservare','Il compositore non ha aperto il messaggio','sha256','FREQ=WEEKLY','heartbeat_reale_report_gia_inviato'])assert.ok(!view.main.includes(text),text);
+  assert.match(view.history,/^<details class="panel" data-operativita-history><summary>Storico dei collaudi<\/summary>/);
+  assert.doesNotMatch(view.history.split('>')[0],/\bopen\b/);
+  for(const text of ['Solo simulazione','Partenza settimanale del report','Il primo evento del calendario settimanale resta da osservare','Il compositore non ha aperto il messaggio'])assert.ok(view.history.includes(text),text);
+  for(const e of state.entries)assert.ok(view.history.includes(e.id),e.id);
+  const calendar=state.entries.find(e=>e.funzione==='report_calendario');
+  for(const field of ['sha256_evento','sha256_ricevuta','sha256_ripristino','ripristino_rrule','origine','esecuzione_id','automazione_id'])assert.ok(view.history.includes(calendar[field]),field);
+  assert.doesNotMatch(view.html,/data-operativita-save/);
+});
+test('una simulazione da sola lascia le funzioni da verificare senza verde',()=>{
+  const state=D.append(null,slug,0,payload([{...report,esito:'simulato'}]),actor,now),view=renderOperationalState(state);
+  assert.doesNotMatch(view.green,/<article>/);
+  assert.match(view.green,/Nessuna funzione ancora verificata/);
+  assert.match(view.pending,/Manca una verifica con un’esecuzione reale/);
+  assert.doesNotMatch(view.main,/Solo simulazione|Prova reale registrata/);
+  assert.match(view.history,/Solo simulazione/);
+});
+test('il solo canale LinkedIn resta da verificare senza promettere il percorso dalla coda',()=>{
+  const state=D.append(null,slug,0,payload([canale]),actor,now),view=renderOperationalState(state);
+  assert.doesNotMatch(view.green,/<article>/);
+  assert.match(view.pending,/Verificato il solo canale LinkedIn/);
+  assert.match(view.pending,/Il percorso dalla coda all’invio resta da verificare/);
+});
+test('un nuovo blocco o esito incerto prevale sui vecchi verdi e separa le voci report',()=>{
+  for(const funzione of ['report_email','report_coordinato','invio_linkedin','report_calendario'])for(const esito of ['bloccato','incerto']){
+    const state=equivalentCalendarState(),entry={id:'nuovo-'+funzione+'-'+esito,funzione,esito,eseguito_il:'2026-10-28T09:00:00Z',fonte:'Riscontro attuale',riscontro:'Motivo attuale da verificare'};
+    const next=D.append(state,slug,state.revision,payload([entry]),actor,'2026-10-28T10:00:00Z'),view=renderOperationalState(next);
+    assert.match(view.pending,/Motivo attuale da verificare/);
+    assert.match(view.pending,esito==='bloccato'?/Bloccato:/:/Esito da verificare:/);
+    if(funzione.startsWith('report_')&&funzione!=='report_calendario'){
+      assert.doesNotMatch(view.main,/<h5>Preparazione e invio del report<\/h5>/);
+      assert.match(view.main,/<h5>Invio del report via email<\/h5>/);
+      assert.match(view.main,/<h5>Preparazione e invio del report dalla dashboard<\/h5>/);
+    }
+  }
+});
+test('un nuovo blocco del report automatico resta visibile accanto al limite del giro anti-duplicato',()=>{
+  const state=equivalentCalendarState(),entry={id:'nuovo-blocco-settimanale',funzione:'report_automatico',esito:'bloccato',eseguito_il:'2026-10-28T09:00:00Z',fonte:'Riscontro attuale',riscontro:'Il processo non ha completato il nuovo invio'};
+  const view=renderOperationalState(D.append(state,slug,state.revision,payload([entry]),actor,'2026-10-28T10:00:00Z'));
+  assert.match(view.pending,/non prova l’invio di uno nuovo/);
+  assert.match(view.pending,/Bloccato: Il processo non ha completato il nuovo invio/);
+});
+test('un vero report automatico verificato non resta tra le verifiche in sospeso',()=>{
+  const state=equivalentCalendarState(),e={...report,id:'email-nuova-settimana',messaggio_id:'<settimana-nuova@example.test>',periodo:{dal:'2026-10-23',al:'2026-10-29'},eseguito_il:'2026-10-30T10:00:00Z',registrato_da:actor,registrato_il:'2026-10-30T10:01:00Z'};
+  // Questo riscontro rappresenta il processo automatico distinto: il modulo manuale resta bloccato.
+  state.entries.push(e,{...e,id:'report-auto-nuova-settimana',funzione:'report_automatico',esecuzione_id:'run-reale-nuova-settimana'});
+  const view=renderOperationalState(D.validate(state,slug));
+  assert.match(view.green,/Invio di un nuovo report settimanale/);
+  assert.match(view.green,/Verificato l’invio di un nuovo report dal calendario settimanale/);
+  assert.doesNotMatch(view.pending,/Invio di un nuovo report settimanale|Da verificare al prossimo invio/);
 });
