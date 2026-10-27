@@ -178,6 +178,8 @@ svg text { font-family: inherit; }
 #monitoraggio label { display:block; font-size:13px; margin:8px 0; }
 #monitoraggio input:not([type="checkbox"]), #monitoraggio select, #monitoraggio textarea, #collaudoCoda input:not([type="checkbox"]), #collaudoCoda select, #collaudoCoda textarea, #provaCeo textarea { display:block; width:100%; font:inherit; background:var(--page); color:var(--text-primary); border:1px solid var(--baseline); padding:8px; border-radius:6px; }
 #monitoraggio summary { cursor:pointer; font-weight:600; }
+#provaTeam label { display:block; margin:8px 0; }
+#provaTeam input:not([type="checkbox"]), #provaTeam textarea { display:block; width:100%; font:inherit; padding:8px; }
 #statoOperativo .panel { padding:18px; border:1px solid var(--border); border-radius:12px; background:var(--surface-1); margin-bottom:16px; }
 #statoOperativo article { border-top:1px solid var(--border); padding:12px 0; }
 #statoOperativo p { font-size:13px; color:var(--text-secondary); margin:8px 0; }
@@ -250,6 +252,7 @@ svg text { font-family: inherit; }
     <section id="monitoraggio" aria-label="Monitoraggio operativo"></section>
     <section id="collaudoCoda" aria-label="Collaudo isolato della coda"></section>
     <section id="provaCeo" aria-label="Prova reale email a Davide"></section>
+    <section id="provaTeam" aria-label="Prova reale LinkedIn al team"></section>
     <div class="history-notice"><strong>Storico precedente</strong><br>I riepiloghi seguenti sono conservati dalla dashboard originale con la loro data di aggiornamento. I dati di luglio non sono i totali attuali; le categorie mancanti restano non disponibili.</div>
     <div class="tiles" id="dTiles"></div>
     <div class="panel" id="dDetailPanel" style="display:none;margin-bottom:22px">
@@ -308,6 +311,7 @@ svg text { font-family: inherit; }
 <script src="monitoraggio-ui.js?v=20261027-linkedin-export"></script>
 <script src="collaudo-coda.js?v=20261027-coda-rilettura"></script>
 <script src="prova-ceo-ui.js?v=20261027-prova-ceo"></script>
+<script src="prova-team-ui.js?v=20261027-team"></script>
 <script>
 /* ================= tema ================= */
 const themeBtn = document.getElementById('themeBtn');
@@ -402,6 +406,7 @@ const monitoraggio = createOutreachMonitoraggio({db, auth, isAdmin:()=>isAdmin, 
 const operativita = createOutreachOperativita({db, auth, isAdmin:()=>isAdmin});
 const collaudoCoda = createOutreachCollaudoCoda({db,auth,isAdmin:()=>isAdmin,fieldDelete:()=>firebase.firestore.FieldValue.delete()});
 const provaCeo = createOutreachProvaCeo({db,auth,isAdmin:()=>isAdmin,fieldDelete:()=>firebase.firestore.FieldValue.delete()});
+const provaTeam = createOutreachProvaTeam({db,auth,isAdmin:()=>isAdmin,fieldDelete:()=>firebase.firestore.FieldValue.delete()});
 const controlloClienti = createOutreachControlloClienti({db, auth, isAdmin:()=>isAdmin, isApprovatore:()=>isApprovatore,
   openClient:c=>{ currentClient=c; renderClient(c,true); },
   onClients:clients=>{ allClients=clients; $('adminAgg').textContent=`${clients.length} clienti · controllo operativo e storico separati`; },
@@ -415,7 +420,7 @@ const controlloClienti = createOutreachControlloClienti({db, auth, isAdmin:()=>i
 
 auth.onAuthStateChanged(async user => {
   if (!user) {
-    controlloClienti.stop(); monitoraggio.stop(); operativita.stop(); collaudoCoda.stop(); provaCeo.stop(); stopWatchCoda(); stopWatchEsclusi(); stopAdminDaApprovare();
+    controlloClienti.stop(); monitoraggio.stop(); operativita.stop(); collaudoCoda.stop(); provaCeo.stop(); provaTeam.stop(); stopWatchCoda(); stopWatchEsclusi(); stopAdminDaApprovare();
     isAdmin = false; isApprovatore = false; allClients = []; currentClient = null; window.__lastRender = null;
     $('userEmail').textContent = '';
     $('logoutBtn').style.display = 'none';
@@ -484,6 +489,7 @@ function renderAdmin() {
   operativita.stop();
   collaudoCoda.stop();
   provaCeo.stop();
+  provaTeam.stop();
   stopWatchCoda();
   stopWatchEsclusi();
   $('adminAgg').textContent = `${allClients.length} clienti · controllo operativo e storico separati`;
@@ -540,6 +546,8 @@ function renderClient(c, fromAdmin) {
   else collaudoCoda.stop();
   if(new URLSearchParams(location.search).has('prova-ceo')) provaCeo.open(c);
   else provaCeo.stop();
+  if(new URLSearchParams(location.search).has('prova-team')) provaTeam.open(c);
+  else provaTeam.stop();
   operativita.open(c);
   stopAdminDaApprovare();
   window.__lastRender = () => renderClient(c, fromAdmin);
