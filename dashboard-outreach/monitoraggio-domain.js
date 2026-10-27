@@ -98,6 +98,7 @@
       if (['inviato','consegnato'].includes(r.stato)) assert(parsed(r.sent_at) && text(r.evidence) && r.evidence.trim(), 'Invio senza prova.');
       if (r.stato==='consegnato') assert(parsed(r.delivered_at), 'Consegna senza prova temporale.');
       if (r.conversation_url) assert(threadUrl(r.tipo,r.conversation_url), 'Filo della richiesta non valido.');
+      if (r.sent_thread_url) assert(r.tipo==='email' && threadUrl('email',r.sent_thread_url) && parsed(r.sent_at) && r.sent_by, 'Collegamento del messaggio email inviato senza riscontro.');
       if (r.approval_snapshot) assert(r.approval_snapshot.testo===r.testo && r.approval_snapshot.destinatario===r.destinatario && destination(r.tipo,r.destinatario) && (!r.approval_snapshot.confirmed_at || r.approval_snapshot.confirmed_at===r.confirmed_at) && (!r.approval_snapshot.confirmed_by || r.approval_snapshot.confirmed_by===r.confirmed_by), 'Testo, destinatario o autore non corrispondenti alla conferma originaria.');
       for (const k of ['claimed_at','checked_at','latest_reply_at','suspended_at','uncertain_at']) assert(!r[k] || parsed(r[k]), 'Data operativa non valida: '+k);
       if (r.stato==='in_corso') assert(text(r.claim_id,200) && r.claim_id && r.claimed_by && parsed(r.claimed_at) && threadUrl(r.tipo,r.thread_url) && text(r.check_evidence) && r.check_evidence.trim(), 'Presa in carico senza controllo o identificativo.');
@@ -214,12 +215,14 @@
       return {recorded:true,may_send:false,stato:r.stato};
     }
     assert(context.testo===r.testo && context.destinatario===r.destinatario,'La prova non corrisponde al testo e destinatario presi in carico.');
-    assert(threadUrl(r.tipo,context.thread_url) && context.thread_url===r.thread_url && text(context.evidence) && context.evidence.trim(),'Serve un riscontro preciso nel filo verificato.');
+    const proofThread=r.tipo==='email'?(r.sent_thread_url||(['inviato','consegnato'].includes(r.stato)?r.thread_url:null)):r.thread_url;
+    assert(threadUrl(r.tipo,context.thread_url) && (!proofThread || context.thread_url===proofThread) && text(context.evidence) && context.evidence.trim(),'Serve un riscontro preciso nel filo verificato.');
     if(context.stato==='inviato') {
       if(['inviato','consegnato'].includes(r.stato)) {assert(r.sent_at===at && r.evidence===context.evidence,'Invio già registrato: non sovrascrivere la prova.');return {recorded:false,may_send:false,stato:r.stato};}
       assert(['in_corso','da_verificare'].includes(r.stato),'Non è possibile registrare un invio per questa richiesta.');
       assert(state.outbox.filter(x=>x.id!==id && day(x.sent_at)===day(at)).length<10,'Limite di dieci invii provati nel giorno raggiunto: riconciliare senza ritentare.');
       Object.assign(r,{stato:'inviato',sent_at:at,sent_by:context.actor,evidence:context.evidence,last_checked_at:at,last_checked_by:context.actor});
+      if(r.tipo==='email')r.sent_thread_url=context.thread_url;
     } else {
       if(r.stato==='consegnato') {assert(r.delivered_at===at && r.delivery_evidence===context.evidence,'Consegna già registrata: non sovrascrivere la prova.');return {recorded:false,may_send:false,stato:r.stato};}
       assert(r.stato==='inviato' && Date.parse(at)>=Date.parse(r.sent_at) && context.evidence!==r.evidence,'La consegna richiede una prova distinta dopo l’invio.');
