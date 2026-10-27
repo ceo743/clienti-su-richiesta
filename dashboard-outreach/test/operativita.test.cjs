@@ -16,7 +16,7 @@ test('verifica del solo canale LinkedIn non dichiara collaudata la coda',()=>{
   assert.equal(D.append(null,slug,0,payload([thread]),actor,now).entries[0].esito,'canale_verificato');
 });
 test('la verifica del solo canale non può essere applicata ad altre funzioni',()=>{
-  for(const funzione of ['controllo_clienti','report_email','report_coordinato','report_automatico'])assert.throws(()=>D.append(null,slug,0,payload([{...canale,funzione}]),actor,now),/esclusivamente.*LinkedIn/);
+  for(const funzione of ['controllo_clienti','report_email','report_coordinato','report_automatico','report_calendario'])assert.throws(()=>D.append(null,slug,0,payload([{...canale,funzione}]),actor,now),/esclusivamente.*LinkedIn/);
 });
 test('canale verificato richiede profilo, intento e filo ufficiale esatti',()=>{
   for(const filo of ['https://www.linkedin.com/in/persona-prova/','http://www.linkedin.com/sales/lead/persona','https://linkedin.com.evil.test/sales/lead/persona','https://www.linkedin.com/sales/inbox','https://evil.test/messaging/thread/persona'])assert.throws(()=>D.append(null,slug,0,payload([{...canale,filo}]),actor,now),/filo ufficiale/);
@@ -187,4 +187,62 @@ test('lo snapshot proprio riconosce le chiavi map riordinate ricorsivamente da F
   assert.equal(h.node('[data-operativita-reviewed]').checked,false);
   assert.equal(h.node('[data-operativita-status]').textContent,undefined);
   assert.match(h.box.innerHTML,/email-reale/);
+});
+
+const calendario={id:'calendario-reale',funzione:'report_calendario',esito:'verificato',eseguito_il:'2026-10-26T19:40:00Z',fonte:'Evento reale, ricevuta e ripristino riletti',riscontro:'Il calendario ha saltato il report già spedito',periodo:{dal:'2026-10-16',al:'2026-10-22'},origine:'heartbeat_reale_report_gia_inviato',automazione_id:'dashboard-linkedin-report-settimanale-chiara',esecuzione_id:'heartbeat-reale-prova-1',sha256_evento:'1'.repeat(64),sha256_ricevuta:'2'.repeat(64),sha256_ripristino:'3'.repeat(64),ripristino_rrule:'FREQ=WEEKLY;BYDAY=FR;BYHOUR=11;BYMINUTE=0;BYSECOND=0'};
+test('avvio reale del calendario con deduplicazione si registra senza una nuova email',()=>{
+  const state=D.append(null,slug,0,payload([calendario]),actor,now),items=D.summarize(state,slug);
+  assert.equal(items.find(x=>x.funzione==='report_calendario').title,'Avvio automatico · controllo anti-duplicato');
+  assert.equal(items.find(x=>x.funzione==='report_calendario').latest.esito,'verificato');
+  for(const funzione of ['report_email','report_coordinato','report_automatico'])assert.equal(items.find(x=>x.funzione===funzione).latest,null);
+  for(const field of ['messaggio_id','destinatario','sha256_html'])assert.equal(Object.hasOwn(state.entries[0],field),false);
+  assert.equal(state.revision,1);assert.equal(state.entries[0].registrato_da,actor);
+});
+test('calendario verificato richiede cliente, origine e automazione esatti',()=>{
+  for(const candidate of [{...calendario,origine:undefined},{...calendario,origine:'email_manuale'},{...calendario,automazione_id:undefined},{...calendario,automazione_id:'altro-job'}])assert.throws(()=>D.append(null,slug,0,payload([candidate]),actor,now),/cliente, origine e automazione/);
+  assert.throws(()=>D.append(null,'altro-cliente',0,{version:1,client_slug:'altro-cliente',entries:[calendario]},actor,now),/cliente, origine e automazione/);
+});
+test('calendario verificato richiede esecuzione, periodo e tutte le impronte valide',()=>{
+  for(const field of ['esecuzione_id','periodo','sha256_evento','sha256_ricevuta','sha256_ripristino']){
+    const candidate={...calendario};delete candidate[field];
+    assert.throws(()=>D.append(null,slug,0,payload([candidate]),actor,now),/esecuzione reale|impronte/);
+  }
+  for(const field of ['sha256_evento','sha256_ricevuta','sha256_ripristino'])for(const value of ['', 'x'.repeat(64),'a'.repeat(63),['a'.repeat(64)]])assert.throws(()=>D.append(null,slug,0,payload([{...calendario,[field]:value}]),actor,now),/impronte/);
+  for(const periodo of [{dal:'2026-02-30',al:'2026-03-01'},{dal:'2026-10-22',al:'2026-10-16'},{}])assert.throws(()=>D.append(null,slug,0,payload([{...calendario,periodo}]),actor,now),/Periodo/);
+  assert.throws(()=>D.append(null,slug,0,payload([{...calendario,esecuzione_id:' '}]),actor,now),/esecuzione reale/);
+});
+test('il ripristino del calendario deve coincidere esattamente con la cadenza prevista',()=>{
+  for(const ripristino_rrule of [undefined,'','FREQ=DAILY','FREQ=WEEKLY;BYDAY=FR;BYHOUR=12;BYMINUTE=0;BYSECOND=0',calendario.ripristino_rrule+';COUNT=1'])assert.throws(()=>D.append(null,slug,0,payload([{...calendario,ripristino_rrule}]),actor,now),/ripristino settimanale esatto/);
+});
+test('il riscontro del calendario rifiuta sempre i campi di una nuova email',()=>{
+  for(const field of ['messaggio_id','destinatario','sha256_html'])for(const value of [report[field],'',null])for(const esito of ['verificato','bloccato'])assert.throws(()=>D.append(null,slug,0,payload([{...calendario,esito,[field]:value}]),actor,now),/campi email non ammessi/);
+  for(const funzione of ['report_email','report_coordinato'])assert.throws(()=>D.append(null,slug,0,payload([{...calendario,funzione}]),actor,now),/campi del calendario/);
+  assert.throws(()=>D.append(null,slug,0,payload([{...calendario,token:'segreto'}]),actor,now),/Campi non ammessi/);
+});
+test('calendario idempotente per id e ordine delle map, senza clonare run o evento',()=>{
+  const state=D.append(null,slug,0,payload([calendario]),actor,now);
+  const reordered={...calendario,periodo:{al:calendario.periodo.al,dal:calendario.periodo.dal}};
+  const again=D.append(state,slug,1,payload([reordered]),actor,now);assert.equal(again.entries.length,1);assert.equal(again.revision,2);
+  assert.throws(()=>D.append(state,slug,1,payload([{...calendario,id:'clone-run',sha256_evento:'4'.repeat(64)}]),actor,now),/calendario già registrato/);
+  assert.throws(()=>D.append(state,slug,1,payload([{...calendario,id:'clone-evento',esecuzione_id:'altro-run'}]),actor,now),/calendario già registrato/);
+  assert.throws(()=>D.append(state,slug,1,payload([{...calendario,riscontro:'Altro'}]),actor,now),/contenuto diverso/);
+  assert.throws(()=>D.append(state,slug,0,payload([calendario]),actor,now),/altro operatore/);
+});
+test('la prova calendario non sblocca il report automatico dal modulo manuale',()=>{
+  const state=D.append(null,slug,0,payload([calendario]),actor,now);
+  assert.throws(()=>D.append(state,slug,1,payload([{...report,funzione:'report_automatico',esecuzione_id:calendario.esecuzione_id}]),actor,now),/modulo manuale/);
+  assert.throws(()=>D.append(state,slug,1,payload([{...calendario,id:'promosso',funzione:'report_automatico'}]),actor,now),/modulo manuale/);
+  assert.equal(D.summarize(state,slug).find(x=>x.funzione==='report_automatico').latest,null);
+});
+test('la pagina mostra prove calendario e limiti senza presentarle come nuova email',()=>{
+  const vm=require('node:vm'),fs=require('node:fs'),path=require('node:path');
+  const state=D.append(null,slug,0,payload([calendario]),actor,now),box={innerHTML:'',querySelector:()=>null};
+  const db={collection:()=>({doc:()=>({onSnapshot:fn=>{fn({data:()=>({operativita_v1:state})});return ()=>{};}})})};
+  const context={window:{OutreachOperativita:D},document:{getElementById:()=>box},Date,JSON,Error};
+  vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../operativita-ui.js'),'utf8'),context);
+  context.window.createOutreachOperativita({db,auth:{currentUser:{email:actor}},isAdmin:()=>false}).open({slug});
+  for(const text of ['Avvio automatico · controllo anti-duplicato','Il giro ha saltato il report già spedito','non prova un nuovo invio della settimana successiva',calendario.origine,calendario.automazione_id,calendario.esecuzione_id,calendario.sha256_evento,calendario.sha256_ricevuta,calendario.sha256_ripristino,calendario.ripristino_rrule])assert.ok(box.innerHTML.includes(text),text);
+  assert.match(box.innerHTML,/<h4>Report via email<\/h4><p><strong>Da collaudare/);
+  assert.match(box.innerHTML,/<h4>Partenza settimanale del report<\/h4><p><strong>Da collaudare/);
+  assert.doesNotMatch(box.innerHTML,/data-operativita-save/);
 });

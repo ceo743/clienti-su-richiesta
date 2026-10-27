@@ -1,7 +1,7 @@
 /* Registro delle prove operative: nessun trasporto esterno e nessuna credenziale. */
 (function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;else root.OutreachOperativita=api;})(typeof globalThis!=='undefined'?globalThis:this,function(){
   'use strict';
-  const TYPES={controllo_clienti:'Controllo clienti',invio_linkedin:'Invii LinkedIn',report_email:'Report via email',report_coordinato:'Procedura report · collaudo reale anticipato',report_automatico:'Partenza settimanale del report',coda_email_ceo:'Coda email · prova reale a Davide'};
+  const TYPES={controllo_clienti:'Controllo clienti',invio_linkedin:'Invii LinkedIn',report_email:'Report via email',report_coordinato:'Procedura report · collaudo reale anticipato',report_automatico:'Partenza settimanale del report',report_calendario:'Avvio automatico · controllo anti-duplicato',coda_email_ceo:'Coda email · prova reale a Davide'};
   const RESULTS={verificato:'Prova reale registrata',canale_verificato:'Canale di invio verificato · coda da collaudare',bloccato:'Bloccato',incerto:'Esito da verificare',simulato:'Solo simulazione'};
   const assert=(ok,msg)=>{if(!ok)throw Error(msg);};
   const timestamp=x=>typeof x==='string'&&Number.isFinite(Date.parse(x));
@@ -12,7 +12,7 @@
   function validate(raw,slug){
     assert(raw&&raw.version===1&&raw.client_slug===slug&&/^[a-z0-9][a-z0-9-]{0,100}$/.test(slug),'Registro di un altro cliente.');
     assert(Number.isSafeInteger(raw.revision)&&raw.revision>=0&&Array.isArray(raw.entries)&&raw.entries.length<=100,'Registro operativo non valido.');
-    const ids=new Set(),coordinatorRuns=new Set(),coordinatorMessages=new Set();
+    const ids=new Set(),coordinatorRuns=new Set(),coordinatorMessages=new Set(),calendarRuns=new Set(),calendarEvents=new Set();
     for(const e of raw.entries){
       assert(text(e.id,200)&&!ids.has(e.id),'Identificativo prova duplicato.');ids.add(e.id);
       assert(Object.hasOwn(TYPES,e.funzione)&&Object.hasOwn(RESULTS,e.esito),'Funzione o esito non valido.');
@@ -21,11 +21,21 @@
         assert(/^https:\/\/www\.linkedin\.com\/in\/[^/?#\s]+\/?$/.test(e.destinatario||'')&&text(e.esecuzione_id,200),'La prova del canale richiede il profilo LinkedIn esatto e l’identificativo dell’intento.');
         assert(/^https:\/\/www\.linkedin\.com\/(?:sales\/lead|messaging\/thread)\/[^/?#\s]+\/?(?:\?[^#\s]*)?$/.test(e.filo||''),'La prova del canale richiede il filo ufficiale Sales Navigator o messaggistica LinkedIn.');
       }
+      if(e.funzione==='report_calendario')assert(!['messaggio_id','destinatario','sha256_html'].some(k=>Object.hasOwn(e,k)),'L’avvio del calendario non è una nuova email: campi email non ammessi.');
+      else assert(!['automazione_id','sha256_evento','sha256_ripristino','ripristino_rrule'].some(k=>Object.hasOwn(e,k)),'I campi del calendario sono ammessi soltanto per l’avvio con controllo anti-duplicato.');
       assert(timestamp(e.eseguito_il)&&timestamp(e.registrato_il)&&text(e.registrato_da,320),'Data o operatore della prova mancante.');
       assert(text(e.fonte)&&text(e.riscontro),'Ogni esito richiede fonte e riscontro rintracciabile.');
       if(e.periodo)assert(date(e.periodo.dal)&&date(e.periodo.al)&&e.periodo.dal<=e.periodo.al,'Periodo della prova non valido.');
       if(e.esito==='verificato'&&['report_email','report_coordinato','report_automatico'].includes(e.funzione)){
         assert(text(e.messaggio_id,320)&&text(e.destinatario,320)&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.destinatario)&&/^[a-f0-9]{64}$/.test(e.sha256_html||'')&&e.periodo,'Report senza prova email e allegato.');
+      }
+      if(e.esito==='verificato'&&e.funzione==='report_calendario'){
+        assert(slug==='davide-caiazzo'&&e.origine==='heartbeat_reale_report_gia_inviato'&&e.automazione_id==='dashboard-linkedin-report-settimanale-chiara','L’avvio del calendario richiede cliente, origine e automazione reali esatti.');
+        assert(text(e.esecuzione_id,200)&&e.periodo,'L’avvio del calendario richiede esecuzione reale e periodo valido.');
+        assert(['sha256_evento','sha256_ricevuta','sha256_ripristino'].every(k=>typeof e[k]==='string'&&/^[a-f0-9]{64}$/.test(e[k])),'L’avvio del calendario richiede le impronte di evento, ricevuta e ripristino.');
+        assert(e.ripristino_rrule==='FREQ=WEEKLY;BYDAY=FR;BYHOUR=11;BYMINUTE=0;BYSECOND=0','Il calendario richiede il ripristino settimanale esatto.');
+        assert(!calendarRuns.has(e.esecuzione_id)&&!calendarEvents.has(e.sha256_evento),'Esecuzione o evento del calendario già registrato con un’altra prova.');
+        calendarRuns.add(e.esecuzione_id);calendarEvents.add(e.sha256_evento);
       }
       if(e.esito==='verificato'&&e.funzione==='invio_linkedin')assert(/^https:\/\/www\.linkedin\.com\/messaging\/thread\/[^\s]+$/.test(e.filo||'')&&text(e.destinatario,1000),'Invio LinkedIn senza filo e destinatario.');
       if(e.esito==='verificato'&&e.funzione==='coda_email_ceo'){
@@ -53,7 +63,7 @@
     assert(state.revision===expected,'Registro aggiornato da un altro operatore: riapri prima di salvare.');
     assert(text(actor,320)&&timestamp(now),'Accesso o data non validi.');
     assert(payload&&payload.version===1&&payload.client_slug===slug&&Array.isArray(payload.entries)&&payload.entries.length>0&&payload.entries.length<=10,'Indicare le prove del solo cliente aperto.');
-    const fields=['id','funzione','esito','eseguito_il','fonte','riscontro','periodo','messaggio_id','destinatario','sha256_html','filo','esecuzione_id','origine','sha256_manifest','sha256_ricevuta','sha256_raw','richiesta_id','presa_id','sha256_testo'];
+    const fields=['id','funzione','esito','eseguito_il','fonte','riscontro','periodo','messaggio_id','destinatario','sha256_html','filo','esecuzione_id','origine','sha256_manifest','sha256_ricevuta','sha256_raw','richiesta_id','presa_id','sha256_testo','automazione_id','sha256_evento','sha256_ripristino','ripristino_rrule'];
     for(const entry of payload.entries){
       assert(entry&&Object.keys(entry).every(k=>fields.includes(k)),'Campi non ammessi nella prova.');
       assert(!(entry.funzione==='report_automatico'&&entry.esito==='verificato'),'Il modulo manuale non certifica la partenza automatica: serve un riscontro del processo automatico distinto.');
