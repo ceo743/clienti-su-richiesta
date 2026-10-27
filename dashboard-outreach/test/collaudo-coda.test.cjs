@@ -1,7 +1,7 @@
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const D=require('../monitoraggio-domain.js');
-const {createAdapter,fixture,removeOwnFixture,FIELD,MARK}=require('../collaudo-coda.js');
+const {createAdapter,createOutreachCollaudoCoda,fixture,removeOwnFixture,verifyCleanup,FIELD,MARK}=require('../collaudo-coda.js');
 const DELETE=Symbol('delete');
 const clone=x=>x===undefined?undefined:JSON.parse(JSON.stringify(x));
 function setup() {
@@ -11,12 +11,12 @@ function setup() {
   ['clienti/'+session.slug,{monitoraggio_v1:{real:true},controllo_v1:{unchanged:true},other:'preserved',[FIELD]:{kind:MARK,client_slug:session.slug,owner_email:session.email,owner_uid:session.uid,run_id:session.runId,stato:state}}],
   ['config/admins',{emails:[session.email]}],['config/approvatori_messaggi',{emails:['reviewer@example.it']}]
  ]);
- const updates=[],reads=[],listeners=new Map();let current=true,before=null,after=null;
+ const updates=[],reads=[],txReads=[],listeners=new Map();let current=true,before=null,after=null,staleClient,failRead=false;
  const snapshot=path=>({exists:store.has(path),data:()=>clone(store.get(path))});
- const ref=path=>({path,get:async opts=>{reads.push([path,opts]);return snapshot(path);},onSnapshot:next=>{listeners.set(path,next);next(snapshot(path));return()=>listeners.delete(path);}});
+ const ref=path=>({path,get:async opts=>{reads.push([path,opts]);return staleClient!==undefined && path.startsWith('clienti/')?{exists:true,data:()=>clone(staleClient)}:snapshot(path);},onSnapshot:next=>{listeners.set(path,next);next(snapshot(path));return()=>listeners.delete(path);}});
  const db={collection:name=>({doc:id=>ref(name+'/'+id)}),runTransaction:async callback=>{
   if(before)before();const pending=[];
-  const result=await callback({get:async r=>snapshot(r.path),update:(r,p)=>pending.push([r.path,p])});
+  const result=await callback({get:async r=>{txReads.push(r.path);if(failRead){failRead=false;throw Error('Lettura transazionale non disponibile.');}return snapshot(r.path);},update:(r,p)=>pending.push([r.path,p])});
   for(const [path,patch] of pending){updates.push([path,patch]);const doc=store.get(path);
    for(const [k,v] of Object.entries(patch)){if(k===FIELD+'.stato')doc[FIELD].stato=clone(v);else if(v===DELETE)delete doc[k];else doc[k]=clone(v);}
    if(after)after();listeners.get(path)?.(snapshot(path));
@@ -24,7 +24,7 @@ function setup() {
  }};
  const auth={currentUser:{email:session.email,uid:session.uid}};
  const options={db,auth,isAdmin:()=>true,isCurrent:()=>current,domain:D,fieldDelete:()=>DELETE};
- return {session,state,store,updates,reads,listeners,auth,options,adapter:createAdapter(options,session),before:fn=>before=fn,after:fn=>after=fn,invalidate:()=>current=false};
+ return {session,state,store,updates,reads,txReads,listeners,auth,options,adapter:createAdapter(options,session),before:fn=>before=fn,after:fn=>after=fn,invalidate:()=>current=false,cacheClient:x=>staleClient=x,failReadOnce:()=>failRead=true};
 }
 const settle=()=>new Promise(r=>setImmediate(r));
 function requested(f){const s=clone(f.state);D.request(s,s.contacts[0].id,'email',s.contacts[0].bozza,f.session.email,'2026-10-27T09:00:00Z');return s;}
@@ -67,7 +67,7 @@ test('other contacts, coverage and invented sent/delivered results are rejected'
 });
 test('cleanup deletes only own isolated field with server absence check',async()=>{
  const f=setup(),before=clone(f.store.get('clienti/'+f.session.slug));delete before[FIELD];await removeOwnFixture(f.options,f.session);
- assert.deepEqual(f.store.get('clienti/'+f.session.slug),before);assert.deepEqual(Object.keys(f.updates[0][1]),[FIELD]);assert.equal(f.updates[0][1][FIELD],DELETE);assert.deepEqual(f.reads.at(-1),['clienti/'+f.session.slug,{source:'server'}]);
+ assert.deepEqual(f.store.get('clienti/'+f.session.slug),before);assert.deepEqual(Object.keys(f.updates[0][1]),[FIELD]);assert.equal(f.updates[0][1][FIELD],DELETE);assert.equal(f.reads.filter(([path])=>path.startsWith('clienti/')).length,0);assert.equal(f.txReads.filter(path=>path.startsWith('clienti/')).length,2);
 });
 test('cleanup rejects conflicting owner/run and revoked identity or permissions',async()=>{
  for(const change of [f=>f.store.get('clienti/'+f.session.slug)[FIELD].run_id='other',f=>f.store.get('clienti/'+f.session.slug)[FIELD].owner_uid='other',f=>f.auth.currentUser=null,f=>f.store.set('config/admins',{emails:[]}),f=>f.invalidate()]){
@@ -83,4 +83,60 @@ test('cleanup reports concurrent real-data changes and never reverts them',async
 test('listener drops queued events after unsubscribe and detects revoked session',async()=>{
  const f=setup(),r=f.adapter.collection('clienti').doc(f.session.slug);let calls=0,errors=0;const off=r.onSnapshot(()=>calls++,()=>errors++);off();await settle();assert.equal(calls,0);
  const off2=r.onSnapshot(()=>calls++,()=>errors++);await settle();assert.equal(calls,1);f.invalidate();f.listeners.get('clienti/'+f.session.slug)({exists:true,data:()=>f.store.get('clienti/'+f.session.slug)});await settle();assert.equal(calls,1);assert.equal(errors,1);off2();
+});
+
+function fakeBox(){
+ const nodes=new Map();return {innerHTML:'',value:'',querySelector(selector){if(!nodes.has(selector))nodes.set(selector,fakeBox());return nodes.get(selector);}};
+}
+test('adapter reads server even when client cache lacks a persisted fixture',async()=>{
+ const f=setup(),cached=clone(f.store.get('clienti/'+f.session.slug));delete cached[FIELD];f.cacheClient(cached);
+ const doc=await f.adapter.collection('clienti').doc(f.session.slug).get();assert.deepEqual(doc.data().monitoraggio_v1,f.state);
+ assert.equal(f.reads.length,0);assert.ok(f.txReads.includes('clienti/'+f.session.slug));
+});
+test('inspect offers resume from server even when cache says no fixture exists',async()=>{
+ const f=setup(),cached=clone(f.store.get('clienti/'+f.session.slug));delete cached[FIELD];f.cacheClient(cached);
+ const box=fakeBox(),panel=createOutreachCollaudoCoda({...f.options,box});panel.open({slug:f.session.slug});await settle();
+ assert.match(box.querySelector('[data-collaudo-actions]').innerHTML,/data-collaudo-resume/);panel.stop();
+});
+test('start verifies persisted fixture on server and mounts despite stale empty cache',async()=>{
+ const f=setup(),raw=f.store.get('clienti/'+f.session.slug);delete raw[FIELD];f.cacheClient(clone(raw));
+ const box=fakeBox();let opened=0;const previous=globalThis.createOutreachMonitoraggio;
+ globalThis.createOutreachMonitoraggio=()=>({open:()=>opened++,stop:()=>{}});
+ const panel=createOutreachCollaudoCoda({...f.options,box});
+ try{
+  panel.open({slug:f.session.slug});await settle();
+  const actions=box.querySelector('[data-collaudo-actions]');assert.match(actions.innerHTML,/data-collaudo-start/);
+  await actions.querySelector('[data-collaudo-start]').onclick({currentTarget:{disabled:false}});await settle();
+  assert.equal(opened,1);assert.ok(f.store.get('clienti/'+f.session.slug)[FIELD].run_id);
+  assert.doesNotMatch(box.querySelector('[data-collaudo-status]').textContent,/non confermato/);
+  assert.equal(f.reads.filter(([path])=>path.startsWith('clienti/')).length,0);assert.ok(f.txReads.length>=6);
+ }finally{panel.stop();globalThis.createOutreachMonitoraggio=previous;}
+});
+
+test('cleanup confirms absence through a separate transaction despite stale server get',async()=>{
+ const f=setup();f.cacheClient(clone(f.store.get('clienti/'+f.session.slug)));
+ const proof={},result=await removeOwnFixture(f.options,f.session,proof);
+ assert.equal(result.absent,true);assert.equal(result.unchanged,true);assert.equal(f.updates.length,1);
+ assert.equal(f.reads.length,0);assert.equal(f.txReads.filter(path=>path.startsWith('clienti/')).length,2);
+});
+test('read-only cleanup verification never deletes a present fixture',async()=>{
+ const f=setup();await assert.rejects(verifyCleanup(f.options,f.session),/assenza/);assert.equal(f.updates.length,0);
+});
+test('failed cleanup readback leaves verification-only UI without another deletion',async()=>{
+ const f=setup(),box=fakeBox(),previous=globalThis.createOutreachMonitoraggio;let stops=0;
+ globalThis.createOutreachMonitoraggio=()=>({open:()=>{},stop:()=>stops++});
+ const panel=createOutreachCollaudoCoda({...f.options,box});
+ try{
+  panel.open({slug:f.session.slug});await settle();
+  const actions=box.querySelector('[data-collaudo-actions]');actions.querySelector('[data-collaudo-resume]').onclick();await settle();
+  f.after(()=>{assert.equal(stops,1);f.failReadOnce();});
+  const remove=actions.querySelector('[data-collaudo-cleanup]').onclick;
+  await remove();assert.equal(f.updates.length,1);assert.equal(f.store.get('clienti/'+f.session.slug)[FIELD],undefined);
+  assert.match(actions.innerHTML,/data-collaudo-verify/);assert.doesNotMatch(actions.innerHTML,/data-collaudo-cleanup/);
+  assert.match(box.querySelector('[data-collaudo-status]').textContent,/Pulizia da verificare/);
+  await remove();assert.equal(f.updates.length,1);
+  await actions.querySelector('[data-collaudo-verify]').onclick();
+  assert.equal(f.updates.length,1);assert.match(box.querySelector('[data-collaudo-status]').textContent,/Monitoraggio reale invariato/);
+  assert.equal(box.querySelector('[data-collaudo-json]').value,'');
+ }finally{panel.stop();globalThis.createOutreachMonitoraggio=previous;}
 });

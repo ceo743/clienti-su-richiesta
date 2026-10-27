@@ -7,9 +7,9 @@ window.createOutreachMonitoraggio = function (options) {
   const pretty = value => value ? new Date(value).toLocaleString('it-IT',{timeZone:'Europe/Rome'}) : 'non disponibile';
   const labels = Object.fromEntries(D.STAGES.map((s,i)=>[s,D.LABELS[i]]));
   const words = {da_classificare:'Da classificare',cortesia:'Cortesia / grazie',proposta:'Risposta alla proposta / CTA',negativa:'Negativa',bisogno_call:'Bisogno concreto / call',materiale:'Solo materiale',richiesta:'Da eseguire · non ancora inviata',sospesa:'Sospesa · nuova conferma necessaria',in_corso:'Presa in carico · invio non provato',da_verificare:'Esito incerto · nessun ritentativo',annullata:'Richiesta annullata',inviato:'Invio provato',consegnato:'Consegna provata',errore:'Errore · nessun ritentativo'};
-  let client = null, state = null, stopListener = null, active = 0, filters = null, draftImport = null, editing = false;
+  let client = null, state = null, stopListener = null, active = 0, filters = null, draftImport = null, editing = false, fingerprint = null, pendingSignature = null;
   const box = options.box || document.getElementById('monitoraggio');
-  function stop() { ++active; if (stopListener) stopListener(); stopListener=null; client=null; state=null; draftImport=null; editing=false; box.innerHTML=''; }
+  function stop() { ++active; if (stopListener) stopListener(); stopListener=null; client=null; state=null; draftImport=null; editing=false; fingerprint=null; pendingSignature=null; box.innerHTML=''; }
   function say(message, error=false) { const el=box.querySelector('[data-status]'); if(el){el.textContent=message;el.className=error?'msg err':'msg ok';} }
   function defaults() { const al=D.day(new Date().toISOString()); return {dal:new Date(Date.parse(al+'T12:00:00Z')-29*86400000).toISOString().slice(0,10),al,settore:'',tema:'',target:''}; }
   // Le regole pubblicate consentono la scrittura del documento cliente ai soli amministratori.
@@ -22,7 +22,15 @@ window.createOutreachMonitoraggio = function (options) {
       const data=snapshot.data() || {};
       client={...c,...data,slug:c.slug};
       const value=data.monitoraggio_v1;
-      try { state=value ? D.validate(value,c.slug) : null; if(!editing) render(); else say('I dati sono stati aggiornati. Le modifiche aperte saranno confrontate prima del salvataggio.'); }
+      try {
+        const next=value ? D.validate(value,c.slug) : null, signature=D.signature(next);
+        if(signature===fingerprint)return;
+        const own=signature===pendingSignature, status=box.querySelector('[data-status]');
+        const feedback=own&&status?{message:status.textContent,error:status.classList.contains('err')}:null;
+        state=next; fingerprint=signature;
+        if(!editing) {render();if(feedback?.message)say(feedback.message,feedback.error);}
+        else if(!own) say('I dati sono stati aggiornati. Le modifiche aperte saranno confrontate prima del salvataggio.');
+      }
       catch(e) { state=null;box.innerHTML='<div class="panel"><h3>Monitoraggio non disponibile</h3><p>'+esc(e.message)+'</p></div>'; }
     },()=>{ if(token===active) box.innerHTML='<div class="panel"><h3>Monitoraggio non disponibile</h3><p>Permesso di lettura non disponibile. Nessun dato è stato modificato.</p></div>'; });
   }
@@ -44,6 +52,7 @@ window.createOutreachMonitoraggio = function (options) {
       const latest=raw ? D.validate(raw,slug) : D.empty(slug);
       const next=change(latest,{actor,operators,approvers}) || latest;
       next.updated_at=new Date().toISOString();
+      pendingSignature=D.signature(D.validate(next,slug));
       transaction.update(ref,{monitoraggio_v1:D.validate(next,slug)});
     });
   }

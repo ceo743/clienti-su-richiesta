@@ -45,6 +45,17 @@
     state.contacts = [{id:'collaudo-ceo',nome:'COLLAUDO — account interno CEO',email:EMAIL,email_verificata:true,scope:'outreach',ingresso:now,events:{},bozza:'COLLAUDO ISOLATO — questo testo non deve essere inviato.',tipo_risposta:'da_classificare',tipo_interesse:'da_classificare',conversazione_verificata_il:now,responsabile:'COLLAUDO interno',prossimo_passo:'Verificare solo i campi isolati, senza invii'}];
     return validateState(state,slug,domain);
   }
+  // transaction.get legge dal server senza dipendere dalla cache del listener.
+  async function readFresh(options, session) {
+    localGuard(options,session);
+    const ref=options.db.collection('clienti').doc(session.slug),roles=options.db.collection('config').doc('admins');
+    return options.db.runTransaction(async transaction=>{
+      const [snapshot,admins]=await Promise.all([transaction.get(ref),transaction.get(roles)]);
+      localGuard(options,session);adminsGuard(admins,session);
+      if(!snapshot.exists)fail('Cliente non disponibile.');
+      return snapshot;
+    });
+  }
   function createAdapter(options, session) {
     const domain = options.domain || root.OutreachMonitoraggio;
     localGuard(options,session);
@@ -64,12 +75,12 @@
       }};
     }
     const clientRef = Object.freeze({
-      get:async()=>{localGuard(options,session);const [snapshot,admins]=await Promise.all([rawRef.get(),adminsRef.get()]);localGuard(options,session);adminsGuard(admins,session);return project(snapshot);},
+      get:async()=>project(await readFresh(options,session)),
       onSnapshot:(next,error)=>{
         localGuard(options,session);
         let live=true;
-        const off=rawRef.onSnapshot(snapshot=>{
-          Promise.resolve().then(()=>adminsRef.get()).then(admins=>{if(!live)return;localGuard(options,session);adminsGuard(admins,session);next(project(snapshot));}).catch(e=>{if(live && error)error(e);});
+        const off=rawRef.onSnapshot(()=>{
+          Promise.resolve().then(()=>live ? readFresh(options,session) : null).then(snapshot=>{if(live && snapshot)next(project(snapshot));}).catch(e=>{if(live && error)error(e);});
         },e=>{if(live && error)error(e);});
         return ()=>{live=false;off();};
       },
@@ -116,22 +127,25 @@
     });
     return adapter;
   }
-  async function removeOwnFixture(options, session) {
+  async function verifyCleanup(options, session, proof={}) {
+    const saved=await readFresh(options,session);
+    if(saved.data()?.[FIELD]!==undefined)fail('L’assenza del campo di prova non è confermata. La verifica non ripete l’eliminazione.');
+    const unchanged=proof.captured===true && (options.domain || root.OutreachMonitoraggio).signature(saved.data()?.monitoraggio_v1)===proof.signature;
+    if(proof.captured && !unchanged)fail('Prova eliminata; il monitoraggio reale risulta cambiato durante la pulizia. Verificare le modifiche concorrenti.');
+    return {absent:true,unchanged};
+  }
+  async function removeOwnFixture(options, session, proof={}) {
     localGuard(options,session);
     if(typeof options.fieldDelete!=='function')fail('Eliminazione campo non disponibile.');
     const ref=options.db.collection('clienti').doc(session.slug),adminsRef=options.db.collection('config').doc('admins');
-    let before;
     await options.db.runTransaction(async transaction=>{
       const [snapshot,admins]=await Promise.all([transaction.get(ref),transaction.get(adminsRef)]);
       localGuard(options,session);adminsGuard(admins,session);
       if(!snapshot.exists || !owned(snapshot.data()?.[FIELD],session))fail('Prova di un’altra esecuzione: nessuna eliminazione.');
-      before=(options.domain || root.OutreachMonitoraggio).signature(snapshot.data()?.monitoraggio_v1);
+      proof.signature=(options.domain || root.OutreachMonitoraggio).signature(snapshot.data()?.monitoraggio_v1);proof.captured=true;
       transaction.update(ref,{[FIELD]:options.fieldDelete()});
     });
-    const saved=await ref.get({source:'server'});
-    localGuard(options,session);
-    if(saved.data()?.[FIELD]!==undefined)fail('L’assenza del campo di prova non è confermata. Riaprire il pannello.');
-    if((options.domain || root.OutreachMonitoraggio).signature(saved.data()?.monitoraggio_v1)!==before)fail('Prova eliminata; il monitoraggio reale risulta cambiato durante la pulizia. Verificare le modifiche concorrenti.');
+    return verifyCleanup(options,session,proof);
   }
   function createOutreachCollaudoCoda(options) {
     const domain=options.domain || root.OutreachMonitoraggio;
@@ -148,11 +162,12 @@
       if(!current(t,actor,slug))fail('Sessione di collaudo cambiata.');
       session={...actor,slug,runId};
       const mountedSession=session;
+      let cleaning=false;
       const adapter=createAdapter({...options,isCurrent:()=>current(t,actor,slug),domain},session);
       const target=box.querySelector('[data-collaudo-renderer]');
       const readExport=async()=>{
-        const raw=await options.db.collection('clienti').doc(slug).get({source:'server'});
-        if(!current(t,actor,slug) || session!==mountedSession)return;
+        const raw=await readFresh({...options,isCurrent:()=>current(t,actor,slug)},mountedSession);
+        if(!current(t,actor,slug) || session!==mountedSession || cleaning)return;
         const value=raw.data()?.[FIELD];
         if(!owned(value,session))fail('Campo di prova non più appartenente a questa esecuzione.');
         box.querySelector('[data-collaudo-json]').value=JSON.stringify(value,null,2);
@@ -165,25 +180,36 @@
       const actions=box.querySelector('[data-collaudo-actions]');
       actions.innerHTML='<button type="button" data-collaudo-reload>Rileggi prova salvata</button><button type="button" data-collaudo-cleanup>Elimina solo questa prova</button>';
       actions.querySelector('[data-collaudo-reload]').onclick=async()=>{try{await adapter.collection('clienti').doc(slug).get();if(!current(t,actor,slug))return;renderer.open(client);say('Prova isolata riletta. Nessun invio effettuato.');}catch(e){say(e.message);}};
-      actions.querySelector('[data-collaudo-cleanup]').onclick=async e=>{
-        const button=e.currentTarget;button.disabled=true;
-        try{
-          await removeOwnFixture({...options,isCurrent:()=>current(t,actor,slug)},session);
+      actions.querySelector('[data-collaudo-cleanup]').onclick=async()=>{
+        if(cleaning)return;cleaning=true;
+        if(renderer)renderer.stop();renderer=null;
+        box.querySelector('[data-collaudo-json]').value='';
+        const proof={},guarded={...options,isCurrent:()=>current(t,actor,slug)};
+        actions.innerHTML='<button type="button" data-collaudo-verify>Verifica pulizia — sola lettura</button>';
+        const verify=actions.querySelector('[data-collaudo-verify]');
+        async function finished(result) {
           if(!current(t,actor,slug))return;
-          if(renderer)renderer.stop();renderer=null;session=null;
-          box.querySelector('[data-collaudo-json]').value='';
+          session=null;
           await inspect(t,actor,slug);
-          say('Prova isolata eliminata; assenza confermata dal server. Monitoraggio reale invariato.');
-        }catch(error){say(error.message);button.disabled=false;}
+          say(result.unchanged?'Prova isolata eliminata; assenza confermata con lettura transazionale. Monitoraggio reale invariato.':'Campo di prova assente; confronto con il monitoraggio precedente non disponibile.');
+        }
+        verify.onclick=async()=>{
+          verify.disabled=true;
+          try{await finished(await verifyCleanup(guarded,mountedSession,proof));}
+          catch(error){say('Pulizia da verificare: '+error.message);}
+          finally{verify.disabled=false;}
+        };
+        verify.disabled=true;
+        try{await finished(await removeOwnFixture(guarded,mountedSession,proof));}
+        catch(error){say('Pulizia da verificare: '+error.message);}
+        finally{verify.disabled=false;}
       };
       say('Prova isolata attiva. Apri la scheda standard o «Controlla richiesta e riscontri». Nessun messaggio viene trasmesso.');
     }
     async function inspect(t,actor,slug) {
       const ref=options.db.collection('clienti').doc(slug),adminsRef=options.db.collection('config').doc('admins');
-      const [snapshot,admins]=await Promise.all([ref.get(),adminsRef.get()]);
+      const snapshot=await readFresh({...options,isCurrent:()=>current(t,actor,slug)},{...actor,slug});
       if(!current(t,actor,slug))return;
-      adminsGuard(admins,{...actor,slug});
-      if(!snapshot.exists)fail('Cliente non disponibile.');
       const existing=snapshot.data()?.[FIELD],actions=box.querySelector('[data-collaudo-actions]');
       if(existing!==undefined){
         const resumable=existing?.kind===MARK && existing.client_slug===slug && existing.owner_email===actor.email && existing.owner_uid===actor.uid && typeof existing.run_id==='string' && existing.run_id;
@@ -207,7 +233,7 @@
             transaction.update(ref,{[FIELD]:{kind:MARK,client_slug:slug,owner_email:actor.email,owner_uid:actor.uid,run_id:runId,created_at:now,stato:fixture(slug,domain,now,actor.email)}});
           });
           if(!current(t,actor,slug))return;
-          const saved=await ref.get();
+          const saved=await readFresh({...options,isCurrent:()=>current(t,actor,slug)},newSession);
           if(!current(t,actor,slug))return;
           if(!owned(saved.data()?.[FIELD],newSession))fail('Salvataggio della prova non confermato.');
           mount(t,actor,slug,runId);
@@ -225,5 +251,5 @@
     }
     return {open,stop};
   }
-  return {createOutreachCollaudoCoda,createAdapter,fixture,validateState,removeOwnFixture,FIELD,MARK};
+  return {createOutreachCollaudoCoda,createAdapter,fixture,validateState,removeOwnFixture,verifyCleanup,readFresh,FIELD,MARK};
 });

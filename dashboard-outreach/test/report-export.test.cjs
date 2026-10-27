@@ -74,20 +74,20 @@ test('HTML inerte: nomi, fonti e prossime azioni codificati; niente rete o crede
 // Non simula un browser o Firebase: intercetta soltanto il salvataggio in memoria.
 function uiHarness(input,control=null,editable=true) {
   const nodes=new Map();
-  const box={html:'',set innerHTML(v){this.html=v;nodes.clear();},get innerHTML(){return this.html;},querySelector(selector){if(!nodes.has(selector)){const key=selector==='[data-report-dal]'?'dal':selector==='[data-report-al]'?'al':null;const value=key?this.html.match(new RegExp('data-report-'+key+' type="date" value="([^"]*)"'))?.[1]:'';nodes.set(selector,{innerHTML:'',textContent:'',className:'',disabled:false,value});}return nodes.get(selector);},querySelectorAll(){return [];}};
-  let saved=null, transactions=0;
+  const box={html:'',set innerHTML(v){this.html=v;nodes.clear();},get innerHTML(){return this.html;},querySelector(selector){if(!nodes.has(selector)){const key=selector==='[data-report-dal]'?'dal':selector==='[data-report-al]'?'al':null;const value=key?this.html.match(new RegExp('data-report-'+key+' type="date" value="([^"]*)"'))?.[1]:'';nodes.set(selector,{innerHTML:'',textContent:'',className:'',disabled:false,value,classList:{contains:()=>false}});}return nodes.get(selector);},querySelectorAll(){return [];}};
+  let saved=null, transactions=0, listener=null;
   let operators=['operatore@example.test'];
   const reads=[];
   let remote={monitoraggio_v1:input,...(control?{controllo_v1:control}:{})};
   const snapshot={exists:true,data:()=>remote};
-  const ref={onSnapshot(fn){fn(snapshot);return ()=>{};}};
+  const ref={onSnapshot(fn){listener=fn;fn(snapshot);return ()=>{};}};
   const db={collection(collection){return {doc(id){return collection==='clienti'?ref:{collection,id};}};},async runTransaction(fn){transactions++;return fn({async get(target){reads.push(target===ref?'clienti':target.collection+'/'+target.id);return target===ref?snapshot:{exists:true,data:()=>({emails:target.id==='admins'?operators:['approvatore@example.test']})};},update(_ref,data){saved=data;}});}};
   class FixedDate extends Date { constructor(...args){super(...(args.length ? args : [now]));} }
   const sandbox={window:{OutreachMonitoraggio:D,OutreachReportExport:E},document:{getElementById:()=>box},Date:FixedDate,console};
   vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../monitoraggio-ui.js'),'utf8'),sandbox);
   const panel=sandbox.window.createOutreachMonitoraggio({db,auth:{currentUser:{email:'operatore@example.test'}},isAdmin:()=>editable,isApprovatore:()=>editable});
   panel.open(client);
-  return {box,nodes,reads,setOperators(emails){operators=emails;},setRemote(data){remote=data;},get saved(){return saved;},get transactions(){return transactions;}};
+  return {box,nodes,reads,emit(data){remote=data;listener(snapshot);},setOperators(emails){operators=emails;},setRemote(data){remote=data;},get saved(){return saved;},get transactions(){return transactions;}};
 }
 test('renderer originale: click effettivo genera testo completo e salva solo monitoraggio_v1 in memoria',async()=>{
   const input=fixture(), h=uiHarness(input);
@@ -186,4 +186,22 @@ test('la coda renderizzata espone destinatario, approvatore e prove distinte sen
   const h=uiHarness(input);
   for(const text of [r.destinatario,'approvatore@example.test','Testo approvato visibile','Nessuna prova di invio','Nessuna prova distinta di consegna','registra richieste e riscontri; non trasmette messaggi','Controlla richiesta e riscontri']) assert.ok(h.box.innerHTML.includes(text),text);
   assert.doesNotMatch(h.box.innerHTML,/>Invia ora</);
+});
+
+
+test('snapshot proprio dopo il salvataggio conserva la conferma visibile',async()=>{
+  const h=uiHarness(fixture());
+  await h.nodes.get('[data-report]').onclick();
+  const message=h.nodes.get('[data-status]').textContent;
+  assert.match(message,/Report preparato e salvato/);
+  h.emit({monitoraggio_v1:h.saved.monitoraggio_v1});
+  assert.equal(h.nodes.get('[data-status]').textContent,message);
+});
+test('snapshot invariato di altri campi non cancella report esportato o moduli',async()=>{
+  const initial=fixture(),h=uiHarness(initial);
+  await h.nodes.get('[data-report]').onclick();
+  const node=h.nodes.get('[data-report-body]');
+  h.emit({monitoraggio_v1:initial,collaudo_coda_v1:{run_id:'altra-prova'}});
+  assert.equal(h.nodes.get('[data-report-body]'),node);
+  assert.match(node.innerHTML,/data-report-text/);
 });
